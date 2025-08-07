@@ -1,0 +1,3243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System - Prince Alex Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Global Box Sizing */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* General Styling */
+        :root {
+            --primary-color: #C71585; /* Dark Fuchsia */
+            --secondary-color: #fff; /* White */
+            --text-color: #333;
+            --border-color: #eee;
+            --hover-color: #a3116d;
+            --light-bg: #f9f9f9;
+            --add-button-bg: #4CAF50; /* Green */
+            --add-button-hover-bg: #45a049;
+            --edit-button-bg: #2196F3; /* Blue */
+            --edit-button-hover-bg: #0b7dda;
+            --delete-button-bg: #f44336; /* Red */
+            --delete-button-hover-bg: #da190b;
+            --save-button-bg: #008CBA; /* Cyan */
+            --save-button-hover-bg: #007bb5;
+            --cancel-button-bg: #555555; /* Dark Grey */
+            --cancel-button-hover-bg: #333333;
+            --table-header-bg: #e0e0e0;
+            --table-row-even-bg: #f2f2f2;
+            --table-row-hover-bg: #ddd;
+            --footer-bg: #333; /* Dark background for footer */
+            --footer-text-color: #fff; /* White text for footer */
+            --card-bg: var(--secondary-color);
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --notification-bg: #fefefe;
+            --notification-border: #ddd;
+            --chat-bg: #f0f0f0;
+            --chat-border: #ccc;
+            --progress-bar-bg: #e0e0e0;
+            --progress-bar-fill: var(--primary-color);
+            --transition-speed: 0.3s ease;
+        }
+
+        /* Dark Mode Styles */
+        body[data-theme="dark"] {
+            --primary-color: #8A2BE2; /* BlueViolet for dark mode primary */
+            --secondary-color: #1a1a1a; /* Dark background */
+            --text-color: #f0f0f0; /* Light text */
+            --border-color: #444;
+            --hover-color: #6a1bb2;
+            --light-bg: #2a2a2a;
+            --add-button-bg: #28a745;
+            --add-button-hover-bg: #218838;
+            --edit-button-bg: #007bff;
+            --edit-button-hover-bg: #0069d9;
+            --delete-button-bg: #dc3545;
+            --delete-button-hover-bg: #c82333;
+            --save-button-bg: #17a2b8;
+            --save-button-hover-bg: #138496;
+            --cancel-button-bg: #6c757d;
+            --cancel-button-hover-bg: #5a6268;
+            --table-header-bg: #3a3a3a;
+            --table-row-even-bg: #2c2c2c;
+            --table-row-hover-bg: #4c4c4c;
+            --footer-bg: #111;
+            --footer-text-color: #ccc;
+            --card-bg: #222;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --notification-bg: #333;
+            --notification-border: #555;
+            --chat-bg: #3a3a3a;
+            --chat-border: #666;
+            --progress-bar-bg: #444;
+            --progress-bar-fill: var(--primary-color);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        /* Dashboard Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent horizontal scroll from sidebar on desktop */
+        }
+
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            height: 100vh; /* Make sidebar take full viewport height */
+            overflow-y: auto; /* Enable scrolling for sidebar content if it overflows */
+            position: fixed; /* Keep sidebar fixed on desktop */
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: transform var(--transition-speed), background-color var(--transition-speed);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-name {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .logo-name i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav > ul > li {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .sidebar-nav > ul > li:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            color: var(--secondary-color);
+            text-decoration: none;
+            padding: 12px 10px;
+            border-radius: 4px;
+            transition: background-color var(--transition-speed);
+        }
+
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background-color: var(--hover-color);
+        }
+
+        .sidebar-nav a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-menu {
+            list-style: none;
+            padding-left: 20px;
+            display: block; /* Always open */
+            margin-top: 5px;
+        }
+
+        .dropdown-menu li a {
+            padding-left: 30px;
+            font-size: 0.95em;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            margin-left: 250px; /* Push main content to the right of the fixed sidebar */
+            width: calc(100% - 250px); /* Occupy remaining width */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensure it takes full viewport height */
+            box-shadow: -2px 0 5px rgba(0,0,0,0.05); /* Added for clearer visual separation */
+            transition: margin-left var(--transition-speed), width var(--transition-speed), background-color var(--transition-speed);
+        }
+
+        .header-bar {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            transition: background-color var(--transition-speed);
+        }
+
+        .header-bar h2 {
+            margin: 0;
+            color: var(--primary-color);
+            transition: color var(--transition-speed);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info i {
+            margin-left: 10px;
+            font-size: 1.5rem;
+            color: #555;
+            transition: color var(--transition-speed);
+        }
+
+        .content-area {
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto; /* Enable vertical scrolling for content if it overflows */
+            background-color: var(--light-bg);
+            transition: background-color var(--transition-speed);
+        }
+
+        /* CRUD Form and List Styling */
+        .content-area button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-right: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Specific button colors */
+        #add-student-btn, #add-teacher-btn, #add-invoice-btn, #add-event-btn, #compose-message-btn {
+            background-color: var(--add-button-bg);
+            color: var(--secondary-color);
+        }
+        #add-student-btn:hover, #add-teacher-btn:hover, #add-invoice-btn:hover, #add-event-btn:hover, #compose-message-btn:hover {
+            background-color: var(--add-button-hover-bg);
+        }
+
+        .content-area button.edit-btn {
+            background-color: var(--edit-button-bg);
+            color: var(--secondary-color);
+        }
+        .content-area button.edit-btn:hover {
+            background-color: var(--edit-button-hover-bg);
+        }
+
+        .content-area button.delete-btn {
+            background-color: var(--delete-button-bg);
+            color: var(--secondary-color);
+        }
+        .content-area button.delete-btn:hover {
+            background-color: var(--delete-button-hover-bg);
+        }
+
+        .content-area form button[type="submit"] {
+            background-color: var(--save-button-bg);
+            color: var(--secondary-color);
+        }
+        .content-area form button[type="submit"]:hover {
+            background-color: var(--save-button-hover-bg);
+        }
+
+        .content-area form button[type="button"] { /* For cancel buttons */
+            background-color: var(--cancel-button-bg);
+            color: var(--secondary-color);
+        }
+        .content-area form button[type="button"]:hover {
+            background-color: var(--cancel-button-hover-bg);
+        }
+
+        .content-area form {
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .content-area form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .content-area form input[type="text"],
+        .content-area form input[type="number"],
+        .content-area form input[type="date"],
+        .content-area form input[type="email"],
+        .content-area form textarea,
+        .content-area form select {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .content-area form button {
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        /* Table Styling */
+        .data-table-container {
+            overflow-x: auto; /* Enable horizontal scrolling on small screens */
+            margin-top: 20px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: var(--secondary-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden; /* Ensures rounded corners apply to content */
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+            transition: border-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .data-table th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            color: var(--text-color);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background-color: var(--table-row-even-bg);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: var(--table-row-hover-bg);
+        }
+
+        .data-table .actions button {
+            margin-bottom: 0; /* Remove extra margin for buttons in tables */
+        }
+
+        /* Custom Modal Styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-color);
+            margin: auto;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            transition: color var(--transition-speed);
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            margin: 0 10px;
+        }
+
+        /* Footer Styling */
+        .main-footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text-color);
+            text-align: center;
+            padding: 15px 20px;
+            margin-top: auto; /* Pushes footer to the bottom */
+            font-size: 0.9em;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+            transition: background-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        /* Welcome Panel */
+        .welcome-panel {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .welcome-panel .greeting-text h2 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .welcome-panel .greeting-text p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .welcome-panel .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--table-header-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-left: 20px;
+            flex-shrink: 0;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        /* Dashboard Widgets */
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .widget-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .widget-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1em;
+            transition: color var(--transition-speed);
+        }
+
+        .widget-card .value {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 10px 0;
+            transition: color var(--transition-speed);
+        }
+
+        .widget-card .description {
+            font-size: 0.85em;
+            color: #777;
+            transition: color var(--transition-speed);
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            width: 80%;
+            background-color: var(--progress-bar-bg);
+            border-radius: 5px;
+            margin: 10px auto 0;
+            height: 10px;
+            overflow: hidden;
+            transition: background-color var(--transition-speed);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-bar-fill);
+            width: 0%; /* Initial width for animation */
+            border-radius: 5px;
+            transition: width 1s ease-out, background-color var(--transition-speed);
+        }
+
+        /* Today's Highlights */
+        .highlights-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 15px; /* Reduced margin */
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .highlights-section h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .highlights-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlights-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            color: var(--text-color);
+        }
+
+        .highlights-list li i {
+            position: absolute;
+            left: 0;
+            top: 3px;
+            color: var(--primary-color);
+        }
+
+        /* Notification Center */
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+
+        .notification-icon .fa-bell {
+            font-size: 1.5rem;
+            color: #555;
+            transition: color var(--transition-speed);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--delete-button-bg);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px; /* Adjust based on header height */
+            right: 0;
+            background-color: var(--notification-bg);
+            border: 1px solid var(--notification-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1001;
+            padding: 10px;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .notification-dropdown.active {
+            display: block;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: var(--text-color);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item strong {
+            color: var(--primary-color);
+        }
+
+        /* Quick Actions FAB */
+        .fab-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .fab {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform 0.3s ease-in-out;
+        }
+
+        .fab:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+        }
+
+        .fab-options {
+            position: absolute;
+            bottom: 70px; /* Above the FAB */
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+        }
+
+        .fab-container.active .fab-options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .fab-option-btn {
+            background-color: var(--save-button-bg);
+            color: var(--secondary-color);
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color var(--transition-speed);
+        }
+
+        .fab-option-btn:hover {
+            background-color: var(--save-button-hover-bg);
+        }
+
+        /* Dark Mode Toggle */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 48px;
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .slider {
+            background-color: #ccc;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            background-color: #fff;
+            bottom: 2px;
+            content: "";
+            height: 20px;
+            left: 2px;
+            position: absolute;
+            width: 20px;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Recent Activity Timeline */
+        .timeline-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .timeline-section h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 10px 0 0 20px;
+            list-style: none;
+        }
+
+        .timeline:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: background-color var(--transition-speed);
+        }
+
+        .timeline-item {
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 20px;
+            color: var(--text-color);
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: -6px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .timeline-item .date {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .timeline-item .description {
+            font-size: 0.95em;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            /* Adjusted minmax to make charts smaller */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 15px; /* Reduced margin */
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .chart-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 15px;
+            transition: color var(--transition-speed);
+        }
+
+        /* Admin Chat Popup */
+        .chat-container {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+        }
+
+        .chat-toggle-btn {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform 0.3s ease-in-out;
+        }
+
+        .chat-toggle-btn:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+        }
+
+        .chat-popup {
+            display: none;
+            position: absolute;
+            bottom: 60px; /* Above the toggle button */
+            left: 0;
+            width: 300px;
+            background-color: var(--chat-bg);
+            border: 1px solid var(--chat-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 15px;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .chat-popup.active {
+            display: block;
+        }
+
+        .chat-header {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .chat-messages {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .chat-message {
+            margin-bottom: 8px;
+            background-color: var(--secondary-color);
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color var(--transition-speed);
+        }
+
+        /* Calendar Styles */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .calendar-nav button {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .calendar-nav button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .calendar-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .day-header {
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 0;
+            background-color: var(--table-header-bg);
+            border-radius: 4px;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 0.9em;
+            position: relative;
+            background-color: var(--light-bg);
+            overflow: hidden;
+        }
+
+        .calendar-day.current-month {
+            background-color: var(--secondary-color);
+        }
+
+        .calendar-day.other-month {
+            background-color: var(--light-bg);
+            opacity: 0.6;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            text-align: right;
+            padding-right: 5px;
+        }
+
+        .event-item {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 3px 5px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            font-size: 0.8em;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        .event-item:hover {
+            opacity: 0.9;
+        }
+
+        /* Message Page Styles */
+        .message-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .message-tabs button {
+            background-color: #ddd;
+            color: #333;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .message-tabs button.active {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+        }
+        .message-tabs button:hover:not(.active) {
+            background-color: #ccc;
+        }
+
+        .message-list {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            min-height: 200px;
+        }
+        .message-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .message-item:last-child {
+            border-bottom: none;
+        }
+        .message-item.unread {
+            font-weight: bold;
+            background-color: #ffe;
+        }
+        body[data-theme="dark"] .message-item.unread {
+            background-color: #3a3020;
+        }
+        .message-item-header {
+            display: flex;
+            flex-direction: column;
+        }
+        .message-item-actions {
+            flex-shrink: 0;
+        }
+        .message-item-actions button {
+            margin-left: 5px;
+            padding: 5px 8px;
+            font-size: 0.8em;
+        }
+
+        .message-detail {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            margin-top: 20px;
+        }
+        .message-detail h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .message-detail p {
+            margin-bottom: 10px;
+        }
+        .message-detail .message-meta {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .message-detail button {
+            margin-top: 15px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%); /* Hide sidebar off-screen by default */
+                position: fixed; /* Keep it fixed when hidden/shown */
+                transition: transform 0.3s ease-in-out; /* Smooth slide transition */
+                width: 220px; /* Adjust width for mobile if desired */
+                height: 100vh; /* Ensure full height on mobile */
+            }
+
+            .sidebar.active {
+                transform: translateX(0); /* Slide sidebar into view */
+            }
+
+            .hamburger {
+                display: block; /* Show hamburger icon on mobile */
+            }
+
+            .main-content {
+                margin-left: 0; /* No margin on mobile, main content takes full width */
+                width: 100%;
+            }
+
+            .header-bar {
+                padding: 15px;
+                position: sticky; /* Keep header sticky on mobile too */
+                top: 0;
+                z-index: 999;
+            }
+
+            /* Adjust table cells for smaller screens if needed, or rely on overflow-x */
+            .data-table th, .data-table td {
+                padding: 8px 10px;
+                font-size: 0.85em;
+            }
+
+            .welcome-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .welcome-panel .user-avatar {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+
+            .fab-container {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .chat-container {
+                bottom: 20px;
+                left: 20px;
+            }
+
+            .chat-popup {
+                bottom: 60px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Dashboard Container -->
+    <div class="dashboard-container" id="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-name">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Prince Alex Academy</span>
+                </div>
+                <button class="hamburger" id="hamburger-menu"><i class="fas fa-bars"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li>
+                        <a href="#" class="menu-item-header"><i class="fas fa-book"></i> Academic Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-section="students"><i class="fas fa-users"></i> Students</a></li>
+                            <li><a href="#" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i> Teachers</a></li>
+                            <li><a href="#" data-section="classes"><i class="fas fa-school"></i> Classes</a></li>
+                            <li><a href="#" data-section="subjects"><i class="fas fa-book-open"></i> Subjects</a></li>
+                            <li><a href="#" data-section="exams"><i class="fas fa-file-alt"></i> Exams</a></li>
+                            <li><a href="#" data-section="grades"><i class="fas fa-award"></i> Grades</a></li>
+                            <li><a href="#" data-section="attendance"><i class="fas fa-user-check"></i> Attendance</a></li>
+                            <li><a href="#" data-section="assignments"><i class="fas fa-tasks"></i> Assignments</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item-header"><i class="fas fa-money-bill-wave"></i> Financial Management</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-section="fees"><i class="fas fa-dollar-sign"></i> Fees</a></li>
+                            <li><a href="#" data-section="invoices"><i class="fas fa-file-invoice-dollar"></i> Invoices</a></li>
+                            <li><a href="#" data-section="payment-history"><i class="fas fa-history"></i> Payment History</a></li>
+                            <li><a href="#" data-section="expenses"><i class="fas fa-money-check-alt"></i> Expenses</a></li>
+                            <li><a href="#" data-section="advanced-finance"><i class="fas fa-chart-line"></i> Advanced Finance</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item-header"><i class="fas fa-chart-bar"></i> Reports and Analytics</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-section="system-reports"><i class="fas fa-file-contract"></i> System Reports</a></li>
+                            <li><a href="#" data-section="student-reports"><i class="fas fa-user-graduate"></i> Student Reports</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item-header"><i class="fas fa-cogs"></i> School Operations</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-section="library"><i class="fas fa-book-reader"></i> Library</a></li>
+                            <li><a href="#" data-section="events"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="menu-item-header"><i class="fas fa-comments"></i> Communication</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-section="messages"><i class="fas fa-envelope"></i> Messages</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" data-section="system-administrator"><i class="fas fa-user-shield"></i> System Administrator</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="header-bar">
+                <h2 id="current-page-title">Dashboard</h2>
+                <div class="header-actions">
+                    <div class="theme-switch-wrapper">
+                        <label class="theme-switch" for="checkbox">
+                            <input type="checkbox" id="checkbox" />
+                            <div class="slider round"></div>
+                        </label>
+                        <i class="fas fa-sun" style="margin-left: 10px; color: #f39c12;"></i>
+                        <i class="fas fa-moon" style="margin-left: 5px; color: #34495e;"></i>
+                    </div>
+                    <div class="notification-icon" id="notification-icon">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-badge">3</span>
+                        <div class="notification-dropdown" id="notification-dropdown">
+                            <!-- Notifications will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="user-info">
+                        <span>Admin User</span>
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+            </header>
+            <div class="content-area" id="content-area">
+                <!-- Content will be loaded here dynamically -->
+            </div>
+            <!-- Footer -->
+            <footer class="main-footer">
+                Design was done by Prince Alex Digital
+            </footer>
+        </main>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-message"></h3>
+            <div class="modal-buttons">
+                <button id="modal-confirm-btn" class="delete-btn">Confirm</button>
+                <button id="modal-cancel-btn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions FAB -->
+    <div class="fab-container" id="fab-container">
+        <div class="fab" id="fab-button">
+            <i class="fas fa-plus"></i>
+        </div>
+        <div class="fab-options">
+            <button class="fab-option-btn" onclick="window.loadContent('students'); window.showAddStudentForm();">Add Student</button>
+            <button class="fab-option-btn" onclick="window.loadContent('teachers'); window.showAddTeacherForm();">Add Teacher</button>
+            <button class="fab-option-btn" onclick="window.loadContent('invoices'); window.showAddInvoiceForm();">Create Invoice</button>
+            <button class="fab-option-btn" onclick="window.loadContent('messages'); window.showMessageComposeForm();">Send Message</button>
+        </div>
+    </div>
+
+    <!-- Admin Chat Popup -->
+    <div class="chat-container">
+        <div class="chat-toggle-btn" id="chat-toggle-btn">
+            <i class="fas fa-comments"></i>
+        </div>
+        <div class="chat-popup" id="chat-popup">
+            <div class="chat-header">Admin Chat</div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message"><strong>System:</strong> Welcome to Prince Alex Academy!</div>
+                <div class="chat-message"><strong>Admin:</strong> Need help managing subjects?</div>
+                <div class="chat-message"><strong>System:</strong> Don't forget to back up today.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentArea = document.getElementById('content-area');
+            const sidebar = document.querySelector('.sidebar');
+            const hamburgerBtn = document.getElementById('hamburger-menu');
+            const pageTitle = document.getElementById('current-page-title');
+            const themeToggle = document.getElementById('checkbox');
+            const body = document.body;
+
+            // Custom Modal Elements
+            const confirmationModal = document.getElementById('confirmationModal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            let confirmAction = null; // Stores the function to execute on confirmation
+
+            // Notification Elements
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationBadge = document.getElementById('notification-badge');
+            const notificationDropdown = document.getElementById('notification-dropdown');
+
+            // FAB Elements
+            const fabContainer = document.getElementById('fab-container');
+            const fabButton = document.getElementById('fab-button');
+
+            // Chat Elements
+            const chatToggleBtn = document.getElementById('chat-toggle-btn');
+            const chatPopup = document.getElementById('chat-popup');
+
+            // --- Page Content Loading ---
+            window.loadContent = (section) => { // Made global for FAB
+                pageTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1).replace(/-/g, ' ');
+
+                document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                const activeLink = document.querySelector(`.sidebar-nav a[data-section="${section}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+
+                // Hide FAB options and chat popup when navigating
+                fabContainer.classList.remove('active');
+                chatPopup.classList.remove('active');
+                notificationDropdown.classList.remove('active');
+
+
+                switch (section) {
+                    case 'dashboard':
+                        renderDashboardPage();
+                        break;
+                    case 'students':
+                        renderStudentsPage();
+                        break;
+                    case 'teachers':
+                        renderTeachersPage();
+                        break;
+                    case 'classes':
+                        renderClassesPage();
+                        break;
+                    case 'subjects':
+                        renderSubjectsPage();
+                        break;
+                    case 'exams':
+                        renderExamsPage();
+                        break;
+                    case 'grades':
+                        renderGradesPage();
+                        break;
+                    case 'attendance':
+                        renderAttendancePage();
+                        break;
+                    case 'assignments':
+                        renderAssignmentsPage();
+                        break;
+                    case 'fees':
+                        renderComingSoonPage('Fees'); // No specific data, covered by invoices
+                        break;
+                    case 'invoices':
+                        renderInvoicesPage();
+                        break;
+                    case 'payment-history':
+                        renderPaymentHistoryPage();
+                        break;
+                    case 'expenses':
+                        renderExpensesPage();
+                        break;
+                    case 'advanced-finance':
+                        renderComingSoonPage('Advanced Finance');
+                        break;
+                    case 'system-reports':
+                        renderComingSoonPage('System Reports', true); // Pass true for PDF/Print buttons
+                        break;
+                    case 'student-reports':
+                        renderComingSoonPage('Student Reports', true); // Pass true for PDF/Print buttons
+                        break;
+                    case 'library':
+                        renderLibraryPage();
+                        break;
+                    case 'events':
+                        renderEventsPage();
+                        break;
+                    case 'messages':
+                        renderMessagesPage();
+                        break;
+                    case 'system-administrator':
+                        renderComingSoonPage('System Administrator');
+                        break;
+                    default:
+                        contentArea.innerHTML = `<h2>${pageTitle.textContent}</h2><p>This is the content for the ${pageTitle.textContent} section. Content coming soon.</p>`;
+                }
+            };
+
+            // --- Initial Setup ---
+            seedData(); // Seed data on dashboard load
+            window.loadContent('dashboard'); // Load initial dashboard content
+
+            // Function to handle sidebar toggle on mobile
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+
+            // --- Dummy Data Seeding ---
+            function seedData() {
+                if (!localStorage.getItem('students')) {
+                    localStorage.setItem('students', JSON.stringify([
+                        { id: '1', name: 'Alice Smith', class: 'Grade 5', guardianName: 'John Smith', guardianPhone: '111-222-3333', guardianEmail: 'john.s@example.com', guardianOccupation: 'Engineer' },
+                        { id: '2', name: 'Bob Johnson', class: 'Grade 6', guardianName: 'Mary Johnson', guardianPhone: '444-555-6666', guardianEmail: 'mary.j@example.com', guardianOccupation: 'Doctor' },
+                        { id: '3', name: 'Charlie Brown', class: 'Grade 5', guardianName: 'Lucy Brown', guardianPhone: '777-888-9999', guardianEmail: 'lucy.b@example.com', guardianOccupation: 'Artist' },
+                        { id: '4', name: 'Diana Prince', class: 'Grade 7', guardianName: 'Steve Trevor', guardianPhone: '000-111-2222', guardianEmail: 'steve.t@example.com', guardianOccupation: 'Pilot' },
+                        { id: '5', name: 'Eve Adams', class: 'Grade 5', guardianName: 'Adam Adams', guardianPhone: '333-444-5555', guardianEmail: 'adam.a@example.com', guardianOccupation: 'Teacher' }
+                    ]));
+                }
+                if (!localStorage.getItem('teachers')) {
+                    localStorage.setItem('teachers', JSON.stringify([
+                        { id: '101', name: 'Ms. Davis', subject: 'Mathematics' },
+                        { id: '102', name: 'Mr. White', subject: 'Science' },
+                        { id: '103', name: 'Mrs. Green', subject: 'English' },
+                        { id: '104', name: 'Dr. Blue', subject: 'History' }
+                    ]));
+                }
+                if (!localStorage.getItem('invoices')) {
+                    localStorage.setItem('invoices', JSON.stringify([
+                        { id: 'INV001', student: 'Alice Smith', amount: 50000.00, dueDate: '2025-09-01', status: 'Pending' },
+                        { id: 'INV002', student: 'Bob Johnson', amount: 35000.00, dueDate: '2025-08-15', status: 'Paid' },
+                        { id: 'INV003', student: 'Charlie Brown', amount: 48000.00, dueDate: '2025-09-10', status: 'Pending' },
+                        { id: 'INV004', student: 'Diana Prince', amount: 60000.00, dueDate: '2025-08-20', status: 'Paid' }
+                    ]));
+                }
+                if (!localStorage.getItem('classes')) {
+                    localStorage.setItem('classes', JSON.stringify([
+                        { id: 'C1', name: 'Grade 5A', teacher: 'Ms. Davis', studentIds: ['1', '3', '5'] }, // Alice, Charlie, Eve
+                        { id: 'C2', name: 'Grade 6B', teacher: 'Mr. White', studentIds: ['2'] },  // Bob
+                        { id: 'C3', name: 'Grade 7C', teacher: 'Mrs. Green', studentIds: ['4'] } // Diana
+                    ]));
+                }
+                if (!localStorage.getItem('subjects')) {
+                    localStorage.setItem('subjects', JSON.stringify([
+                        { id: 'SUB1', name: 'Mathematics', teacher: 'Ms. Davis' },
+                        { id: 'SUB2', name: 'Science', teacher: 'Mr. White' },
+                        { id: 'SUB3', name: 'English', teacher: 'Mrs. Green' },
+                        { id: 'SUB4', name: 'History', teacher: 'Dr. Blue' }
+                    ]));
+                }
+                if (!localStorage.getItem('exams')) {
+                    localStorage.setItem('exams', JSON.stringify([
+                        { id: 'EXAM1', name: 'Mid-term Math', subject: 'Mathematics', date: '2025-10-10', class: 'Grade 5A' },
+                        { id: 'EXAM2', name: 'End-term Science', subject: 'Science', date: '2025-12-01', class: 'Grade 6B' },
+                        { id: 'EXAM3', name: 'English Essay', subject: 'English', date: '2025-08-08', class: 'Grade 7C' } // Today's exam
+                    ]));
+                }
+                if (!localStorage.getItem('grades')) {
+                    localStorage.setItem('grades', JSON.stringify([
+                        { id: 'G1', studentId: '1', studentName: 'Alice Smith', subject: 'Mathematics', exam: 'Mid-term Math', score: 85, grade: 'B', term: 'Term 1' },
+                        { id: 'G2', studentId: '2', studentName: 'Bob Johnson', subject: 'Science', exam: 'End-term Science', score: 92, grade: 'A', term: 'Term 1' },
+                        { id: 'G3', studentId: '3', studentName: 'Charlie Brown', subject: 'Mathematics', exam: 'Mid-term Math', score: 78, grade: 'C', term: 'Term 1' },
+                        { id: 'G4', studentId: '4', studentName: 'Diana Prince', subject: 'English', exam: 'English Essay', score: 95, grade: 'A+', term: 'Term 1' }
+                    ]));
+                }
+                if (!localStorage.getItem('attendance')) {
+                    localStorage.setItem('attendance', JSON.stringify([
+                        { id: 'ATT1', studentId: '1', studentName: 'Alice Smith', date: '2025-08-01', status: 'Present' },
+                        { id: 'ATT2', studentId: '2', studentName: 'Bob Johnson', date: '2025-08-01', status: 'Present' },
+                        { id: 'ATT3', studentId: '3', studentName: 'Charlie Brown', date: '2025-08-01', status: 'Absent' },
+                        { id: 'ATT4', studentId: '1', studentName: 'Alice Smith', date: '2025-08-02', status: 'Present' },
+                        { id: 'ATT5', studentId: '2', studentName: 'Bob Johnson', date: '2025-08-02', status: 'Present' },
+                        { id: 'ATT6', studentId: '3', studentName: 'Charlie Brown', date: '2025-08-02', status: 'Present' },
+                        { id: 'ATT7', studentId: '4', studentName: 'Diana Prince', date: '2025-08-02', status: 'Present' },
+                        { id: 'ATT8', studentId: '5', studentName: 'Eve Adams', date: '2025-08-02', status: 'Present' },
+                        { id: 'ATT9', studentId: '1', studentName: 'Alice Smith', date: '2025-08-07', status: 'Present' }, // Today's attendance
+                        { id: 'ATT10', studentId: '2', studentName: 'Bob Johnson', date: '2025-08-07', status: 'Present' },
+                        { id: 'ATT11', studentId: '3', studentName: 'Charlie Brown', date: '2025-08-07', status: 'Absent' }
+                    ]));
+                }
+                if (!localStorage.getItem('assignments')) {
+                    localStorage.setItem('assignments', JSON.stringify([
+                        { id: 'ASS1', title: 'Math Homework 1', subject: 'Mathematics', dueDate: '2025-08-10', assignedTo: ['1', '3'], status: 'Assigned' },
+                        { id: 'ASS2', title: 'Science Project', subject: 'Science', dueDate: '2025-09-01', assignedTo: ['2'], status: 'Assigned' },
+                        { id: 'ASS3', title: 'English Reading', subject: 'English', dueDate: '2025-08-07', assignedTo: ['4'], status: 'Due Today' } // Due today
+                    ]));
+                }
+                if (!localStorage.getItem('paymentHistory')) {
+                    localStorage.setItem('paymentHistory', JSON.stringify([
+                        { id: 'PHT1', invoiceId: 'INV002', student: 'Bob Johnson', amountPaid: 35000.00, date: '2025-08-10' },
+                        { id: 'PHT2', invoiceId: 'INV001', student: 'Alice Smith', amountPaid: 25000.00, date: '2025-08-05' },
+                        { id: 'PHT3', invoiceId: 'INV004', student: 'Diana Prince', amountPaid: 60000.00, date: '2025-08-12' }
+                    ]));
+                }
+                if (!localStorage.getItem('expenses')) {
+                    localStorage.setItem('expenses', JSON.stringify([
+                        { id: 'EXP1', item: 'Office Supplies', amount: 12000.50, date: '2025-07-20' },
+                        { id: 'EXP2', item: 'Electricity Bill', amount: 30000.00, date: '2025-07-25' },
+                        { id: 'EXP3', item: 'Teacher Salaries', amount: 500000.00, date: '2025-07-30' }
+                    ]));
+                }
+                if (!localStorage.getItem('library')) {
+                    localStorage.setItem('library', JSON.stringify([
+                        { id: 'LIB1', title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', status: 'Available' },
+                        { id: 'LIB2', title: '1984', author: 'George Orwell', status: 'Borrowed (Alice Smith)' },
+                        { id: 'LIB3', title: 'To Kill a Mockingbird', author: 'Harper Lee', status: 'Available' }
+                    ]));
+                }
+                if (!localStorage.getItem('events')) {
+                    localStorage.setItem('events', JSON.stringify([
+                        { id: 'EVT1', name: 'Annual Sports Day', date: '2025-10-20', location: 'School Field', description: 'Fun day of sports activities for all students.' },
+                        { id: 'EVT2', name: 'Parent-Teacher Meeting', date: '2025-11-05', location: 'School Hall', description: 'Discussion on student progress.' },
+                        { id: 'EVT3', name: 'School Play Practice', date: '2025-08-07', location: 'Auditorium', description: 'Rehearsal for the annual school play.' }, // Today's event
+                        { id: 'EVT4', name: 'Science Fair', date: '2025-08-15', location: 'Gym', description: 'Students showcase science projects.' }
+                    ]));
+                }
+                if (!localStorage.getItem('messages')) {
+                    localStorage.setItem('messages', JSON.stringify([
+                        { id: 'MSG1', sender: 'Admin', recipient: 'All Teachers', subject: 'New Policy Update', date: '2025-08-01', content: 'Please review the updated school policy document by end of week.', status: 'read', type: 'sent' },
+                        { id: 'MSG2', sender: 'Ms. Davis', recipient: 'Admin', subject: 'Student Query', date: '2025-08-02', content: 'Query regarding student Alice Smith\'s recent performance.', status: 'unread', type: 'received' },
+                        { id: 'MSG3', sender: 'Mr. White', recipient: 'Admin', subject: 'Exam Schedule', date: '2025-08-06', content: 'The science exam schedule has been finalized.', status: 'read', type: 'received' }
+                    ]));
+                }
+                if (!localStorage.getItem('activityTimeline')) {
+                    localStorage.setItem('activityTimeline', JSON.stringify([
+                        { id: 'ACT1', date: '2025-08-07', time: '14:30', description: 'Mr. White added exam: English Essay' },
+                        { id: 'ACT2', date: '2025-08-06', time: '10:00', description: 'Student Eve Adams registered for Grade 5' },
+                        { id: 'ACT3', date: '2025-08-05', time: '16:45', description: 'Payment received from Alice Smith (KSH 25,000)' },
+                        { id: 'ACT4', date: '2025-08-04', time: '09:15', description: 'New assignment "Math Homework 1" created' }
+                    ]));
+                }
+            }
+
+            // --- Custom Confirmation Modal Logic ---
+            function showConfirmationModal(message, callback) {
+                modalMessage.textContent = message;
+                confirmAction = callback;
+                confirmationModal.style.display = 'flex'; // Use flex to center
+            }
+
+            modalConfirmBtn.addEventListener('click', () => {
+                if (confirmAction) {
+                    confirmAction();
+                }
+                confirmationModal.style.display = 'none';
+                confirmAction = null;
+            });
+
+            modalCancelBtn.addEventListener('click', () => {
+                confirmationModal.style.display = 'none';
+                confirmAction = null;
+            });
+
+            // Event listener for sidebar links
+            document.querySelectorAll('.sidebar-nav a[data-section]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = e.target.closest('a').dataset.section;
+                    window.loadContent(section); // Call the global loadContent
+                });
+            });
+
+            // --- Generic "Coming Soon" Page ---
+            function renderComingSoonPage(title, includePdfPrint = false) {
+                contentArea.innerHTML = `
+                    <h2>${title}</h2>
+                    <p>This section for ${title} is under development. Please check back later!</p>
+                `;
+                if (includePdfPrint) {
+                    contentArea.innerHTML += `
+                        <button class="add-btn" onclick="window.printPage()">Print this page</button>
+                        <button class="add-btn" onclick="window.generatePdf('${title} Report')">Download PDF</button>
+                    `;
+                }
+            }
+
+            // --- Dashboard Page Rendering ---
+            function renderDashboardPage() {
+                const students = getStudents();
+                const teachers = getTeachers();
+                const invoices = getInvoices();
+                const assignments = getAssignments();
+                const events = getEvents();
+                const exams = getExams();
+                const messages = getMessages();
+                const activityTimeline = JSON.parse(localStorage.getItem('activityTimeline')) || [];
+
+                // Calculate total fees collected
+                const totalFeesCollected = invoices.filter(inv => inv.status === 'Paid').reduce((sum, inv) => sum + inv.amount, 0);
+                const totalPendingFees = invoices.filter(inv => inv.status === 'Pending').reduce((sum, inv) => sum + inv.amount, 0);
+                const totalPossibleFees = totalFeesCollected + totalPendingFees;
+                const feesCollectionProgress = totalPossibleFees > 0 ? (totalFeesCollected / totalPossibleFees) * 100 : 0;
+
+                // Student enrollment capacity (dummy value for demonstration)
+                const maxStudentCapacity = 100;
+                const currentStudents = students.length;
+                const enrollmentProgress = (currentStudents / maxStudentCapacity) * 100;
+
+                // Pending actions (dummy logic for ungraded exams, unread messages)
+                const ungradedExams = getGrades().filter(grade => grade.score === null || grade.score === undefined).length;
+                const unreadMessages = messages.filter(msg => msg.type === 'received' && msg.status === 'unread').length;
+                const pendingActionsCount = ungradedExams + unreadMessages + assignments.filter(a => a.status !== 'Completed').length;
+
+
+                const now = new Date();
+                const hour = now.getHours();
+                let greeting;
+                if (hour < 12) {
+                    greeting = "Good Morning";
+                } else if (hour < 18) {
+                    greeting = "Good Afternoon";
+                } else {
+                    greeting = "Good Evening";
+                }
+
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = now.toLocaleDateString(undefined, options);
+                const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+                const todaysClasses = getClasses().filter(_class => {
+                    // Dummy logic: assume all classes have daily schedule
+                    return true; // For demonstration, assume all classes are today
+                });
+                const todaysExams = exams.filter(exam => exam.date === today);
+                const todaysAssignments = assignments.filter(assignment => assignment.dueDate === today);
+                const todaysEvents = events.filter(event => event.date === today);
+
+                contentArea.innerHTML = `
+                    <div class="welcome-panel">
+                        <div class="greeting-text">
+                            <h2>${greeting}, Admin!</h2>
+                            <p>Welcome back to Prince Alex Academy.</p>
+                            <p>Current Date: ${formattedDate}</p>
+                            <p>Current Time: ${formattedTime}</p>
+                        </div>
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-widgets">
+                        <div class="widget-card">
+                            <h3>Students Enrolled</h3>
+                            <div class="value" id="students-enrolled-value">${currentStudents}</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="enrollment-progress-bar" style="width: ${enrollmentProgress}%;"></div>
+                            </div>
+                            <div class="description">${enrollmentProgress.toFixed(0)}% of capacity</div>
+                        </div>
+                        <div class="widget-card">
+                            <h3>Total Fees Collected</h3>
+                            <div class="value" id="fees-collected-value">KSH ${totalFeesCollected.toFixed(2)}</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="fees-progress-bar" style="width: ${feesCollectionProgress}%;"></div>
+                            </div>
+                            <div class="description">${feesCollectionProgress.toFixed(0)}% collected</div>
+                        </div>
+                        <div class="widget-card">
+                            <h3>Teachers on Staff</h3>
+                            <div class="value" id="teachers-on-staff-value">${teachers.length}</div>
+                            <div class="description">Active educators</div>
+                        </div>
+                        <div class="widget-card">
+                            <h3>Pending Actions</h3>
+                            <div class="value" id="pending-actions-value">${pendingActionsCount}</div>
+                            <div class="description">Ungraded exams, unread messages, etc.</div>
+                        </div>
+                    </div>
+
+                    <div class="highlights-section">
+                        <h3><i class="fas fa-calendar-day"></i> Today's Highlights</h3>
+                        <ul class="highlights-list">
+                            <li><i class="fas fa-book-reader"></i> <strong>Class Schedule:</strong> All regular classes are running as usual.</li>
+                            ${todaysExams.length > 0 ? todaysExams.map(exam => `<li><i class="fas fa-file-alt"></i> <strong>Exam:</strong> ${exam.name} (${exam.subject}) for ${exam.class}</li>`).join('') : '<li><i class="fas fa-file-alt"></i> No exams scheduled for today.</li>'}
+                            ${todaysAssignments.length > 0 ? todaysAssignments.map(assignment => `<li><i class="fas fa-tasks"></i> <strong>Assignment Due:</strong> ${assignment.title} (${assignment.subject})</li>`).join('') : '<li><i class="fas fa-tasks"></i> No assignments due today.</li>'}
+                            ${todaysEvents.length > 0 ? todaysEvents.map(event => `<li><i class="fas fa-calendar-alt"></i> <strong>Event:</strong> ${event.name} at ${event.location}</li>`).join('') : '<li><i class="fas fa-calendar-alt"></i> No events today.</li>'}
+                        </ul>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="chart-card">
+                            <h3>Overall Attendance Summary</h3>
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="timeline-section">
+                        <h3><i class="fas fa-history"></i> Recent Activity Timeline</h3>
+                        <ul class="timeline" id="activity-timeline">
+                            <!-- Timeline items will be dynamically added here -->
+                        </ul>
+                    </div>
+                `;
+
+                // Animate numbers
+                animateNumber('students-enrolled-value', currentStudents);
+                animateNumber('fees-collected-value', totalFeesCollected, 'KSH ');
+                animateNumber('teachers-on-staff-value', teachers.length);
+                animateNumber('pending-actions-value', pendingActionsCount);
+
+                // Render charts
+                renderAttendanceChart(); // Only attendance chart remains
+                renderActivityTimeline();
+            }
+
+            // --- Number Animation Function ---
+            function animateNumber(elementId, targetValue, prefix = '', suffix = '') {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                let startValue = 0;
+                const duration = 1000; // 1 second
+                const frameDuration = 1000 / 60; // 60 frames per second
+                const totalFrames = Math.round(duration / frameDuration);
+                let currentFrame = 0;
+
+                const animate = () => {
+                    currentFrame++;
+                    const progress = currentFrame / totalFrames;
+                    const easedProgress = easeOutQuad(progress); // Apply easing function
+                    const currentValue = startValue + (targetValue - startValue) * easedProgress;
+
+                    if (elementId === 'fees-collected-value') {
+                        element.textContent = `${prefix}${currentValue.toFixed(2)}${suffix}`;
+                    } else {
+                        element.textContent = `${prefix}${Math.round(currentValue)}${suffix}`;
+                    }
+
+                    if (currentFrame < totalFrames) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Ensure final value is exact
+                        if (elementId === 'fees-collected-value') {
+                            element.textContent = `${prefix}${targetValue.toFixed(2)}${suffix}`;
+                        } else {
+                            element.textContent = `${prefix}${targetValue}${suffix}`;
+                        }
+                    }
+                };
+
+                // Easing function (Quadratic Ease Out)
+                function easeOutQuad(t) {
+                    return t * (2 - t);
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            // --- Chart.js Integration ---
+            // Removed renderGradePerformanceChart() as requested
+
+            function renderAttendanceChart() {
+                const attendance = getAttendance();
+                const totalPresent = attendance.filter(a => a.status === 'Present').length;
+                const totalAbsent = attendance.filter(a => a.status === 'Absent').length;
+
+                const labels = ['Present', 'Absent'];
+                const data = [totalPresent, totalAbsent];
+                const backgroundColors = [
+                    '#4CAF50', // Present (Green)
+                    '#F44336'  // Absent (Red)
+                ];
+
+                const ctx = document.getElementById('attendanceChart');
+                if (ctx) {
+                    // Destroy existing chart instance if it exists to prevent conflicts
+                    if (Chart.getChart(ctx)) {
+                        Chart.getChart(ctx).destroy();
+                    }
+                    new Chart(ctx, {
+                        type: 'pie', // Changed to pie chart
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Number of Students',
+                                data: data,
+                                backgroundColor: backgroundColors,
+                                borderColor: 'white',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right', // Place legend on the right for pie charts
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Overall Attendance Summary' // Changed title
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            // --- Recent Activity Timeline ---
+            function renderActivityTimeline() {
+                const timelineData = JSON.parse(localStorage.getItem('activityTimeline')) || [];
+                const timelineList = document.getElementById('activity-timeline');
+                timelineList.innerHTML = ''; // Clear existing
+
+                // Sort by date and time descending
+                timelineData.sort((a, b) => {
+                    const dateA = new Date(`${a.date}T${a.time}`);
+                    const dateB = new Date(`${b.date}T${b.time}`);
+                    return dateB - dateA;
+                });
+
+                timelineData.forEach(item => {
+                    const li = document.createElement('li');
+                    li.classList.add('timeline-item');
+                    li.innerHTML = `
+                        <div class="date">${item.date} ${item.time}</div>
+                        <div class="description">${item.description}</div>
+                    `;
+                    timelineList.appendChild(li);
+                });
+            }
+
+            // --- Notification Center Logic ---
+            notificationIcon.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent document click from closing immediately
+                notificationDropdown.classList.toggle('active');
+                // Update badge to 0 or mark all as read
+                notificationBadge.textContent = '0';
+                // In a real app, you'd mark notifications as read in localStorage
+            });
+
+            // Close notification dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!notificationDropdown.contains(e.target) && !notificationIcon.contains(e.target)) {
+                    notificationDropdown.classList.remove('active');
+                }
+            });
+
+            // Populate dummy notifications
+            function populateNotifications() {
+                const notifications = getMessages().filter(msg => msg.type === 'received' && msg.status === 'unread');
+                const dropdownContent = document.getElementById('notification-dropdown');
+                dropdownContent.innerHTML = '';
+                if (notifications.length === 0) {
+                    dropdownContent.innerHTML = '<div class="notification-item">No new notifications.</div>';
+                } else {
+                    notifications.forEach(notif => {
+                        const div = document.createElement('div');
+                        div.classList.add('notification-item');
+                        div.innerHTML = `<strong>${notif.sender}:</strong> ${notif.subject}`;
+                        div.onclick = () => {
+                            window.loadContent('messages');
+                            window.showMessageDetail(notif.id);
+                        };
+                        dropdownContent.appendChild(div);
+                    });
+                }
+                notificationBadge.textContent = notifications.length; // Update badge count
+            }
+            populateNotifications(); // Call on load
+
+            // --- Quick Actions FAB Logic ---
+            fabButton.addEventListener('click', () => {
+                fabContainer.classList.toggle('active');
+            });
+
+            // Close FAB options if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!fabContainer.contains(e.target) && e.target !== fabButton) {
+                    fabContainer.classList.remove('active');
+                }
+            });
+
+            // --- Dark Mode Toggle Logic ---
+            themeToggle.addEventListener('change', () => {
+                if (themeToggle.checked) {
+                    body.setAttribute('data-theme', 'dark');
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                }
+            });
+
+            // --- Admin Chat Popup Logic ---
+            chatToggleBtn.addEventListener('click', () => {
+                chatPopup.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!chatPopup.contains(e.target) && !chatToggleBtn.contains(e.target)) {
+                    chatPopup.classList.remove('active');
+                }
+            });
+
+
+            // --- Students Management Logic (CRUD with localStorage) ---
+            function renderStudentsPage() {
+                contentArea.innerHTML = `
+                    <h2>Students</h2>
+                    <button id="add-student-btn">Add New Student</button>
+                    <button class="add-btn" onclick="window.exportTableToExcel('student-table', 'Students_Data')">Export to Excel</button>
+                    <div class="data-table-container">
+                        <table class="data-table" id="student-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Class</th>
+                                    <th>Guardian Name</th>
+                                    <th>Guardian Phone</th>
+                                    <th>Guardian Email</th>
+                                    <th>Guardian Occupation</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="student-form-container" style="display:none;">
+                        <h3>Add/Edit Student</h3>
+                        <form id="student-form">
+                            <input type="hidden" id="student-id">
+                            <label for="student-name">Name:</label>
+                            <input type="text" id="student-name" required><br><br>
+                            <label for="student-class">Class:</label>
+                            <input type="text" id="student-class" required><br><br>
+                            <label for="guardian-name">Guardian Name:</label>
+                            <input type="text" id="guardian-name"><br><br>
+                            <label for="guardian-phone">Guardian Phone:</label>
+                            <input type="text" id="guardian-phone"><br><br>
+                            <label for="guardian-email">Guardian Email:</label>
+                            <input type="email" id="guardian-email"><br><br>
+                            <label for="guardian-occupation">Guardian Occupation:</label>
+                            <input type="text" id="guardian-occupation"><br><br>
+                            <button type="submit">Save</button>
+                            <button type="button" id="cancel-student-btn">Cancel</button>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('add-student-btn').addEventListener('click', window.showAddStudentForm);
+                document.getElementById('student-form').addEventListener('submit', handleStudentFormSubmit);
+                document.getElementById('cancel-student-btn').addEventListener('click', hideStudentForm);
+                displayStudents();
+            }
+
+            function getStudents() {
+                return JSON.parse(localStorage.getItem('students')) || [];
+            }
+
+            function saveStudents(students) {
+                localStorage.setItem('students', JSON.stringify(students));
+                displayStudents();
+                // Update dashboard widgets if on dashboard page
+                if (pageTitle.textContent === 'Dashboard') {
+                    renderDashboardPage();
+                }
+            }
+
+            function displayStudents() {
+                const students = getStudents();
+                const tableBody = document.querySelector('#student-table tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+                if (students.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="8">No students found.</td></tr>';
+                    return;
+                }
+                students.forEach(student => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.class}</td>
+                        <td>${student.guardianName || 'N/A'}</td>
+                        <td>${student.guardianPhone || 'N/A'}</td>
+                        <td>${student.guardianEmail || 'N/A'}</td>
+                        <td>${student.guardianOccupation || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="edit-btn" onclick="window.editStudent('${student.id}')">Edit</button>
+                            <button class="delete-btn" onclick="window.requestDeleteStudent('${student.id}')">Delete</button>
+                        </td>
+                    `;
+                });
+            }
+
+            window.showAddStudentForm = () => { // Made global for FAB
+                document.getElementById('student-form-container').style.display = 'block';
+                document.getElementById('add-student-btn').style.display = 'none';
+                document.getElementById('student-id').value = '';
+                document.getElementById('student-name').value = '';
+                document.getElementById('student-class').value = '';
+                document.getElementById('guardian-name').value = '';
+                document.getElementById('guardian-phone').value = '';
+                document.getElementById('guardian-email').value = '';
+                document.getElementById('guardian-occupation').value = '';
+            }
+
+            function hideStudentForm() {
+                document.getElementById('student-form-container').style.display = 'none';
+                document.getElementById('add-student-btn').style.display = 'block';
+            }
+
+            window.editStudent = (id) => {
+                const students = getStudents();
+                const student = students.find(s => s.id === id);
+                if (student) {
+                    window.showAddStudentForm();
+                    document.getElementById('student-id').value = student.id;
+                    document.getElementById('student-name').value = student.name;
+                    document.getElementById('student-class').value = student.class;
+                    document.getElementById('guardian-name').value = student.guardianName || '';
+                    document.getElementById('guardian-phone').value = student.guardianPhone || '';
+                    document.getElementById('guardian-email').value = student.guardianEmail || '';
+                    document.getElementById('guardian-occupation').value = student.guardianOccupation || '';
+                }
+            };
+
+            window.requestDeleteStudent = (id) => {
+                showConfirmationModal('Are you sure you want to delete this student?', () => deleteStudent(id));
+            };
+
+            function deleteStudent(id) {
+                const students = getStudents();
+                const filteredStudents = students.filter(s => s.id !== id);
+                saveStudents(filteredStudents);
+            }
+
+            function handleStudentFormSubmit(e) {
+                e.preventDefault();
+                const id = document.getElementById('student-id').value;
+                const name = document.getElementById('student-name').value;
+                const studentClass = document.getElementById('student-class').value;
+                const guardianName = document.getElementById('guardian-name').value;
+                const guardianPhone = document.getElementById('guardian-phone').value;
+                const guardianEmail = document.getElementById('guardian-email').value;
+                const guardianOccupation = document.getElementById('guardian-occupation').value;
+
+                const students = getStudents();
+
+                if (id) {
+                    const index = students.findIndex(s => s.id === id);
+                    if (index !== -1) {
+                        students[index] = { id, name, class: studentClass, guardianName, guardianPhone, guardianEmail, guardianOccupation };
+                    }
+                } else {
+                    const newStudent = {
+                        id: Date.now().toString(),
+                        name: name,
+                        class: studentClass,
+                        guardianName: guardianName,
+                        guardianPhone: guardianPhone,
+                        guardianEmail: guardianEmail,
+                        guardianOccupation: guardianOccupation
+                    };
+                    students.push(newStudent);
+                }
+
+                saveStudents(students);
+                hideStudentForm();
+            }
+
+            // --- Teachers Management Logic (CRUD with localStorage) ---
+            function renderTeachersPage() {
+                contentArea.innerHTML = `
+                    <h2>Teachers</h2>
+                    <button id="add-teacher-btn">Add New Teacher</button>
+                    <button class="add-btn" onclick="window.exportTableToExcel('teacher-table', 'Teachers_Data')">Export to Excel</button>
+                    <div class="data-table-container">
+                        <table class="data-table" id="teacher-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Subject</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="teacher-form-container" style="display:none;">
+                        <h3>Add/Edit Teacher</h3>
+                        <form id="teacher-form">
+                            <input type="hidden" id="teacher-id">
+                            <label for="teacher-name">Name:</label>
+                            <input type="text" id="teacher-name" required><br><br>
+                            <label for="teacher-subject">Subject:</label>
+                            <input type="text" id="teacher-subject" required><br><br>
+                            <button type="submit">Save</button>
+                            <button type="button" id="cancel-teacher-btn">Cancel</button>
+                        </form>
+                    </div>
+                `;
+                document.getElementById('add-teacher-btn').addEventListener('click', window.showAddTeacherForm);
+                document.getElementById('teacher-form').addEventListener('submit', handleTeacherFormSubmit);
+                document.getElementById('cancel-teacher-btn').addEventListener('click', hideTeacherForm);
+                displayTeachers();
+            }
+
+            function getTeachers() {
+                return JSON.parse(localStorage.getItem('teachers')) || [];
+            }
+
+            function saveTeachers(teachers) {
+                localStorage.setItem('teachers', JSON.stringify(teachers));
+                displayTeachers();
+                if (pageTitle.textContent === 'Dashboard') {
+                    renderDashboardPage();
+                }
+            }
+
+            function displayTeachers() {
+                const teachers = getTeachers();
+                const tableBody = document.querySelector('#teacher-table tbody');
+                tableBody.innerHTML = '';
+                if (teachers.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No teachers found.</td></tr>';
+                    return;
+                }
+                teachers.forEach(teacher => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${teacher.id}</td>
+                        <td>${teacher.name}</td>
+                        <td>${teacher.subject}</td>
+                        <td class="actions">
+                            <button class="edit-btn" onclick="window.editTeacher('${teacher.id}')">Edit</button>
+                            <button class="delete-btn" onclick="window.requestDeleteTeacher('${teacher.id}')">Delete</button>
+                        </td>
+                    `;
+                });
+            }
+
+            window.showAddTeacherForm = () => { // Made global for FAB
+                document.getElementById('teacher-form-container').style.display = 'block';
+                document.getElementById('add-teacher-btn').style.display = 'none';
+                document.getElementById('teacher-id').value = '';
+                document.getElementById('teacher-name').value = '';
+                document.getElementById('teacher-subject').value = '';
+            }
+
+            function hideTeacherForm() {
+                document.getElementById('teacher-form-container').style.display = 'none';
+                document.getElementById('add-teacher-btn').style.display = 'block';
+            }
+
+            window.editTeacher = (id) => {
+                const teachers = getTeachers();
+                const teacher = teachers.find(s => s.id === id);
+                if (teacher) {
+                    window.showAddTeacherForm();
+                    document.getElementById('teacher-id').value = teacher.id;
+                    document.getElementById('teacher-name').value = teacher.name;
+                    document.getElementById('teacher-subject').value = teacher.subject;
+                }
+            };
+
+            window.requestDeleteTeacher = (id) => {
+                showConfirmationModal('Are you sure you want to delete this teacher?', () => deleteTeacher(id));
+            };
+
+            function deleteTeacher(id) {
+                const teachers = getTeachers();
+                const filteredTeachers = teachers.filter(s => s.id !== id);
+                saveTeachers(filteredTeachers);
+            }
+
+            function handleTeacherFormSubmit(e) {
+                e.preventDefault();
+                const id = document.getElementById('teacher-id').value;
+                const name = document.getElementById('teacher-name').value;
+                const subject = document.getElementById('teacher-subject').value;
+
+                const teachers = getTeachers();
+
+                if (id) {
+                    const index = teachers.findIndex(s => s.id === id);
+                    if (index !== -1) {
+                        teachers[index] = { id, name, subject: subject };
+                    }
+                } else {
+                    const newTeacher = {
+                        id: Date.now().toString(),
+                        name: name,
+                        subject: subject
+                    };
+                    teachers.push(newTeacher);
+                    // Add to activity timeline
+                    const activityTimeline = JSON.parse(localStorage.getItem('activityTimeline')) || [];
+                    activityTimeline.unshift({ id: Date.now().toString(), date: new Date().toISOString().slice(0, 10), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), description: `New teacher ${name} (${subject}) added` });
+                    localStorage.setItem('activityTimeline', JSON.stringify(activityTimeline));
+                }
+
+                saveTeachers(teachers);
+                hideTeacherForm();
+            }
+
+            // --- Invoices Management Logic (CRUD with localStorage) ---
+            function renderInvoicesPage() {
+                contentArea.innerHTML = `
+                    <h2>Invoices</h2>
+                    <button id="add-invoice-btn">Create New Invoice</button>
+                    <button class="add-btn" onclick="window.exportTableToExcel('invoice-table', 'Invoices_Data')">Export to Excel</button>
+                    <div class="data-table-container">
+                        <table class="data-table" id="invoice-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student</th>
+                                    <th>Amount (KSH)</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="invoice-form-container" style="display:none;">
+                        <h3>Create/Edit Invoice</h3>
+                        <form id="invoice-form">
+                            <input type="hidden" id="invoice-id">
+                            <label for="invoice-student">Student Name:</label>
+                            <input type="text" id="invoice-student" required><br><br>
+                            <label for="invoice-amount">Amount (KSH):</label>
+                            <input type="number" id="invoice-amount" step="0.01" required><br><br>
+                            <label for="invoice-dueDate">Due Date:</label>
+                            <input type="date" id="invoice-dueDate" required><br><br>
+                            <label for="invoice-status">Status:</label>
+                            <input type="text" id="invoice-status" required><br><br>
+                            <button type="submit">Save</button>
+                            <button type="button" id="cancel-invoice-btn">Cancel</button>
+                        </form>
+                    </div>
+                    <div class="invoice-actions">
+                        <button class="add-btn" onclick="window.printPage()">Print Invoices</button>
+                        <button class="add-btn" onclick="window.generatePdf('All Invoices Report')">Download Invoices PDF</button>
+                    </div>
+                `;
+                document.getElementById('add-invoice-btn').addEventListener('click', window.showAddInvoiceForm);
+                document.getElementById('invoice-form').addEventListener('submit', handleInvoiceFormSubmit);
+                document.getElementById('cancel-invoice-btn').addEventListener('click', hideInvoiceForm);
+                displayInvoices();
+            }
+
+            function getInvoices() {
+                return JSON.parse(localStorage.getItem('invoices')) || [];
+            }
+
+            function saveInvoices(invoices) {
+                localStorage.setItem('invoices', JSON.stringify(invoices));
+                displayInvoices();
+                if (pageTitle.textContent === 'Dashboard') {
+                    renderDashboardPage();
+                }
+            }
+
+            function displayInvoices() {
+                const invoices = getInvoices();
+                const tableBody = document.querySelector('#invoice-table tbody');
+                tableBody.innerHTML = '';
+                if (invoices.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6">No invoices found.</td></tr>';
+                    return;
+                }
+                invoices.forEach(invoice => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${invoice.id}</td>
+                        <td>${invoice.student}</td>
+                        <td>KSH ${invoice.amount.toFixed(2)}</td>
+                        <td>${invoice.dueDate}</td>
+                        <td>${invoice.status}</td>
+                        <td class="actions">
+                            <button class="edit-btn" onclick="window.editInvoice('${invoice.id}')">Edit</button>
+                            <button class="delete-btn" onclick="window.requestDeleteInvoice('${invoice.id}')">Delete</button>
+                            <button class="add-btn" onclick="window.generatePaymentReceipt('${invoice.id}')">Generate Receipt</button>
+                        </td>
+                    `;
+                });
+            }
+
+            window.showAddInvoiceForm = () => { // Made global for FAB
+                document.getElementById('invoice-form-container').style.display = 'block';
+                document.getElementById('add-invoice-btn').style.display = 'none';
+                document.getElementById('invoice-id').value = '';
+                document.getElementById('invoice-student').value = '';
+                document.getElementById('invoice-amount').value = '';
+                document.getElementById('invoice-dueDate').value = '';
+                document.getElementById('invoice-status').value = '';
+            }
+
+            function hideInvoiceForm() {
+                document.getElementById('invoice-form-container').style.display = 'none';
+                document.getElementById('add-invoice-btn').style.display = 'block';
+            }
+
+            window.editInvoice = (id) => {
+                const invoices = getInvoices();
+                const invoice = invoices.find(s => s.id === id);
+                if (invoice) {
+                    window.showAddInvoiceForm();
+                    document.getElementById('invoice-id').value = invoice.id;
+                    document.getElementById('invoice-student').value = invoice.student;
+                    document.getElementById('invoice-amount').value = invoice.amount;
+                    document.getElementById('invoice-dueDate').value = invoice.dueDate;
+                    document.getElementById('invoice-status').value = invoice.status;
+                }
+            };
+
+            window.requestDeleteInvoice = (id) => {
+                showConfirmationModal('Are you sure you want to delete this invoice?', () => deleteInvoice(id));
+            };
+
+            function deleteInvoice(id) {
+                const invoices = getInvoices();
+                const filteredInvoices = invoices.filter(s => s.id !== id);
+                saveInvoices(filteredInvoices);
+            }
+
+            function handleInvoiceFormSubmit(e) {
+                e.preventDefault();
+                const id = document.getElementById('invoice-id').value;
+                const student = document.getElementById('invoice-student').value;
+                const amount = parseFloat(document.getElementById('invoice-amount').value);
+                const dueDate = document.getElementById('invoice-dueDate').value;
+                const status = document.getElementById('invoice-status').value;
+
+                const invoices = getInvoices();
+
+                if (id) {
+                    const index = invoices.findIndex(s => s.id === id);
+                    if (index !== -1) {
+                        invoices[index] = { id, student, amount, dueDate, status };
+                    }
+                } else {
+                    const newInvoice = {
+                        id: 'INV' + Date.now().toString().slice(-5), // Simple unique ID
+                        student: student,
+                        amount: amount,
+                        dueDate: dueDate,
+                        status: status
+                    };
+                    invoices.push(newInvoice);
+                    // Add to activity timeline
+                    const activityTimeline = JSON.parse(localStorage.getItem('activityTimeline')) || [];
+                    activityTimeline.unshift({ id: Date.now().toString(), date: new Date().toISOString().slice(0, 10), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), description: `New invoice created for ${student} (KSH ${amount.toFixed(2)})` });
+                    localStorage.setItem('activityTimeline', JSON.stringify(activityTimeline));
+                }
+
+                saveInvoices(invoices);
+                hideInvoiceForm();
+            }
+
+            window.generatePaymentReceipt = (invoiceId) => {
+                const invoices = getInvoices();
+                const invoice = invoices.find(inv => inv.id === invoiceId);
+
+                if (!invoice) {
+                    showConfirmationModal(`Invoice ${invoiceId} not found.`, () => {});
+                    return;
+                }
+
+                if (typeof window.jsPDF !== 'undefined') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    doc.setFontSize(22);
+                    doc.text("Prince Alex Academy", 105, 20, null, null, "center");
+                    doc.setFontSize(12);
+                    doc.text("Payment Receipt", 105, 30, null, null, "center");
+                    doc.line(20, 35, 190, 35); // Horizontal line
+
+                    doc.setFontSize(10);
+                    doc.text(`Receipt ID: REC-${Date.now().toString().slice(-6)}`, 20, 45);
+                    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 50);
+                    doc.text(`Invoice ID: ${invoice.id}`, 20, 55);
+
+                    doc.text(`Student Name: ${invoice.student}`, 20, 65);
+                    doc.text(`Amount: KSH ${invoice.amount.toFixed(2)}`, 20, 70);
+                    doc.text(`Status: ${invoice.status}`, 20, 75);
+                    doc.text(`Due Date: ${invoice.dueDate}`, 20, 80);
+
+                    doc.text("Thank you for your payment!", 105, 100, null, null, "center");
+
+                    doc.save(`Receipt_INV${invoice.id}.pdf`);
+                } else {
+                    showConfirmationModal("jsPDF library is not loaded. Cannot generate PDF receipt.", () => {});
+                }
+            };
+
+
+            // --- Classes Management Logic ---
+            function renderClassesPage() {
+                contentArea.innerHTML = `
+                    <h2>Classes</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="class-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Class Name</th>
+                                    <th>Teacher</th>
+                                    <th>Students</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayClasses();
+            }
+
+            function getClasses() {
+                return JSON.parse(localStorage.getItem('classes')) || [];
+            }
+
+            function displayClasses() {
+                const classes = getClasses();
+                const students = getStudents(); // Get student data to link
+                const tableBody = document.querySelector('#class-table tbody');
+                tableBody.innerHTML = '';
+                if (classes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No classes found.</td></tr>';
+                    return;
+                }
+                classes.forEach(_class => {
+                    const studentNames = _class.studentIds.map(id => {
+                        const student = students.find(s => s.id === id);
+                        return student ? student.name : 'Unknown Student';
+                    }).join(', ');
+
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${_class.id}</td>
+                        <td>${_class.name}</td>
+                        <td>${_class.teacher}</td>
+                        <td>${studentNames || 'None'}</td>
+                    `;
+                });
+            }
+
+            // --- Subjects Management Logic ---
+            function renderSubjectsPage() {
+                contentArea.innerHTML = `
+                    <h2>Subjects</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="subject-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Subject Name</th>
+                                    <th>Taught By</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displaySubjects();
+            }
+
+            function getSubjects() {
+                return JSON.parse(localStorage.getItem('subjects')) || [];
+            }
+
+            function displaySubjects() {
+                const subjects = getSubjects();
+                const tableBody = document.querySelector('#subject-table tbody');
+                tableBody.innerHTML = '';
+                if (subjects.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3">No subjects found.</td></tr>';
+                    return;
+                }
+                subjects.forEach(subject => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${subject.id}</td>
+                        <td>${subject.name}</td>
+                        <td>${subject.teacher}</td>
+                    `;
+                });
+            }
+
+            // --- Exams Management Logic ---
+            function renderExamsPage() {
+                contentArea.innerHTML = `
+                    <h2>Exams</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="exam-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Exam Name</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Class</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayExams();
+            }
+
+            function getExams() {
+                return JSON.parse(localStorage.getItem('exams')) || [];
+            }
+
+            function displayExams() {
+                const exams = getExams();
+                const tableBody = document.querySelector('#exam-table tbody');
+                tableBody.innerHTML = '';
+                if (exams.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5">No exams found.</td></tr>';
+                    return;
+                }
+                exams.forEach(exam => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${exam.id}</td>
+                        <td>${exam.name}</td>
+                        <td>${exam.subject}</td>
+                        <td>${exam.date}</td>
+                        <td>${exam.class}</td>
+                    `;
+                });
+            }
+
+            // --- Grades Management Logic ---
+            function renderGradesPage() {
+                contentArea.innerHTML = `
+                    <h2>Grades</h2>
+                    <button class="add-btn" onclick="window.exportTableToExcel('grade-table', 'Grades_Data')">Export to Excel</button>
+                    <div class="data-table-container">
+                        <table class="data-table" id="grade-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student</th>
+                                    <th>Subject</th>
+                                    <th>Exam</th>
+                                    <th>Score</th>
+                                    <th>Grade</th>
+                                    <th>Term</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayGrades();
+            }
+
+            function getGrades() {
+                return JSON.parse(localStorage.getItem('grades')) || [];
+            }
+
+            function displayGrades() {
+                const grades = getGrades();
+                const tableBody = document.querySelector('#grade-table tbody');
+                tableBody.innerHTML = '';
+                if (grades.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7">No grades found.</td></tr>';
+                    return;
+                }
+                grades.forEach(grade => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${grade.id}</td>
+                        <td>${grade.studentName}</td>
+                        <td>${grade.subject}</td>
+                        <td>${grade.exam}</td>
+                        <td>${grade.score}</td>
+                        <td>${grade.grade}</td>
+                        <td>${grade.term}</td>
+                    `;
+                });
+            }
+
+            // --- Attendance Management Logic ---
+            function renderAttendancePage() {
+                contentArea.innerHTML = `
+                    <h2>Attendance</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayAttendance();
+            }
+
+            function getAttendance() {
+                return JSON.parse(localStorage.getItem('attendance')) || [];
+            }
+
+            function displayAttendance() {
+                const attendanceRecords = getAttendance();
+                const tableBody = document.querySelector('#attendance-table tbody');
+                tableBody.innerHTML = '';
+                if (attendanceRecords.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No attendance records found.</td></tr>';
+                    return;
+                }
+                attendanceRecords.forEach(record => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${record.id}</td>
+                        <td>${record.studentName}</td>
+                        <td>${record.date}</td>
+                        <td>${record.status}</td>
+                    `;
+                });
+            }
+
+            // --- Assignments Management Logic ---
+            function renderAssignmentsPage() {
+                contentArea.innerHTML = `
+                    <h2>Assignments</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="assignment-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Subject</th>
+                                    <th>Due Date</th>
+                                    <th>Assigned To</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayAssignments();
+            }
+
+            function getAssignments() {
+                return JSON.parse(localStorage.getItem('assignments')) || [];
+            }
+
+            function displayAssignments() {
+                const assignments = getAssignments();
+                const students = getStudents(); // Get student data to link
+                const tableBody = document.querySelector('#assignment-table tbody');
+                tableBody.innerHTML = '';
+                if (assignments.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6">No assignments found.</td></tr>';
+                    return;
+                }
+                assignments.forEach(assignment => {
+                    const assignedToNames = assignment.assignedTo.map(id => {
+                        const student = students.find(s => s.id === id);
+                        return student ? student.name : 'Unknown';
+                    }).join(', ');
+
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${assignment.id}</td>
+                        <td>${assignment.title}</td>
+                        <td>${assignment.subject}</td>
+                        <td>${assignment.dueDate}</td>
+                        <td>${assignedToNames}</td>
+                        <td>${assignment.status}</td>
+                    `;
+                });
+            }
+
+            // --- Payment History Management Logic ---
+            function renderPaymentHistoryPage() {
+                contentArea.innerHTML = `
+                    <h2>Payment History</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="payment-history-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Invoice ID</th>
+                                    <th>Student</th>
+                                    <th>Amount Paid (KSH)</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="financial-actions">
+                        <button class="add-btn" onclick="window.printPage()">Print Payment History</button>
+                        <button class="add-btn" onclick="window.generatePdf('Payment History Report')">Download Payment History PDF</button>
+                    </div>
+                `;
+                displayPaymentHistory();
+            }
+
+            function getPaymentHistory() {
+                return JSON.parse(localStorage.getItem('paymentHistory')) || [];
+            }
+
+            function displayPaymentHistory() {
+                const history = getPaymentHistory();
+                const tableBody = document.querySelector('#payment-history-table tbody');
+                tableBody.innerHTML = '';
+                if (history.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5">No payment records found.</td></tr>';
+                    return;
+                }
+                history.forEach(record => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${record.id}</td>
+                        <td>${record.invoiceId}</td>
+                        <td>KSH ${record.amountPaid.toFixed(2)}</td>
+                        <td>${record.date}</td>
+                    `;
+                });
+            }
+
+            // --- Expenses Management Logic ---
+            function renderExpensesPage() {
+                contentArea.innerHTML = `
+                    <h2>Expenses</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="expenses-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Item</th>
+                                    <th>Amount (KSH)</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="financial-actions">
+                        <button class="add-btn" onclick="window.printPage()">Print Expenses</button>
+                        <button class="add-btn" onclick="window.generatePdf('Expenses Report')">Download Expenses PDF</button>
+                    </div>
+                `;
+                displayExpenses();
+            }
+
+            function getExpenses() {
+                return JSON.parse(localStorage.getItem('expenses')) || [];
+            }
+
+            function displayExpenses() {
+                const expenses = getExpenses();
+                const tableBody = document.querySelector('#expenses-table tbody');
+                tableBody.innerHTML = '';
+                if (expenses.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No expenses found.</td></tr>';
+                    return;
+                }
+                expenses.forEach(expense => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${expense.id}</td>
+                        <td>${expense.item}</td>
+                        <td>KSH ${expense.amount.toFixed(2)}</td>
+                        <td>${expense.date}</td>
+                    `;
+                });
+            }
+
+            // --- Library Management Logic ---
+            function renderLibraryPage() {
+                contentArea.innerHTML = `
+                    <h2>Library</h2>
+                    <div class="data-table-container">
+                        <table class="data-table" id="library-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                `;
+                displayLibrary();
+            }
+
+            function getLibrary() {
+                return JSON.parse(localStorage.getItem('library')) || [];
+            }
+
+            function displayLibrary() {
+                const books = getLibrary();
+                const tableBody = document.querySelector('#library-table tbody');
+                tableBody.innerHTML = '';
+                if (books.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4">No books found.</td></tr>';
+                    return;
+                }
+                books.forEach(book => {
+                    const row = tableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${book.id}</td>
+                        <td>${book.title}</td>
+                        <td>${book.author}</td>
+                        <td>${book.status}</td>
+                    `;
+                });
+            }
+
+            // --- Events Management Logic (Calendar) ---
+            let currentCalendarDate = new Date(); // Global to keep track of month
+
+            function renderEventsPage() {
+                contentArea.innerHTML = `
+                    <h2>Events Calendar</h2>
+                    <button id="add-event-btn">Add New Event</button>
+                    <div class="calendar-nav">
+                        <button id="prev-month-btn"><i class="fas fa-chevron-left"></i> Previous</button>
+                        <h3 id="current-month-year" class="calendar-header"></h3>
+                        <button id="next-month-btn">Next <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <div class="day-header">Sun</div>
+                        <div class="day-header">Mon</div>
+                        <div class="day-header">Tue</div>
+                        <div class="day-header">Wed</div>
+                        <div class="day-header">Thu</div>
+                        <div class="day-header">Fri</div>
+                        <div class="day-header">Sat</div>
+                    </div>
+                    <div id="event-form-container" style="display:none;">
+                        <h3>Add/Edit Event</h3>
+                        <form id="event-form">
+                            <input type="hidden" id="event-id">
+                            <label for="event-name">Event Name:</label>
+                            <input type="text" id="event-name" required><br><br>
+                            <label for="event-date">Date:</label>
+                            <input type="date" id="event-date" required><br><br>
+                            <label for="event-location">Location:</label>
+                            <input type="text" id="event-location"><br><br>
+                            <label for="event-description">Description:</label>
+                            <textarea id="event-description"></textarea><br><br>
+                            <button type="submit">Save Event</button>
+                            <button type="button" id="cancel-event-btn">Cancel</button>
+                        </form>
+                    </div>
+                `;
+
+                document.getElementById('add-event-btn').addEventListener('click', showAddEventForm);
+                document.getElementById('event-form').addEventListener('submit', handleEventFormSubmit);
+                document.getElementById('cancel-event-btn').addEventListener('click', hideEventForm);
+                document.getElementById('prev-month-btn').addEventListener('click', () => changeMonth(-1));
+                document.getElementById('next-month-btn').addEventListener('click', () => changeMonth(1));
+
+                renderCalendar(currentCalendarDate);
+            }
+
+            function getEvents() {
+                return JSON.parse(localStorage.getItem('events')) || [];
+            }
+
+            function saveEvents(events) {
+                localStorage.setItem('events', JSON.stringify(events));
+                renderCalendar(currentCalendarDate); // Re-render calendar after saving
+            }
+
+            function renderCalendar(date) {
+                currentCalendarDate = date; // Update global date
+                const year = date.getFullYear();
+                const month = date.getMonth(); // 0-indexed
+
+                const firstDayOfMonth = new Date(year, month, 1);
+                const lastDayOfMonth = new Date(year, month + 1, 0);
+                const daysInMonth = lastDayOfMonth.getDate();
+
+                const startDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 6 = Saturday
+
+                const calendarGrid = document.getElementById('calendar-grid');
+                calendarGrid.innerHTML = `
+                    <div class="day-header">Sun</div>
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
+                    <div class="day-header">Sat</div>
+                `; // Clear and re-add headers
+
+                document.getElementById('current-month-year').textContent = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+
+                // Add empty days for the start of the month
+                for (let i = 0; i < startDayOfWeek; i++) {
+                    const prevMonthLastDay = new Date(year, month, 0).getDate();
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('calendar-day', 'other-month');
+                    dayDiv.innerHTML = `<div class="day-number">${prevMonthLastDay - startDayOfWeek + 1 + i}</div>`;
+                    calendarGrid.appendChild(dayDiv);
+                }
+
+                // Add days of the current month
+                const allEvents = getEvents();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('calendar-day', 'current-month');
+                    dayDiv.innerHTML = `<div class="day-number">${day}</div>`;
+
+                    const currentDateString = new Date(year, month, day).toISOString().slice(0, 10);
+                    const eventsForDay = allEvents.filter(event => event.date === currentDateString);
+
+                    eventsForDay.forEach(event => {
+                        const eventSpan = document.createElement('div');
+                        eventSpan.classList.add('event-item');
+                        eventSpan.textContent = event.name;
+                        eventSpan.title = `${event.name}\n${event.location || ''}\n${event.description || ''}`;
+                        eventSpan.onclick = () => editEvent(event.id); // Make events clickable for editing
+                        dayDiv.appendChild(eventSpan);
+                    });
+                    calendarGrid.appendChild(dayDiv);
+                }
+
+                // Add empty days for the end of the month
+                const totalDaysDisplayed = startDayOfWeek + daysInMonth;
+                const remainingDays = 42 - totalDaysDisplayed; // Max 6 rows * 7 days = 42
+                for (let i = 1; i <= remainingDays; i++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.classList.add('calendar-day', 'other-month');
+                    dayDiv.innerHTML = `<div class="day-number">${i}</div>`;
+                    calendarGrid.appendChild(dayDiv);
+                }
+            }
+
+            function changeMonth(delta) {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+                renderCalendar(currentCalendarDate);
+            }
+
+            function showAddEventForm() {
+                document.getElementById('event-form-container').style.display = 'block';
+                document.getElementById('add-event-btn').style.display = 'none';
+                document.getElementById('event-id').value = '';
+                document.getElementById('event-name').value = '';
+                document.getElementById('event-date').value = '';
+                document.getElementById('event-location').value = '';
+                document.getElementById('event-description').value = '';
+            }
+
+            function hideEventForm() {
+                document.getElementById('event-form-container').style.display = 'none';
+                document.getElementById('add-event-btn').style.display = 'block';
+            }
+
+            function editEvent(id) {
+                const events = getEvents();
+                const event = events.find(e => e.id === id);
+                if (event) {
+                    showAddEventForm();
+                    document.getElementById('event-id').value = event.id;
+                    document.getElementById('event-name').value = event.name;
+                    document.getElementById('event-date').value = event.date;
+                    document.getElementById('event-location').value = event.location || '';
+                    document.getElementById('event-description').value = event.description || '';
+                }
+            }
+
+            function handleEventFormSubmit(e) {
+                e.preventDefault();
+                const id = document.getElementById('event-id').value;
+                const name = document.getElementById('event-name').value;
+                const date = document.getElementById('event-date').value;
+                const location = document.getElementById('event-location').value;
+                const description = document.getElementById('event-description').value;
+
+                const events = getEvents();
+
+                if (id) {
+                    const index = events.findIndex(e => e.id === id);
+                    if (index !== -1) {
+                        events[index] = { id, name, date, location, description };
+                    }
+                } else {
+                    const newEvent = {
+                        id: Date.now().toString(),
+                        name,
+                        date,
+                        location,
+                        description
+                    };
+                    events.push(newEvent);
+                    // Add to activity timeline
+                    const activityTimeline = JSON.parse(localStorage.getItem('activityTimeline')) || [];
+                    activityTimeline.unshift({ id: Date.now().toString(), date: new Date().toISOString().slice(0, 10), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), description: `New event "${name}" added on ${date}` });
+                    localStorage.setItem('activityTimeline', JSON.stringify(activityTimeline));
+                }
+
+                saveEvents(events);
+                hideEventForm();
+            }
+
+
+            // --- Messages Management Logic ---
+            let currentMessageView = 'inbox'; // 'inbox', 'sent', 'compose', 'detail'
+            let selectedMessageId = null;
+
+            function renderMessagesPage() {
+                contentArea.innerHTML = `
+                    <h2>Messages</h2>
+                    <div class="message-controls">
+                        <div class="message-tabs">
+                            <button id="inbox-tab" class="active">Inbox</button>
+                            <button id="sent-tab">Sent</button>
+                        </div>
+                        <button id="compose-message-btn">Compose New Message</button>
+                    </div>
+                    <div id="message-view-container">
+                        <!-- Message list or compose form will load here -->
+                    </div>
+                `;
+
+                document.getElementById('inbox-tab').addEventListener('click', () => showMessageView('inbox'));
+                document.getElementById('sent-tab').addEventListener('click', () => showMessageView('sent'));
+                document.getElementById('compose-message-btn').addEventListener('click', window.showMessageComposeForm);
+
+                showMessageView(currentMessageView); // Display initial view
+            }
+
+            function getMessages() {
+                return JSON.parse(localStorage.getItem('messages')) || [];
+            }
+
+            function saveMessages(messages) {
+                localStorage.setItem('messages', JSON.stringify(messages));
+                populateNotifications(); // Update notification badge
+                showMessageView(currentMessageView); // Re-render current view
+            }
+
+            window.showMessageComposeForm = () => {
+                const viewContainer = document.getElementById('message-view-container');
+                viewContainer.innerHTML = `
+                    <h3>Compose Message</h3>
+                    <form id="compose-form">
+                        <label for="message-recipient">Recipient:</label>
+                        <input type="text" id="message-recipient" required placeholder="e.g., Admin, Ms. Davis, All Teachers"><br><br>
+                        <label for="message-subject">Subject:</label>
+                        <input type="text" id="message-subject" required><br><br>
+                        <label for="message-content">Content:</label>
+                        <textarea id="message-content" rows="8" required></textarea><br><br>
+                        <button type="submit">Send Message</button>
+                        <button type="button" id="cancel-compose-btn">Cancel</button>
+                    </form>
+                `;
+                document.getElementById('compose-form').addEventListener('submit', handleComposeSubmit);
+                document.getElementById('cancel-compose-btn').addEventListener('click', () => showMessageView('inbox'));
+                setActiveTab(null); // No tab active when composing
+            };
+
+            function handleComposeSubmit(e) {
+                e.preventDefault();
+                const recipient = document.getElementById('message-recipient').value;
+                const subject = document.getElementById('message-subject').value;
+                const content = document.getElementById('message-content').value;
+
+                const messages = getMessages();
+                const newMessage = {
+                    id: Date.now().toString(),
+                    sender: 'Admin User', // Assuming current user is Admin
+                    recipient: recipient,
+                    subject: subject,
+                    date: new Date().toISOString().slice(0, 10),
+                    content: content,
+                    status: 'read', // Sent messages are 'read' by sender by default
+                    type: 'sent'
+                };
+                messages.push(newMessage);
+
+                // Simulate receiving the message if sent to "Admin" or "All Teachers"
+                if (recipient.toLowerCase() === 'admin' || recipient.toLowerCase() === 'all teachers') {
+                    const receivedMessage = { ...newMessage, id: Date.now().toString() + '-rec', sender: 'Admin User', recipient: 'Admin', status: 'unread', type: 'received' };
+                    messages.push(receivedMessage);
+                }
+
+                saveMessages(messages);
+                currentMessageView = 'sent'; // Go to sent after composing
+            }
+
+            function showMessageView(view) {
+                currentMessageView = view;
+                const viewContainer = document.getElementById('message-view-container');
+                const messages = getMessages();
+                let filteredMessages = [];
+
+                setActiveTab(view);
+
+                if (view === 'inbox') {
+                    filteredMessages = messages.filter(msg => msg.type === 'received');
+                    viewContainer.innerHTML = '<h3>Inbox</h3><div class="message-list" id="inbox-list"></div>';
+                    displayMessageList('inbox-list', filteredMessages);
+                } else if (view === 'sent') {
+                    filteredMessages = messages.filter(msg => msg.type === 'sent');
+                    viewContainer.innerHTML = '<h3>Sent Messages</h3><div class="message-list" id="sent-list"></div>';
+                    displayMessageList('sent-list', filteredMessages);
+                }
+            }
+
+            function displayMessageList(listId, messages) {
+                const listElement = document.getElementById(listId);
+                listElement.innerHTML = '';
+                if (messages.length === 0) {
+                    listElement.innerHTML = '<p>No messages in this folder.</p>';
+                    return;
+                }
+
+                messages.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date descending
+
+                messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message-item');
+                    if (message.status === 'unread' && message.type === 'received') {
+                        messageDiv.classList.add('unread');
+                    }
+                    messageDiv.innerHTML = `
+                        <div class="message-item-header">
+                            <strong>${message.type === 'received' ? 'From' : 'To'}:</strong> ${message.type === 'received' ? message.sender : message.recipient}<br>
+                            <strong>Subject:</strong> ${message.subject}<br>
+                            <small>${message.date}</small>
+                        </div>
+                        <div class="message-item-actions">
+                            <button class="edit-btn" onclick="window.showMessageDetail('${message.id}')">View</button>
+                            ${message.type === 'received' ? `<button class="delete-btn" onclick="window.deleteMessage('${message.id}')">Delete</button>` : ''}
+                        </div>
+                    `;
+                    listElement.appendChild(messageDiv);
+                });
+            }
+
+            window.showMessageDetail = (id) => {
+                const messages = getMessages();
+                const message = messages.find(msg => msg.id === id);
+                if (!message) {
+                    showConfirmationModal('Message not found.', () => {});
+                    showMessageView(currentMessageView);
+                    return;
+                }
+
+                const viewContainer = document.getElementById('message-view-container');
+                viewContainer.innerHTML = `
+                    <div class="message-detail">
+                        <h3>Subject: ${message.subject}</h3>
+                        <div class="message-meta">
+                            <strong>From:</strong> ${message.sender}<br>
+                            <strong>To:</strong> ${message.recipient}<br>
+                            <strong>Date:</strong> ${message.date}
+                        </div>
+                        <p>${message.content}</p>
+                        <button type="button" class="cancel-btn" onclick="window.showMessageView('${message.type === 'received' ? 'inbox' : 'sent'}')">Back to ${message.type === 'received' ? 'Inbox' : 'Sent'}</button>
+                    </div>
+                `;
+
+                // Mark as read if it's an unread received message
+                if (message.type === 'received' && message.status === 'unread') {
+                    message.status = 'read';
+                    saveMessages(messages); // Save updated status
+                }
+                setActiveTab(null); // No tab active when viewing detail
+            };
+
+            window.deleteMessage = (id) => {
+                showConfirmationModal('Are you sure you want to delete this message?', () => {
+                    let messages = getMessages();
+                    messages = messages.filter(msg => msg.id !== id);
+                    saveMessages(messages);
+                    showMessageView(currentMessageView); // Re-render the current view
+                });
+            };
+
+            function setActiveTab(activeTabId) {
+                document.querySelectorAll('.message-tabs button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                if (activeTabId) {
+                    const tabButton = document.getElementById(`${activeTabId}-tab`);
+                    if (tabButton) {
+                        tabButton.classList.add('active');
+                    }
+                }
+            }
+
+
+            // --- PDF/Print Functionality ---
+            window.printPage = () => {
+                window.print();
+            };
+
+            window.generatePdf = (title = 'Document') => {
+                if (typeof window.jsPDF !== 'undefined') {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+
+                    doc.text(`Prince Alex Academy - ${title}`, 10, 10);
+                    doc.text("This is a sample PDF generated from your website.", 10, 20);
+                    
+                    doc.save(`${title.toLowerCase().replace(/\s/g, '-')}.pdf`);
+                } else {
+                    showConfirmationModal("jsPDF library is not loaded. Cannot generate PDF.", () => {});
+                }
+            };
+
+            // --- Export to Excel Functionality (SheetJS) ---
+            window.exportTableToExcel = (tableID, filename = '') => {
+                const table = document.getElementById(tableID);
+                if (!table) {
+                    showConfirmationModal(`Table with ID "${tableID}" not found.`, () => {});
+                    return;
+                }
+
+                const ws = XLSX.utils.table_to_sheet(table);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                XLSX.writeFile(wb, `${filename || 'data'}.xlsx`);
+            };
+
+        });
+    </script>
+</body>
+</html>

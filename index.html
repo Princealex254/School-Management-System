@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        /* General Styling */
+        :root {
+            --primary-brand-maroon: #8B0000; /* Maroon */
+            --primary-brand-fuchsia: #C71585; /* Dark Fuchsia */
+            --secondary-color: #fff; /* White for login box */
+            --text-color-maroon: #8B0000; /* Text color inside form */
+            --button-hover-fuchsia: #a3116d; /* Slightly darker fuchsia for hover */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            /* Gradient background blending maroon and dark fuchsia */
+            background: linear-gradient(135deg, var(--primary-brand-maroon), var(--primary-brand-fuchsia));
+            color: var(--text-color-maroon); /* Default text color for body */
+        }
+
+        /* Login Page Styling */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background-color: var(--secondary-color); /* Clean white login form */
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logo Specific Styling */
+        .school-logo {
+            width: 120px; /* Moderate sizing */
+            max-width: 100%; /* Ensures responsiveness on smaller screens */
+            margin-bottom: 25px; /* Spacing below the logo */
+            display: block; /* Makes it a block element for margin auto to work */
+            margin-left: auto; /* Centers the logo */
+            margin-right: auto; /* Centers the logo */
+        }
+
+        .login-box h1 {
+            color: var(--text-color-maroon); /* Text in maroon for high contrast */
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .login-box p {
+            color: var(--text-color-maroon); /* Text in maroon for high contrast */
+            margin-bottom: 30px;
+        }
+
+        .login-box button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-brand-fuchsia); /* Login button matches dark fuchsia */
+            color: var(--secondary-color); /* White text on button */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .login-box button[type="submit"]:hover {
+            background-color: var(--button-hover-fuchsia); /* Darkens slightly on hover */
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <img src="mylogo.png" alt="Prince Alex Academy Logo" class="school-logo">
+            <h1>School Management System</h1>
+            <p>Welcome back! Please login to your account.</p>
+            <form id="login-form">
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    // Redirect to the dashboard page
+                    window.location.href = 'dashboard.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
