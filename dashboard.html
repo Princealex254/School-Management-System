@@ -47,6 +47,7 @@
             --progress-bar-bg: #e0e0e0;
             --progress-bar-fill: var(--primary-color);
             --transition-speed: 0.3s ease;
+            --header-height: 80px; /* Define a fixed height for the header */
         }
 
         /* Dark Mode Styles */
@@ -243,10 +244,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
+            position: fixed; /* Fixed position */
+            top: 0; /* Align to the top */
+            left: 250px; /* Align with main content on desktop */
+            width: calc(100% - 250px); /* Span remaining width on desktop */
+            height: var(--header-height); /* Fixed height */
             z-index: 999;
-            transition: background-color var(--transition-speed);
+            transition: background-color var(--transition-speed), left var(--transition-speed), width var(--transition-speed);
+        }
+
+        @media (max-width: 768px) {
+            .header-bar {
+                left: 0; /* Full width on mobile */
+                width: 100%; /* Full width on mobile */
+            }
         }
 
         .header-bar h2 {
@@ -269,6 +280,7 @@
 
         .content-area {
             padding: 20px;
+            padding-top: calc(20px + var(--header-height)); /* Add padding to account for fixed header */
             flex-grow: 1;
             overflow-y: auto; /* Enable vertical scrolling for content if it overflows */
             background-color: var(--light-bg);
@@ -3180,4 +3192,3 @@
     </script>
 </body>
 </html>
-
