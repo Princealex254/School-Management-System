@@ -3,115 +3,3106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Management System</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    <title>Prince Alex | School Management System</title>
+    <meta name="description" content="Modern School Management SaaS Dashboard">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        /* General Styling */
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
         :root {
-            --primary-brand-maroon: #8B0000; /* Maroon */
-            --primary-brand-fuchsia: #C71585; /* Dark Fuchsia */
-            --secondary-color: #fff; /* White for login box */
-            --text-color-maroon: #8B0000; /* Text color inside form */
-            --button-hover-fuchsia: #a3116d; /* Slightly darker fuchsia for hover */
+            --primary: #800000; /* Maroon */
+            --primary-dark: #600000;
+            --primary-light: #a52a2a;
+            --secondary: #ffffff;
+            --bg-light: #f8f9fa;
+            --bg-dark: #121212;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border: #e9ecef;
+            --success: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            --bg-light: #1a1a1b;
+            --text-main: #f5f6fa;
+            --text-muted: #a4b0be;
+            --border: #2f3542;
+            --secondary: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            /* Gradient background blending maroon and dark fuchsia */
-            background: linear-gradient(135deg, var(--primary-brand-maroon), var(--primary-brand-fuchsia));
-            color: var(--text-color-maroon); /* Default text color for body */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        /* Login Page Styling */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .login-box {
-            background-color: var(--secondary-color); /* Clean white login form */
-            padding: 40px;
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .card {
+            background: var(--secondary);
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-            animation: fadeIn 1s ease-in-out;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Logo Specific Styling */
-        .school-logo {
-            width: 120px; /* Moderate sizing */
-            max-width: 100%; /* Ensures responsiveness on smaller screens */
-            margin-bottom: 25px; /* Spacing below the logo */
-            display: block; /* Makes it a block element for margin auto to work */
-            margin-left: auto; /* Centers the logo */
-            margin-right: auto; /* Centers the logo */
-        }
-
-        .login-box h1 {
-            color: var(--text-color-maroon); /* Text in maroon for high contrast */
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .login-box p {
-            color: var(--text-color-maroon); /* Text in maroon for high contrast */
-            margin-bottom: 30px;
-        }
-
-        .login-box button[type="submit"] {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--primary-brand-fuchsia); /* Login button matches dark fuchsia */
-            color: var(--secondary-color); /* White text on button */
-            border: none;
+        .btn {
+            padding: 0.6rem 1.2rem;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
+            border: none;
             font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+        /* --- AUTH SECTION --- */
+        #auth-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #4a0000 100%),
+                        url('https://www.transparenttextures.com/patterns/cubes.png');
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 3rem 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(128,0,0,0.15);
+            text-align: center;
+            border-top: 6px solid var(--primary);
+        }
+        .auth-card h2 { color: var(--primary); margin-bottom: 0.5rem; font-weight: 800; font-size: 1.8rem; }
+        .auth-card p.auth-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            outline: none;
+        }
+        .auth-form input:focus { border-color: var(--primary); }
+        .auth-footer { margin-top: 2.5rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .auth-footer strong { color: var(--primary); font-weight: 700; }
+
+        /* --- LAYOUT --- */
+        #app-section { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-menu { list-style: none; padding: 1rem 0; }
+        .menu-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid var(--secondary);
+        }
+        .menu-item i { width: 20px; font-size: 1.1rem; }
+
+        /* Main Content */
+        .main-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
         }
 
-        .login-box button[type="submit"]:hover {
-            background-color: var(--button-hover-fuchsia); /* Darkens slightly on hover */
-            transform: translateY(-2px);
+        /* Top Navbar */
+        .navbar {
+            height: var(--header-height);
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 900;
         }
+        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .content-body { padding: 2rem; flex: 1; }
+
+        /* --- DASHBOARD COMPONENTS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stat-icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .bg-maroon-soft { background: rgba(128, 0, 0, 0.1); color: var(--primary); }
+        .bg-green-soft { background: rgba(46, 204, 113, 0.1); color: var(--success); }
+
+        /* --- TABLES --- */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px 12px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        tr:hover { background: rgba(0,0,0,0.02); }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--secondary);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-modal { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+        /* --- FORMS --- */
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+
+        /* --- ATTENDANCE --- */
+        .attendance-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .status-present { background: #d4f8e2; color: #1e7e34; }
+        .status-absent { background: #fceaea; color: #c0392b; }
+
+        /* --- NOTIFICATIONS --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
+        .toast { padding: 12px 24px; border-radius: 8px; color: white; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* --- RESPONSIVE --- */
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); }
+        #sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width); transition: transform var(--transition); }
+            .sidebar.active { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .menu-toggle { display: block; }
+            .navbar-branding { display: none; }
+            .navbar { padding: 0 1rem; }
+            .content-body { padding: 1.5rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .auth-card { padding: 2.5rem 1.5rem; }
+            .btn { padding: 0.5rem 1rem; font-size: 0.8rem; }
+            .navbar h3 { font-size: 1rem; }
+        }
+
+        /* Student Photo */
+        .student-thumb { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .photo-preview { width: 100px; height: 100px; border-radius: 12px; border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Loading Spinner */
+        .loader-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 5000; display: none; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <img src="mylogo.png" alt="Prince Alex Academy Logo" class="school-logo">
-            <h1>School Management System</h1>
-            <p>Welcome back! Please login to your account.</p>
-            <form id="login-form">
-                <button type="submit">Login</button>
+
+    <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- AUTHENTICATION SECTION -->
+    <section id="auth-section">
+        <div class="auth-card">
+            <div id="login-form">
+                <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h2>Admin Login</h2>
+                <p class="auth-sub">Access your school management dashboard</p>
+                <form class="auth-form" onsubmit="handleAuth(event, 'login')">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Dashboard</button>
+                </form>
+            </div>
+            <div class="auth-footer">
+                This system is powered by <a href="https://www.princealex.pro" target="_blank" style="color: var(--primary); text-decoration: none;"><strong>Prince Alex Digital</strong></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN APPLICATION SECTION -->
+    <section id="app-section" class="hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 id="school-name-sidebar">School Admin</h2>
+                <p style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;">Management System</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" data-view="dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </div>
+                <div class="menu-item" data-view="students">
+                    <i class="fas fa-user-graduate"></i> Students
+                </div>
+                <div class="menu-item" data-view="teachers">
+                    <i class="fas fa-chalkboard-teacher"></i> Teachers
+                </div>
+                <div class="menu-item" data-view="classes">
+                    <i class="fas fa-school"></i> Classes & Subjects
+                </div>
+                <div class="menu-item" data-view="attendance">
+                    <i class="fas fa-calendar-check"></i> Attendance
+                </div>
+                <div class="menu-item" data-view="fee-structures">
+                    <i class="fas fa-file-invoice"></i> Fee Structure
+                </div>
+                <div class="menu-item" data-view="fees">
+                    <i class="fas fa-file-invoice-dollar"></i> Fees Management
+                </div>
+                <div class="menu-item" data-view="exams">
+                    <i class="fas fa-poll-h"></i> Exams & Results
+                </div>
+                <div class="menu-item" data-view="announcements">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </div>
+                <div class="menu-item" data-view="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="main-wrapper">
+            <header class="navbar">
+                <div class="flex align-center gap-12">
+                    <i class="fas fa-bars menu-toggle" id="toggle-btn"></i>
+                    <h3 id="current-view-title">Dashboard</h3>
+                </div>
+                <div class="navbar-branding" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                    This system is powered by <a href="https://www.princealex.pro" target="_blank" style="color: var(--primary); text-decoration: none;"><strong>Prince Alex Digital</strong></a>
+                </div>
+                <div class="flex align-center gap-20">
+                    <div id="master-access-indicator" class="hidden" style="background:rgba(128,0,0,0.1); border:1px solid var(--primary); padding:6px 12px; border-radius:8px; font-size:0.75rem; color:var(--primary); font-weight:700; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-user-shield"></i> MASTER ACCESS
+                        <button onclick="exitMasterAccess()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:800; font-size:1rem; padding:0 4px;">&times;</button>
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="admin-initials">AD</div>
+                        <div class="admin-details">
+                            <p id="admin-name-nav" style="font-weight: 700; font-size: 0.9rem;"></p>
+                            <p id="admin-role-nav" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;"></p>
+                        </div>
+                        <i class="fas fa-sign-out-alt" style="margin-left: 10px; color: var(--danger);" onclick="logout()"></i>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body" id="view-container">
+                
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view">
+                    <div class="stats-grid">
+                        <div class="card stat-card">
+                            <div class="stat-icon-box bg-maroon-soft"><i class="fas fa-user-graduate"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">TOTAL STUDENTS</p>
+                                <h2 id="count-students">0</h2>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon-box bg-green-soft"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">TOTAL TEACHERS</p>
+                                <h2 id="count-teachers">0</h2>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--success);">
+                            <div class="stat-icon-box bg-green-soft"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">TOTAL COLLECTED</p>
+                                <h3 id="dash-fees-collected">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--warning);">
+                            <div class="stat-icon-box" style="background: rgba(241, 196, 15, 0.1); color: var(--warning);"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">TOTAL EXPECTED</p>
+                                <h3 id="dash-fees-expected">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--danger);">
+                            <div class="stat-icon-box" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);"><i class="fas fa-exclamation-circle"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">OUTSTANDING BALANCE</p>
+                                <h3 id="dash-fees-balance">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon-box" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fas fa-door-open"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">CLASSES</p>
+                                <h2 id="count-classes">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-20" style="flex-wrap: wrap;">
+                        <div class="card" style="flex: 2; min-width: 300px;">
+                            <h3 style="margin-bottom: 1rem;">Recent Announcements</h3>
+                            <div id="dash-announcements-list"></div>
+                        </div>
+                        <div class="card" style="flex: 1; min-width: 250px;">
+                            <h3 style="margin-bottom: 1rem;">Attendance Summary</h3>
+                            <div id="dash-attendance-chart">
+                                <p class="text-muted">Today's attendance will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students View -->
+                <div id="view-students" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 15px;">
+                            <h3>Student Directory</h3>
+                            <div class="flex gap-10" style="flex-wrap: wrap;">
+                                <div class="search-box">
+                                    <input type="text" class="form-control" placeholder="Search name..." id="student-search" onkeyup="filterTable('student-table', this.value)">
+                                </div>
+                                <button class="btn btn-primary" onclick="openModal('modal-student')">+ Add Student</button>
+                                <button class="btn btn-outline" onclick="exportToCSV('student-table', 'Students_List')">Export CSV</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="min-width: 800px;">
+                            <table id="student-table">
+                                <thead>
+                                    <tr>
+                                        <th>Photo</th>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>DOB</th>
+                                        <th>Parent Contact</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teachers View -->
+                <div id="view-teachers" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 15px;">
+                            <h3>Faculty Management</h3>
+                            <div class="flex gap-10">
+                                <div class="search-box">
+                                    <input type="text" class="form-control" placeholder="Search faculty..." onkeyup="filterTable('teacher-table-el', this.value)">
+                                </div>
+                                <button class="btn btn-primary" onclick="openModal('modal-teacher')">+ Add Teacher</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="teacher-table-el">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Subjects</th>
+                                        <th>Workload</th>
+                                        <th>Phone</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes View -->
+                <div id="view-classes" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>Classes & Subjects</h3>
+                            <button class="btn btn-primary" onclick="openModal('modal-class')">+ Create Class</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class Name</th>
+                                        <th>Class Teacher</th>
+                                        <th>Subject-Teacher Mapping</th>
+                                        <th>Students</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="class-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Structure View -->
+                <div id="view-fee-structures" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>Class Fee Structures</h3>
+                            <button class="btn btn-primary" onclick="document.getElementById('fs-edit-id').value=''; openModal('modal-fee-structure')">+ Set Structure</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Term</th>
+                                        <th>Year</th>
+                                        <th>Tuition (KES)</th>
+                                        <th>Other Fees (KES)</th>
+                                        <th>Total (KES)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fee-structure-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance View -->
+                <div id="view-attendance" class="view hidden">
+                    <div class="card">
+                        <h3>Daily Attendance</h3>
+                        <div class="flex gap-12 align-center" style="margin-top: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Select Class</label>
+                                <select class="form-control" id="attendance-class-select"></select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Date</label>
+                                <input type="date" class="form-control" id="attendance-date">
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 5px;" onclick="loadAttendanceForm()">Mark Attendance</button>
+                        </div>
+                    </div>
+                    <div class="card hidden" id="attendance-form-card">
+                        <h3 id="attendance-form-title">Students List</h3>
+                        <div id="attendance-students-list" style="margin: 1.5rem 0;"></div>
+                        <button class="btn btn-primary" onclick="saveAttendance()">Save Attendance</button>
+                    </div>
+                </div>
+
+                <!-- Fees View -->
+                <div id="view-fees" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                            <h3>Fee Records</h3>
+                            <div class="flex gap-10">
+                                <div class="form-group" style="margin-bottom:0; width:220px;">
+                                    <input type="text" class="form-control" id="fee-search-input" placeholder="Search student name..." onkeyup="refreshFeesTable()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:180px;">
+                                    <select class="form-control" id="filter-fee-class" onchange="refreshFeesTable()">
+                                        <option value="">All Classes</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="document.getElementById('fee-edit-id').value=''; openModal('modal-fee')">Record Payment</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Period</th>
+                                        <th>Expected</th>
+                                        <th>Paid</th>
+                                        <th>Balance</th>
+                                        <th>Method</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fee-history-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exams View -->
+                <div id="view-exams" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>Examination Results</h3>
+                            <button class="btn btn-primary" onclick="openModal('modal-exam')">+ Add Exam Record</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Exam Name</th>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Marks</th>
+                                        <th>Grade</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exam-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcements View -->
+                <div id="view-announcements" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>School Notices & Newsletters</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openModal('modal-bulk-newsletter')"><i class="fas fa-users"></i> Bulk Personalized Newsletters</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-announcement')">Post Notice</button>
+                            </div>
+                        </div>
+                        <div id="announcement-list" style="margin-top: 1.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="view-settings" class="view hidden">
+                    <div class="card" style="max-width: 600px;">
+                        <h3>School Profile</h3>
+                        <div style="margin-top: 1.5rem;">
+                            <div class="form-group">
+                                <label>School Name</label>
+                                <input type="text" class="form-control" id="set-school-name">
+                            </div>
+                            <div class="form-group">
+                                <label>School Motto</label>
+                                <input type="text" class="form-control" id="set-school-motto" placeholder="e.g. Excellence in Education">
+                            </div>
+                            <div class="form-group">
+                                <label>School Contact (Email/Phone/Address)</label>
+                                <input type="text" class="form-control" id="set-school-contact" placeholder="info@school.com | +254...">
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Display Name</label>
+                                <input type="text" class="form-control" id="set-admin-name">
+                            </div>
+                            <button class="btn btn-primary" onclick="saveSettings()">Update Profile</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </section>
+
+    <!-- --- MODALS --- -->
+
+    <!-- Student Modal -->
+    <div class="modal-overlay" id="modal-student">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Register Student</h3>
+                <span class="close-modal" onclick="closeModal('modal-student')">&times;</span>
+            </div>
+            <form onsubmit="saveStudent(event)">
+                <input type="hidden" id="student-edit-id">
+                <div class="form-group">
+                    <label>Student Photo</label>
+                    <div class="photo-preview" id="student-photo-preview"><i class="fas fa-camera"></i></div>
+                    <input type="file" id="student-photo" accept="image/*" onchange="previewImage(this, 'student-photo-preview')">
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="student-name" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Class</label>
+                        <select class="form-control" id="student-class" required></select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Date of Birth</label>
+                        <input type="date" class="form-control" id="student-dob" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Parent Contact (Phone)</label>
+                    <input type="tel" class="form-control" id="student-parent" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Student Profile</button>
             </form>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
-            if (loginForm) {
-                loginForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    // Redirect to the dashboard page
-                    window.location.href = 'dashboard.html';
-                });
+
+    <!-- Teacher Modal -->
+    <div class="modal-overlay" id="modal-teacher">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Teacher Details</h3>
+                <span class="close-modal" onclick="closeModal('modal-teacher')">&times;</span>
+            </div>
+            <form onsubmit="saveTeacher(event)">
+                <input type="hidden" id="teacher-edit-id">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="teacher-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" id="teacher-email" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Employee ID</label>
+                        <input type="text" class="form-control" id="teacher-emp-id">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Phone Number</label>
+                        <input type="tel" class="form-control" id="teacher-phone" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subjects Qualified (Comma separated)</label>
+                    <input type="text" class="form-control" id="teacher-subjects-csv" placeholder="Math, Physics...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Teacher</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Class Modal -->
+    <div class="modal-overlay" id="modal-class">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Manage Class</h3>
+                <span class="close-modal" onclick="closeModal('modal-class')">&times;</span>
+            </div>
+            <form onsubmit="saveClass(event)">
+                <input type="hidden" id="class-edit-id">
+                <div class="form-group">
+                    <label>Class Name (e.g. Grade 10-A)</label>
+                    <input type="text" class="form-control" id="class-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Class Teacher</label>
+                    <select class="form-control" id="class-teacher-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Subject-Teacher Mapping (JSON Format)</label>
+                    <textarea class="form-control" id="class-subject-mapping" rows="5" placeholder='[{"name": "Math", "teacherId": "TEA-ID"}]'></textarea>
+                    <small class="text-muted">Example: [{"name": "Math", "teacherId": "TEA-123"}]</small>
+                    <label>Subject-Teacher Mapping</label>
+                    <div id="class-subject-teacher-rows">
+                        <!-- Dynamic rows will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addSubjectTeacherRow()" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create / Update Class</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Payment Modal -->
+    <div class="modal-overlay" id="modal-fee">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Record Fee Payment</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee')">&times;</span>
+            </div>
+            <form onsubmit="saveFee(event)">
+                <input type="hidden" id="fee-edit-id">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <select class="form-control" id="fee-student-select" required></select>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="fee-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="fee-year" value="2025" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payment Amount (KES)</label>
+                    <input type="number" class="form-control" id="fee-amount" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Payment Method</label>
+                        <select class="form-control" id="fee-method">
+                            <option>Cash</option>
+                            <option>Bank Transfer</option>
+                            <option>M-Pesa</option>
+                            <option>Cheque</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Reference No.</label>
+                        <input type="text" class="form-control" id="fee-ref" placeholder="e.g. M-Pesa ID">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" class="form-control" id="fee-note">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Payment & Generate Receipt</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Structure Modal -->
+    <div class="modal-overlay" id="modal-fee-structure">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Define Fee Structure</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee-structure')">&times;</span>
+            </div>
+            <form onsubmit="saveFeeStructure(event)">
+                <input type="hidden" id="fs-edit-id">
+                <div class="form-group">
+                    <label>Target Class</label>
+                    <select class="form-control" id="fs-class" required></select>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="fs-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="fs-year" value="2025" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tuition Fee (KES)</label>
+                    <input type="number" class="form-control" id="fs-tuition" required>
+                </div>
+                <div class="form-group">
+                    <label>Other Requirements / Extra Fees</label>
+                    <div id="fs-extra-fees-container"></div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addExtraFeeRow()" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Add Extra Fee
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Fee Structure</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Modal -->
+    <div class="modal-overlay" id="modal-exam">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="exam-modal-title">Input Examination Marks</h3>
+                <span class="close-modal" onclick="closeModal('modal-exam')">&times;</span>
+            </div>
+            <form onsubmit="saveExam(event)">
+                <input type="hidden" id="exam-edit-id">
+                <div class="form-group">
+                    <label>Examination Name</label>
+                    <input type="text" class="form-control" id="exam-name" placeholder="Mid Term 2025" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="exam-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="exam-year" value="2025" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Student</label>
+                    <select class="form-control" id="exam-student-select" required onchange="window.populateExamSubjects()"></select>
+                </div>
+                <div id="exam-bulk-area" style="margin-top: 15px;">
+                    <div class="flex justify-between align-center" style="margin-bottom: 10px;">
+                        <label style="font-weight: 600; font-size: 0.9rem;">Subject Marks Entries</label>
+                        <button type="button" class="btn btn-outline btn-sm" id="exam-add-row-btn" onclick="window.addExamSubjectRow()">
+                            <i class="fas fa-plus"></i> Add Subject Entry
+                        </button>
+                    </div>
+                    <div id="exam-subjects-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Save Examination Marks</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Announcement Modal -->
+    <div class="modal-overlay" id="modal-announcement">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Post New Notice</h3>
+                <span class="close-modal" onclick="closeModal('modal-announcement')">&times;</span>
+            </div>
+            <form onsubmit="saveAnnouncement(event)">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="ann-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Announcement Type</label>
+                    <select class="form-control" id="ann-type">
+                        <option>General</option>
+                        <option>Urgent</option>
+                        <option>Exam</option>
+                        <option>Holiday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea class="form-control" id="ann-content" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Publish Announcement</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Statement Modal -->
+    <div class="modal-overlay" id="modal-fee-statement">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice-dollar"></i> Student Fee Statement</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee-statement')">&times;</span>
+            </div>
+            <div class="modal-body" id="fee-statement-body">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading fee statement...</p>
+                </div>
+            </div>
+            <div class="flex gap-10 mfoot" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+                <button class="btn btn-outline" onclick="closeModal('modal-fee-statement')">Close</button>
+                <button class="btn btn-primary" id="print-fee-statement-btn"><i class="fas fa-print"></i> Print Statement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Newsletter Modal -->
+    <div class="modal-overlay" id="modal-bulk-newsletter">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Bulk Personalized Newsletters</h3>
+                <span class="close-modal" onclick="closeModal('modal-bulk-newsletter')">&times;</span>
+            </div>
+            <form onsubmit="generateBulkClosingNewsletters(event)">
+                <div class="form-group">
+                    <label>Academic Term</label>
+                    <select class="form-control" id="bulk-news-term" required>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <input type="number" class="form-control" id="bulk-news-year" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Generate Bulk PDFs</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Parameters Modal -->
+    <div class="modal-overlay" id="modal-report-params">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Report Form Configuration</h3>
+                <span class="close-modal" onclick="closeModal('modal-report-params')">&times;</span>
+            </div>
+            <form onsubmit="event.preventDefault(); generateReportFormPDF()">
+                <input type="hidden" id="report-student-id">
+                <div class="form-group">
+                    <label>Select Term</label>
+                    <select class="form-control" id="report-term" required>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <input type="number" class="form-control" id="report-year" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Generate PDF Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, where, setDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGErPBeQ1Fdx9EHPXOHepoEoOx7P2f57o",
+            authDomain: "princealextravel.firebaseapp.com",
+            projectId: "princealextravel",
+            storageBucket: "princealextravel.firebasestorage.app",
+            messagingSenderId: "947577729462",
+            appId: "1:947577729462:web:dd4b4c7cb4a984c5e3d117"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- APP STATE ---
+        let currentUserData = null;
+        let currentSchoolId = null;
+        let currentUserRole = null; // New: Store the current user's role
+        let allTeachers = []; // Cache teachers for dropdowns
+        let teacherOptionsHTML = ""; // Cache for dynamic rows
+        let allClasses = []; // Cache classes for dropdowns
+        let allStudents = []; // Cache students for dropdowns
+
+        // --- THEME ENGINE ---
+        let schoolThemeColor = "#800000";
+
+        function applyTheme(hexColor) {
+            if (!hexColor) return;
+            schoolThemeColor = hexColor;
+            document.documentElement.style.setProperty('--primary', hexColor);
+        }
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return [r, g, b];
+        }
+
+        // Helper to format currency
+        const fmtKES = (amount) => `KES ${parseFloat(amount || 0).toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+
+        // SaaS Role-Based Access Control (RBAC)
+        function hasPermission(action) {
+            if(currentUserRole === 'admin') return true;
+            if(currentUserRole === 'teacher' && (action === 'view' || action === 'edit')) return true;
+            return false;
+        }
+
+        // Resource-specific access control
+        function canEdit(resource) {
+            if(currentUserRole === 'admin') return true;
+            if(currentUserRole === 'teacher' && ['exams', 'attendance', 'students', 'announcements'].includes(resource)) return true;
+            return false;
+        }
+
+        // Grading & Remarks Engine
+        function getGrade(marks) {
+            if (marks >= 80) return "A";
+            if (marks >= 70) return "B";
+            if (marks >= 60) return "C";
+            if (marks >= 50) return "D";
+            return "E";
+        }
+
+        function getRemark(avg) {
+            if(avg >= 75) return "Excellent Performance";
+            if(avg >= 60) return "Good, keep it up";
+            if(avg >= 50) return "Fair, put in more effort";
+            return "Needs Improvement";
+        }
+
+        const MASTER_ADMIN_EMAILS = ['senerwaalex@gmail.com', 'noreply@princealex.pro']; // Recognized Owners
+
+        // --- AUTHENTICATION ---
+        function getFriendlyErrorMessage(error) {
+            if (typeof error === 'string') return error;
+            switch (error.code) {
+                case 'auth/user-not-found': return "Account not found. Check your email.";
+                case 'auth/wrong-password': return "Incorrect password. Try again.";
+                case 'auth/invalid-credential': return "Incorrect login details provided.";
+                case 'permission-denied': return "You do not have permission for this operation.";
+                case 'unavailable': return "Server unreachable. Check your internet connection.";
+                default: return error.message || "An unexpected error occurred.";
+            }
+        }
+
+        window.handleAuth = async (e, mode) => {
+            e.preventDefault();
+            showLoader(true);
+            
+            const email = document.getElementById(`${mode}-email`).value;
+            const password = document.getElementById(`${mode}-password`).value;
+
+            try {
+                if(mode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast("Welcome back!", "success");
+                }
+            } catch (error) {
+                showToast(getFriendlyErrorMessage(error), "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserData = user;
+                
+                // Multi-tenant check: Find school assignment
+                const adminSnap = await getDoc(doc(db, "school_admins", user.email));
+                const isOwner = MASTER_ADMIN_EMAILS.includes(user.email);
+                if(!adminSnap.exists() && !isOwner){
+                    alert("You are not assigned to any school. Contact the system owner.");
+                    await signOut(auth);
+                    return;
+                }
+
+                currentSchoolId = adminSnap.data().schoolId;
+                currentUserRole = adminSnap.data().role; // New: Get the user's role
+
+                // Enforce Teacher Role UI Restrictions
+                if(currentUserRole === 'teacher') {
+                    const restrictedMenus = ['fees', 'fee-structures', 'settings'];
+                    
+                    document.querySelectorAll('.menu-item').forEach(item => {
+                        if(restrictedMenus.includes(item.getAttribute('data-view'))) {
+                            item.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Auto-redirect if teacher lands on restricted page
+                    const currentActive = document.querySelector('.menu-item.active').getAttribute('data-view');
+                    if(restrictedMenus.includes(currentActive)) {
+                        document.querySelector('.menu-item[data-view="dashboard"]').click();
+                    }
+                }
+
+                // If no role is explicitly set (e.g., for existing entries), default to 'admin'
+                if (!currentUserRole) currentUserRole = 'admin';
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                
+                // Load Settings
+                const settingsSnap = await getDoc(doc(db, "schools", currentSchoolId));
+                if(settingsSnap.exists()) {
+                    if (settingsSnap.data().status === 'inactive' && !isOwner) {
+                        alert("Your school's access has been suspended. Contact the system owner.");
+                        await signOut(auth);
+                        return;
+                    }
+
+                    const data = settingsSnap.data();
+                    applyTheme(data.themeColor);
+                    document.getElementById('school-name-sidebar').innerText = data.schoolName;
+                    
+                    // Pre-fill settings form
+                    document.getElementById('set-school-name').value = data.schoolName || '';
+                    document.getElementById('set-school-motto').value = data.motto || '';
+                    document.getElementById('set-school-contact').value = data.contact || '';
+                    document.getElementById('set-admin-name').value = data.adminName || '';
+                }
+
+                // Set User Info in Nav (The person logged in)
+                const displayName = user.displayName || user.email.split('@')[0];
+                document.getElementById('admin-name-nav').innerText = displayName;
+                document.getElementById('admin-role-nav').innerText = currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+                document.getElementById('admin-initials').innerText = displayName.substring(0, 2).toUpperCase();
+
+                initRealtimeListeners();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
             }
         });
+
+        window.logout = () => {
+            if(confirm("Logout from dashboard?")) signOut(auth);
+        };
+
+        window.exitMasterAccess = () => {
+            sessionStorage.removeItem('owner_override_school_id');
+            window.location.href = 'owner-admin.html';
+        };
+
+        window.toggleAuthView = (view) => {
+            document.getElementById('login-form').classList.toggle('hidden', view === 'register');
+            document.getElementById('register-form').classList.toggle('hidden', view === 'login');
+        };
+
+        // --- UI NAVIGATION ---
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const viewId = item.getAttribute('data-view');
+                
+                // Update Active State
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update Header
+                document.getElementById('current-view-title').innerText = item.innerText;
+
+                // Show View
+                document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+                if(window.innerWidth <= 768) toggleSidebar();
+            });
+        });
+
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('active');
+                overlay.style.display = 'block';
+            }
+        };
+        document.getElementById('toggle-btn').onclick = toggleSidebar;
+
+        // --- NOTIFICATIONS & LOADER ---
+        window.showToast = (msg, type) => {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'btn-primary' : 'btn-danger'}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        };
+
+        window.showLoader = (status) => {
+            document.getElementById('loader').style.display = status ? 'flex' : 'none';
+        };
+
+        // --- DATA OPERATIONS ---
+
+        // Global dropdown refreshers
+        async function refreshSelects() {
+            const classSelects = ['student-class', 'attendance-class-select', 'fs-class', 'filter-fee-class'];
+            const studentsSelects = ['fee-student-select', 'exam-student-select'];
+            const teacherSelects = ['class-teacher-select'];
+
+            // Get Classes
+            const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+            const classOptions = classSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+            classSelects.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerHTML = `<option value="">Select Class</option>${classOptions}`;
+            });
+
+            // Get Teachers
+            const teachSnap = await getDocs(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)));
+            const teachOptions = teachSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+            teacherOptionsHTML = teachOptions; 
+            teacherSelects.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerHTML = `<option value="">Select Class Teacher</option>${teachOptions}`;
+            });
+
+            // Get Students
+            const studSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
+            const studOptions = studSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+            studentsSelects.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerHTML = `<option value="">Select Student</option>${studOptions}`;
+            });
+        }
+
+        // 1. Students
+        window.saveStudent = async (e) => {
+            e.preventDefault();
+            if(!canEdit('students')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            showLoader(true);
+            try {
+                const id = document.getElementById('student-edit-id').value;
+                const photoFile = document.getElementById('student-photo').files[0];
+                
+                // Safely handle potentially missing fields
+                const feesTotalEl = document.getElementById('student-fees-total');
+                const feesTotal = feesTotalEl ? parseFloat(feesTotalEl.value) || 0 : 0;
+                
+                const subjectsEl = document.getElementById('student-subjects');
+                let studentSubjects = [];
+                if (subjectsEl && subjectsEl.value) {
+                    try { studentSubjects = JSON.parse(subjectsEl.value); } catch(e) { throw new Error("Invalid JSON format in subjects field."); }
+                }
+
+                let photoUrl = "";
+                let feesPaid = 0;
+
+                if(photoFile) {
+                    const storageRef = ref(storage, `students/${Date.now()}_${photoFile.name}`);
+                    const upload = await uploadBytes(storageRef, photoFile);
+                    photoUrl = await getDownloadURL(upload.ref);
+                } else if(id) {
+                    const old = await getDoc(doc(db, "students", id));
+                    if (old.exists()) {
+                        photoUrl = old.data().photoUrl;
+                        if (old.data().fees) feesPaid = old.data().fees.paid || 0;
+                    }
+                }
+
+            const data = {
+                schoolId: currentSchoolId,
+                name: document.getElementById('student-name').value,
+                classId: document.getElementById('student-class').value,
+                photoUrl: photoUrl || "https://ui-avatars.com/api/?background=800000&color=fff&name=" + document.getElementById('student-name').value,
+                studentId: "STU-" + Math.floor(1000 + Math.random() * 9000),
+                updatedAt: new Date().toISOString(),
+                dob: document.getElementById('student-dob').value,
+                parentContact: document.getElementById('student-parent').value,
+                studentSubjects: studentSubjects,
+                fees: { total: feesTotal, paid: feesPaid, balance: feesTotal - feesPaid }
+            };
+
+            if(id) {
+                await updateDoc(doc(db, "students", id), data);
+            } else {
+                await addDoc(collection(db, "students"), data);
+            }
+            
+            closeModal('modal-student');
+            showToast("Student profile saved", "success");
+
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+            finally { showLoader(false); }
+        };
+
+        window.deleteStudent = async (id) => {
+            if(!hasPermission('delete')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            if(!confirm("Delete student record permanently?")) return;
+            try {
+                await deleteDoc(doc(db, "students", id));
+                showToast("Student record deleted successfully", "success");
+                // No need to reload, onSnapshot will update the UI
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.editStudent = async (id) => {
+            const snap = await getDoc(doc(db, "students", id));
+            const data = snap.data();
+            document.getElementById('student-edit-id').value = id;
+            document.getElementById('student-name').value = data.name;
+            document.getElementById('student-class').value = data.classId;
+            document.getElementById('student-dob').value = data.dob;
+            document.getElementById('student-parent').value = data.parentContact;
+            document.getElementById('student-photo-preview').innerHTML = `<img src="${data.photoUrl}">`;
+            openModal('modal-student');
+        };
+
+        // 2. Teachers
+        window.saveTeacher = async (e) => {
+            e.preventDefault();
+            if(!canEdit('teachers')) return showToast("Permission denied", "error");
+
+            const id = document.getElementById('teacher-edit-id').value;
+            const subjects = document.getElementById('teacher-subjects-csv').value.split(',').map(s => s.trim());
+
+            const data = {
+                schoolId: currentSchoolId,
+                name: document.getElementById('teacher-name').value,
+                email: document.getElementById('teacher-email').value,
+                phone: document.getElementById('teacher-phone').value,
+                employeeId: document.getElementById('teacher-emp-id').value || "TCH-" + Math.floor(1000 + Math.random() * 9000),
+                subjects: subjects,
+                role: 'teacher',
+                status: 'active',
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                if(id) {
+                    await updateDoc(doc(db, "teachers", id), data);
+                } else {
+                    data.createdAt = new Date().toISOString();
+                    await addDoc(collection(db, "teachers"), data);
+                }
+                closeModal('modal-teacher');
+                showToast(`Record for ${data.name} saved successfully`, "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.deleteTeacher = async (id) => {
+            if(!hasPermission('delete')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            if(!confirm("Remove teacher?")) return;
+            try {
+                await deleteDoc(doc(db, "teachers", id));
+                showToast("Teacher record removed", "success");
+                // No need to reload, onSnapshot will update the UI
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.deleteFeeStructure = async (id) => {
+            if(!hasPermission('delete')) return showToast("Permission denied", "error");
+            if(!confirm("Remove this fee structure?")) return;
+            try {
+                await deleteDoc(doc(db, "fee_structures", id));
+                showToast("Fee structure removed", "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.editTeacher = async (id) => {
+            const snap = await getDoc(doc(db, "teachers", id));
+            const data = snap.data();
+            document.getElementById('teacher-edit-id').value = id;
+            document.getElementById('teacher-name').value = data.name;
+            document.getElementById('teacher-email').value = data.email || '';
+            document.getElementById('teacher-phone').value = data.phone;
+            document.getElementById('teacher-emp-id').value = data.employeeId || '';
+            document.getElementById('teacher-subjects-csv').value = (data.subjects || []).join(', ');
+            openModal('modal-teacher');
+        };
+
+        // 3. Classes
+        window.saveClass = async (e) => {
+            e.preventDefault();
+            if(!canEdit('classes')) return showToast("Permission denied", "error");
+
+            const id = document.getElementById('class-edit-id').value;
+            
+            // Gather mapping from dynamic rows instead of JSON textarea
+            const subjectMapping = [];
+            const rows = document.querySelectorAll('#class-subject-teacher-rows .subject-teacher-row');
+            rows.forEach(row => {
+                const name = row.querySelector('.subject-name').value.trim();
+                const teacherId = row.querySelector('.teacher-select').value;
+                if (name && teacherId) {
+                    subjectMapping.push({ name, teacherId });
+                }
+            });
+
+            const data = {
+                schoolId: currentSchoolId,
+                name: document.getElementById('class-name').value,
+                classTeacherId: document.getElementById('class-teacher-select').value,
+                subjects: subjectMapping,
+                updatedAt: new Date().toISOString()
+            };
+            try {
+                if(id) await updateDoc(doc(db, "classes", id), data);
+                else await addDoc(collection(db, "classes"), data);
+                closeModal('modal-class');
+                showToast(`Class "${data.name}" configured successfully`, "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.addSubjectTeacherRow = (subjectData = null) => {
+            const container = document.getElementById('class-subject-teacher-rows');
+            const rowId = 'row-' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            const row = document.createElement('div');
+            row.className = 'flex gap-10 align-center subject-teacher-row';
+            row.id = rowId;
+            
+            row.innerHTML = `
+                <input type="text" class="form-control subject-name" placeholder="Subject Name" value="${subjectData ? subjectData.name : ''}" style="flex: 2;">
+                <select class="form-control teacher-select" style="flex: 2;">
+                    <option value="">Select Teacher</option>
+                    ${teacherOptionsHTML}
+                </select>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSubjectTeacherRow('${rowId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            if (subjectData && subjectData.teacherId) {
+                row.querySelector('.teacher-select').value = subjectData.teacherId;
+            }
+            
+            container.appendChild(row);
+        };
+
+        window.removeSubjectTeacherRow = (rowId) => {
+            const row = document.getElementById(rowId);
+            if (row) row.remove();
+        };
+
+        window.editClass = async (id) => {
+            const snap = await getDoc(doc(db, "classes", id));
+            if (!snap.exists()) return;
+            const data = snap.data();
+            
+            document.getElementById('class-edit-id').value = id;
+            document.getElementById('class-name').value = data.name;
+            document.getElementById('class-teacher-select').value = data.classTeacherId || '';
+            
+            document.getElementById('class-subject-teacher-rows').innerHTML = '';
+            if (data.subjects) data.subjects.forEach(s => addSubjectTeacherRow(s));
+            
+            openModal('modal-class');
+        };
+
+        window.deleteClass = async (id) => {
+            if(!hasPermission('delete')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            if(!confirm("Delete this class?")) return;
+            try {
+                await deleteDoc(doc(db, "classes", id));
+                showToast("Class deleted successfully", "success");
+                // No need to reload, onSnapshot will update the UI
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        // 4. Attendance
+        window.loadAttendanceForm = async () => {
+            if(!hasPermission('view')) { showToast("Permission denied", "error"); return; }
+            const classId = document.getElementById('attendance-class-select').value;
+            const date = document.getElementById('attendance-date').value;
+            if(!classId || !date) return showToast("Select class and date", "error");
+
+            // Teacher Restriction: Can only mark for their assigned class
+            if(currentUserRole === 'teacher') {
+                const classSnap = await getDoc(doc(db, "classes", classId));
+                if(classSnap.exists() && classSnap.data().classTeacherId !== currentUserData.uid) {
+                    return showToast("You can only mark attendance for your assigned class.", "error");
+                }
+            }
+
+            const q = query(collection(db, "students"), where("classId", "==", classId));
+            const snap = await getDocs(q);
+            
+            let html = "";
+            snap.forEach(d => {
+                html += `
+                <div class="attendance-row">
+                    <span>${d.data().name}</span>
+                    <div class="flex gap-10">
+                        <label><input type="radio" name="att-${d.id}" value="Present" checked> Present</label>
+                        <label><input type="radio" name="att-${d.id}" value="Absent"> Absent</label>
+                    </div>
+                </div>`;
+            });
+            
+            document.getElementById('attendance-students-list').innerHTML = html || "<p>No students in this class.</p>";
+            document.getElementById('attendance-form-card').classList.remove('hidden');
+        };
+
+        window.saveAttendance = async () => {
+            if(!hasPermission('edit')) {
+                showToast("Permission denied for attendance", "error");
+                return;
+            }
+
+            const classId = document.getElementById('attendance-class-select').value;
+            const date = document.getElementById('attendance-date').value;
+            const list = document.getElementById('attendance-students-list');
+            const records = {};
+            
+            list.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                const id = input.name.replace('att-', '');
+                records[id] = input.value;
+            });
+
+            try {
+                await addDoc(collection(db, "attendance"), { schoolId: currentSchoolId, classId, date, records, createdAt: new Date().toISOString() });
+                showToast(`Attendance for ${date} has been recorded`, "success");
+                document.getElementById('attendance-form-card').classList.add('hidden');
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        // 5. Fees
+        window.addExtraFeeRow = (feeName = '', feeAmount = '') => {
+            const container = document.getElementById('fs-extra-fees-container');
+            const rowId = 'extra-fee-' + Date.now() + Math.floor(Math.random() * 1000);
+            const row = document.createElement('div');
+            row.className = 'flex gap-10 align-center extra-fee-row';
+            row.id = rowId;
+            row.style.marginBottom = '10px';
+            row.innerHTML = `
+                <input type="text" class="form-control fee-name" placeholder="Fee Name" value="${feeName}" style="flex: 2;">
+                <input type="number" class="form-control fee-amount" placeholder="Amount" value="${feeAmount}" style="flex: 1;">
+                <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        };
+
+        window.editFeeStructure = async (id) => {
+            const snap = await getDoc(doc(db, "fee_structures", id));
+            if(!snap.exists()) return;
+            const data = snap.data();
+
+            document.getElementById('fs-edit-id').value = id;
+            document.getElementById('fs-class').value = data.classId;
+            document.getElementById('fs-term').value = data.term;
+            document.getElementById('fs-year').value = data.year;
+            document.getElementById('fs-tuition').value = data.tuition;
+
+            const container = document.getElementById('fs-extra-fees-container');
+            container.innerHTML = '';
+            if (data.extraFees && Array.isArray(data.extraFees)) {
+                data.extraFees.forEach(fee => addExtraFeeRow(fee.name, fee.amount));
+            } else if (data.extra) {
+                addExtraFeeRow('Other Fees', data.extra);
+            }
+
+            openModal('modal-fee-structure');
+        };
+
+        window.saveFeeStructure = async (e) => {
+            e.preventDefault();
+            const tuition = parseFloat(document.getElementById('fs-tuition').value);
+
+            const extraFees = [];
+            let extraTotal = 0;
+            document.querySelectorAll('.extra-fee-row').forEach(row => {
+                const name = row.querySelector('.fee-name').value.trim();
+                const amount = parseFloat(row.querySelector('.fee-amount').value) || 0;
+                if (name) {
+                    extraFees.push({ name, amount });
+                    extraTotal += amount;
+                }
+            });
+
+            const data = {
+                schoolId: currentSchoolId,
+                classId: document.getElementById('fs-class').value,
+                term: document.getElementById('fs-term').value,
+                year: parseInt(document.getElementById('fs-year').value),
+                tuition, 
+                extraFees,
+                extra: extraTotal,
+                total: tuition + extraTotal,
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                const id = document.getElementById('fs-edit-id').value;
+                if(id) await updateDoc(doc(db, "fee_structures", id), data);
+                else await addDoc(collection(db, "fee_structures"), data);
+                closeModal('modal-fee-structure');
+                showToast("Fee structure saved", "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        async function getStudentFeeSummary(studentId, classId, term, year) {
+            const fsQuery = query(collection(db, "fee_structures"), 
+                where("schoolId", "==", currentSchoolId), 
+                where("classId", "==", classId), 
+                where("term", "==", term), 
+                where("year", "==", year)
+            );
+            const fsSnap = await getDocs(fsQuery);
+            const totalRequired = fsSnap.docs[0]?.data()?.total || 0;
+
+            const payQuery = query(collection(db, "fees"), 
+                where("schoolId", "==", currentSchoolId),
+                where("studentId", "==", studentId),
+                where("term", "==", term),
+                where("year", "==", year)
+            );
+            const paySnap = await getDocs(payQuery);
+            let paid = 0;
+            paySnap.forEach(d => paid += (d.data().amount || 0));
+            return { total: totalRequired, paid, balance: totalRequired - paid };
+        }
+
+        window.saveFee = async (e) => {
+            e.preventDefault();
+            if(!canEdit('fees')) return showToast("Permission denied", "error");
+            const studentId = document.getElementById('fee-student-select').value;
+            const amount = parseFloat(document.getElementById('fee-amount').value);
+            const method = document.getElementById('fee-method').value;
+            const data = {
+                schoolId: currentSchoolId,
+                studentId, amount, method,
+                term: document.getElementById('fee-term').value,
+                year: parseInt(document.getElementById('fee-year').value),
+                reference: document.getElementById('fee-ref').value || "N/A",
+                note: document.getElementById('fee-note').value,
+                date: new Date().toISOString()
+            };
+            try {
+                const id = document.getElementById('fee-edit-id').value;
+                if(id) {
+                    await updateDoc(doc(db, "fees", id), data);
+                    showToast("Payment record updated", "success");
+                } else {
+                    await addDoc(collection(db, "fees"), data);
+                    showToast(`Payment of KES ${amount} recorded`, "success");
+                }
+                
+                const studentSnap = await getDoc(doc(db, "students", studentId));
+                await generateFeeReceiptPDF(studentSnap.data(), amount, method, data.term, data.year, studentId);
+                closeModal('modal-fee');
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.editFeeRecord = async (id) => {
+            if(!canEdit('fees')) return showToast("Permission denied", "error");
+            const snap = await getDoc(doc(db, "fees", id));
+            if(!snap.exists()) return;
+            const data = snap.data();
+            
+            await refreshSelects();
+            
+            document.getElementById('fee-edit-id').value = id;
+            document.getElementById('fee-student-select').value = data.studentId;
+            document.getElementById('fee-term').value = data.term;
+            document.getElementById('fee-year').value = data.year;
+            document.getElementById('fee-amount').value = data.amount;
+            document.getElementById('fee-method').value = data.method;
+            document.getElementById('fee-ref').value = data.reference;
+            document.getElementById('fee-note').value = data.note || '';
+            
+            openModal('modal-fee');
+        };
+
+        // 6. Exams
+        window.saveExam = async (e) => {
+            e.preventDefault();
+            if(!hasPermission('edit')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            const id = document.getElementById('exam-edit-id').value;
+            const marks = parseInt(document.getElementById('exam-marks').value);
+            const grade = getGrade(marks);
+
+            const data = {
+                schoolId: currentSchoolId,
+                examName: document.getElementById('exam-name').value,
+                studentId: document.getElementById('exam-student-select').value,
+                subject: document.getElementById('exam-subject').value,
+                term: document.getElementById('exam-term').value,
+                year: parseInt(document.getElementById('exam-year').value),
+                marks, 
+                grade,
+                date: new Date().toISOString()
+            };
+            try {
+                if(id) {
+                    await updateDoc(doc(db, "exams", id), data);
+                    showToast("Exam record updated", "success");
+                } else {
+                    await addDoc(collection(db, "exams"), data);
+                    showToast("Exam results have been published", "success");
+                }
+                closeModal('modal-exam');
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        // --- EXAMINATION MANAGEMENT ---
+        window.saveExam = async (e) => {
+            e.preventDefault();
+            if(!hasPermission('edit')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            const id = document.getElementById('exam-edit-id').value;
+            const examName = document.getElementById('exam-name').value;
+            const term = document.getElementById('exam-term').value;
+            const year = parseInt(document.getElementById('exam-year').value);
+            const studentId = document.getElementById('exam-student-select').value;
+
+            const rows = document.querySelectorAll('.exam-subject-row');
+            if (rows.length === 0) {
+                showToast("No marks were entered to save.", "error");
+                return;
+            }
+
+            showLoader(true);
+            try {
+                if(id) {
+                    // Edit Mode (Updates one document)
+                    const row = rows[0];
+                    const subject = row.querySelector('.subject-name').value.trim();
+                    const marks = parseInt(row.querySelector('.subject-marks-input').value);
+                    const data = {
+                        schoolId: currentSchoolId, examName, studentId, subject,
+                        term, year, marks, grade: getGrade(marks), 
+                        updatedAt: new Date().toISOString()
+                    };
+                    await updateDoc(doc(db, "exams", id), data);
+                    showToast("Exam record updated", "success");
+                } else {
+                    // Add Mode (Saves multiple documents)
+                    for (let row of rows) {
+                        const subject = row.querySelector('.subject-name').value.trim();
+                        const marksVal = row.querySelector('.subject-marks-input').value.trim();
+                        if (subject === "" || marksVal === "") continue; 
+
+                        const marks = parseInt(marksVal);
+                        const data = {
+                            schoolId: currentSchoolId, examName, studentId, subject,
+                            term, year, marks, grade: getGrade(marks), date: new Date().toISOString()
+                        };
+                        await addDoc(collection(db, "exams"), data);
+                    }
+                    showToast("Examination marks have been published", "success");
+                }
+                closeModal('modal-exam');
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+            finally { showLoader(false); }
+        };
+
+        window.editExam = async (id) => {
+            const snap = await getDoc(doc(db, "exams", id));
+            const data = snap.data();
+            document.getElementById('exam-edit-id').value = id;
+            document.getElementById('exam-name').value = data.examName;
+            document.getElementById('exam-term').value = data.term || 'Term 1';
+            document.getElementById('exam-year').value = data.year || 2025;
+            document.getElementById('exam-student-select').value = data.studentId;
+            
+            document.getElementById('exam-add-row-btn').classList.add('hidden');
+            document.getElementById('exam-subjects-list').innerHTML = "";
+            window.addExamSubjectRow(data);
+            
+            document.getElementById('exam-modal-title').innerText = "Edit Exam Mark";
+            openModal('modal-exam');
+        };
+
+        window.addExamSubjectRow = (data = null) => {
+            const listDiv = document.getElementById('exam-subjects-list');
+            const editId = document.getElementById('exam-edit-id').value;
+            const rowId = 'ex-row-' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            const row = document.createElement('div');
+            row.className = 'flex align-center gap-10 exam-subject-row';
+            row.id = rowId;
+            
+            row.innerHTML = `
+                <input type="text" class="form-control subject-name" placeholder="Subject Name" value="${data ? data.subject : ''}" style="flex: 2;" required>
+                <input type="number" class="form-control subject-marks-input" placeholder="Marks" min="0" max="100" value="${data ? data.marks : ''}" style="flex: 1;" required>
+                ${!editId ? `
+                    <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove()" title="Remove Entry">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : ''}
+            `;
+            listDiv.appendChild(row);
+        };
+
+        window.populateExamSubjects = () => {
+            if (document.getElementById('exam-edit-id').value) return;
+            document.getElementById('exam-add-row-btn').classList.remove('hidden');
+            document.getElementById('exam-subjects-list').innerHTML = "";
+            window.addExamSubjectRow(); 
+        };
+
+        // 7. Announcements
+        window.saveAnnouncement = async (e) => {
+            e.preventDefault();
+            if(!canEdit('announcements')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            const data = {
+                schoolId: currentSchoolId,
+                title: document.getElementById('ann-title').value,
+                type: document.getElementById('ann-type').value,
+                content: document.getElementById('ann-content').value,
+                date: new Date().toISOString()
+            };
+            try {
+                await addDoc(collection(db, "announcements"), data);
+                closeModal('modal-announcement');
+                showToast("Announcement live on dashboard", "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.editExam = async (id) => {
+            const snap = await getDoc(doc(db, "exams", id));
+            const data = snap.data();
+            document.getElementById('exam-edit-id').value = id;
+            document.getElementById('exam-name').value = data.examName;
+            document.getElementById('exam-term').value = data.term || 'Term 1';
+            document.getElementById('exam-year').value = data.year || 2025;
+            document.getElementById('exam-student-select').value = data.studentId;
+            document.getElementById('exam-subject').value = data.subject;
+            document.getElementById('exam-marks').value = data.marks;
+            openModal('modal-exam');
+        };
+
+        window.deleteExam = async (id) => {
+            if(!hasPermission('delete')) return showToast("Permission denied", "error");
+            if(!confirm("Delete this exam record?")) return;
+            try {
+                await deleteDoc(doc(db, "exams", id));
+                showToast("Exam record deleted", "success");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        // 8. Settings
+        window.saveSettings = async () => {
+            if(!canEdit('settings')) {
+                showToast("Permission denied", "error");
+                return;
+            }
+
+            const schoolName = document.getElementById('set-school-name').value;
+            const motto = document.getElementById('set-school-motto').value;
+            const contact = document.getElementById('set-school-contact').value;
+            const adminName = document.getElementById('set-admin-name').value;
+            
+            try {
+                await updateDoc(doc(db, "schools", currentSchoolId), { schoolName, motto, contact, adminName });
+                showToast("Settings updated successfully", "success");
+                setTimeout(() => location.reload(), 1000);
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        // --- REALTIME LISTENERS & RENDERING ---
+        let lastFeesSnap = null;
+        function initRealtimeListeners() {
+            refreshSelects(); 
+
+            // Students
+            onSnapshot(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)), async snap => {
+                document.getElementById('count-students').innerText = snap.size;
+                const tbody = document.getElementById('student-list-body');
+                tbody.innerHTML = "";
+
+                // Get class names for display
+                const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+                const classMap = {};
+                classSnap.forEach(d => classMap[d.id] = d.data().name);
+
+                snap.forEach(d => {
+                    const s = d.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><img src="${s.photoUrl}" class="student-thumb"></td>
+                            <td><span style="font-family:'Space Mono'; font-size:0.8rem;">${s.studentId}</span></td>
+                            <td><b>${s.name}</b></td>
+                            <td>${classMap[s.classId] || 'Unassigned'}</td>
+                            <td>${s.dob}</td>
+                            <td>${s.parentContact}</td>
+                            <td>
+                                <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editStudent('${d.id}')"></i>
+                                ${hasPermission('delete') ? `
+                                    <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteStudent('${d.id}')"></i>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            // Teachers
+            onSnapshot(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)), snap => {
+                getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId))).then(classSnap => {
+                    const teacherLoadMap = {};
+                    classSnap.forEach(cd => {
+                        const c = cd.data();
+                        (c.subjects || []).forEach(s => {
+                            if(!teacherLoadMap[s.teacherId]) teacherLoadMap[s.teacherId] = [];
+                            teacherLoadMap[s.teacherId].push(c.name);
+                        });
+                    });
+
+                    document.getElementById('count-teachers').innerText = snap.size;
+                    const tbody = document.getElementById('teacher-list-body');
+                    tbody.innerHTML = "";
+                    snap.forEach(d => {
+                        const t = d.data();
+                        const load = [...new Set(teacherLoadMap[d.id] || [])];
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><span style="font-family:'Space Mono'; font-size:0.8rem;">${t.employeeId || 'N/A'}</span></td>
+                                <td><b>${t.name}</b><br><small class="text-muted">${t.email || ''}</small></td>
+                                <td>${(t.subjects || []).map(s => `<span class="badge badge-info">${s}</span>`).join(' ')}</td>
+                                <td>${load.map(c => `<span class="badge" style="background:#e0f2f1; color:#00695c;">${c}</span>`).join(' ')}</td>
+                                <td>${t.phone}</td>
+                                <td>
+                                    <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editTeacher('${d.id}')"></i>
+                                    ${hasPermission('delete') ? `<i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteTeacher('${d.id}')"></i>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+            });
+
+            // Classes
+            onSnapshot(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)), async snap => {
+                document.getElementById('count-classes').innerText = snap.size;
+                const tbody = document.getElementById('class-list-body');
+                tbody.innerHTML = "";
+                
+                const teachSnap = await getDocs(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)));
+                const teachMap = {};
+                teachSnap.forEach(d => teachMap[d.id] = d.data().name);
+
+                snap.forEach(d => {
+                    const c = d.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${c.name}</b></td>
+                            <td>${teachMap[c.classTeacherId] || 'Not Set'}</td>
+                            <td>${(c.subjects || []).map(s => `<div style="font-size:0.75rem;"><b>${s.name}</b>: ${teachMap[s.teacherId] || 'Unassigned'}</div>`).join('')}</td>
+                            <td>
+                                ${(c.subjects || []).map(s => `<div style="font-size:0.75rem;"><b>${s.name}</b>: ${teachMap[s.teacherId] || 'Unassigned'}</div>`).join('')}
+                            </td>
+                            <td><i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editClass('${c.id}')"></i></td>
+                            <td><span class="btn btn-outline btn-xs">View Students</span></td> 
+                            <td>
+                                ${hasPermission('delete') ? `<i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteClass('${d.id}')"></i>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            // Fees & Finance Dashboard
+            onSnapshot(query(collection(db, "fees"), where("schoolId", "==", currentSchoolId)), async snap => {
+                lastFeesSnap = snap;
+                window.refreshFeesTable();
+            });
+
+            window.refreshFeesTable = async () => {
+                if (!lastFeesSnap) return;
+                let totalCollected = 0;
+                const tbody = document.getElementById('fee-history-body');
+                if (tbody) tbody.innerHTML = "";
+                const filterClass = document.getElementById('filter-fee-class')?.value || '';
+                const filterText = document.getElementById('fee-search-input')?.value.toLowerCase() || '';
+                
+                const studSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
+                const studMap = {};
+                studSnap.forEach(d => studMap[d.id] = d.data());
+
+                for (const d of lastFeesSnap.docs) {
+                    const f = d.data();
+                    const student = studMap[f.studentId] || { name: 'Unknown', classId: '' };
+                    if (filterClass && student.classId !== filterClass) continue;
+                    if (filterText && !student.name.toLowerCase().includes(filterText)) continue;
+
+                    if (!tbody) continue;
+                    totalCollected += f.amount;
+                    const summary = await getStudentFeeSummary(f.studentId, student.classId, f.term, f.year);
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${new Date(f.date).toLocaleDateString()}</td>
+                            <td><b>${student.name}</b></td>
+                            <td>${f.term} ${f.year}</td>
+                            <td>${summary.total.toLocaleString()}</td>
+                            <td style="color:var(--success); font-weight:700;">${f.amount.toLocaleString()}</td>
+                            <td style="color:${summary.balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${summary.balance.toLocaleString()}</td>
+                            <td>
+                                <span class="badge badge-success">${f.method}</span>
+                                <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-left:10px;" title="Edit Payment" onclick="editFeeRecord('${d.id}')"></i>
+                            </td>
+                            <td><i class="fas fa-file-invoice-dollar" style="color:var(--blue); cursor:pointer;" title="View Full Statement" onclick="viewFeeStatement('${f.studentId}', '${f.term}', ${f.year})"></i></td>
+                            <td><i class="fas fa-file-pdf" style="color:var(--primary); cursor:pointer;" title="Reprint Receipt" onclick="reprintFeeReceipt('${d.id}')"></i></td>
+                        </tr>
+                    `;
+                }
+                document.getElementById('dash-fees-collected').innerText = fmtKES(totalCollected);
+
+                // Calc Expected & Balance
+                const fsSnap = await getDocs(query(collection(db, "fee_structures"), where("schoolId", "==", currentSchoolId), where("year", "==", 2025)));
+                const structMap = {};
+                fsSnap.forEach(d => structMap[`${d.data().classId}_${d.data().term}`] = d.data().total);
+                
+                let totalExpected = 0;
+                studSnap.forEach(d => { totalExpected += (structMap[`${d.data().classId}_Term 1`] || 0); }); // Example logic
+                document.getElementById('dash-fees-expected').innerText = fmtKES(totalExpected);
+                document.getElementById('dash-fees-balance').innerText = fmtKES(totalExpected - totalCollected);
+            };
+
+            // Fee Structures
+            onSnapshot(query(collection(db, "fee_structures"), where("schoolId", "==", currentSchoolId)), async snap => {
+                const tbody = document.getElementById('fee-structure-list-body');
+                if (tbody) tbody.innerHTML = "";
+                const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+                const classMap = {};
+                classSnap.forEach(d => classMap[d.id] = d.data().name);
+
+                snap.forEach(d => {
+                    const fs = d.data();
+                    if (!tbody) return;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${classMap[fs.classId] || '-'}</b></td>
+                            <td>${fs.term}</td>
+                            <td>${fs.year}</td>
+                            <td>${fs.tuition.toLocaleString()}</td>
+                            <td>${fs.extra.toLocaleString()}</td>
+                            <td style="font-weight:700; color:var(--primary);">${fs.total.toLocaleString()}</td>
+                            <td>
+                                <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editFeeStructure('${d.id}')"></i>
+                                <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteFeeStructure('${d.id}')"></i>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+
+            // Announcements
+            onSnapshot(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc")), snap => {
+                const dashList = document.getElementById('dash-announcements-list');
+                const fullList = document.getElementById('announcement-list');
+                dashList.innerHTML = "";
+                fullList.innerHTML = "";
+
+                snap.forEach(d => {
+                    const a = d.data();
+                    const html = `
+                        <div style="border-left: 4px solid var(--primary); padding: 10px; background: var(--bg-light); border-radius: 4px; margin-bottom: 10px;">
+                            <div class="flex justify-between">
+                                <h5 style="color:var(--primary)">${a.title}</h5>
+                                <span class="status-pill status-present" style="font-size:0.6rem;">${a.type}</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin: 5px 0;">${a.content}</p>
+                            <small class="text-muted">${new Date(a.date).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                    dashList.innerHTML += html;
+                    fullList.innerHTML += html;
+                });
+                if(fullList.innerHTML !== "") {
+                    fullList.innerHTML += `<button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="generateNewsletterPDF()"><i class="fas fa-file-pdf"></i> Download Newsletter PDF</button>`;
+                }
+            });
+
+            // Exams
+            onSnapshot(query(collection(db, "exams"), where("schoolId", "==", currentSchoolId)), async snap => {
+                const tbody = document.getElementById('exam-list-body');
+                tbody.innerHTML = "";
+                
+                const studSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
+                const studMap = {};
+                studSnap.forEach(d => studMap[d.id] = { name: d.data().name, cid: d.data().classId });
+                const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+                const classMap = {};
+                classSnap.forEach(d => classMap[d.id] = d.data().name);
+
+                snap.forEach(d => {
+                    const e = d.data();
+                    const sInfo = studMap[e.studentId] || { name: 'Unknown', cid: '' };
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${e.examName}</td>
+                            <td><b>${sInfo.name}</b></td>
+                            <td>${classMap[sInfo.cid] || '-'}</td>
+                            <td>${e.marks} / 100</td>
+                            <td><span class="badge ${e.grade === 'F' ? 'badge-danger' : 'badge-success'}">${e.grade}</span></td>
+                            <td>${new Date(e.date).toLocaleDateString()}</td>
+                            <td>
+                                <i class="fas fa-file-pdf" style="color:var(--success); cursor:pointer; margin-right:10px;" title="Generate Full Report Card" onclick="openReportModal('${e.studentId}')"></i>
+                                <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:10px;" onclick="editExam('${d.id}')"></i>
+                                <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteExam('${d.id}')"></i>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // --- UTILS ---
+        window.openModal = (id) => {
+            if(id === 'modal-student' || id === 'modal-teacher' || id === 'modal-class' || id === 'modal-fee' || id === 'modal-exam' || id === 'modal-announcement' || id === 'modal-fee-structure' || id === 'modal-bulk-newsletter') {
+                if(!hasPermission('edit')) {
+                    showToast("Permission denied", "error");
+                    return;
+                }
+                refreshSelects();
+                // Clear dynamic subject-teacher rows when opening class modal for new entry
+                if (id === 'modal-class') {
+                    document.getElementById('class-subject-teacher-rows').innerHTML = '';
+                }
+                if (id === 'modal-bulk-newsletter') {
+                    document.getElementById('bulk-news-year').value = new Date().getFullYear();
+                }
+                if (id === 'modal-fee-structure') {
+                    document.getElementById('fs-extra-fees-container').innerHTML = '';
+                }
+            }
+            document.getElementById(id).classList.add('active');
+        };
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.remove('active');
+            // Reset forms
+            const form = document.querySelector(`#${id} form`);
+            if(form) form.reset();
+            // Clear dynamic subject-teacher rows when closing class modal
+            if (id === 'modal-class') {
+                document.getElementById('class-subject-teacher-rows').innerHTML = '';
+            }
+            if (id === 'modal-fee-structure') {
+                document.getElementById('fs-extra-fees-container').innerHTML = '';
+            }
+        };
+
+        window.previewImage = (input, previewId) => {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.innerHTML = `<img src="${e.target.result}">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.filterTable = (tableId, query) => {
+            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query.toLowerCase()) ? "" : "none";
+            });
+        };
+
+        window.exportToCSV = (tableId, filename) => {
+            let csv = [];
+            const rows = document.querySelectorAll(`#${tableId} tr`);
+            for (const row of rows) {
+                let cols = Array.from(row.cells).map(c => `"${c.innerText}"`);
+                csv.push(cols.join(","));
+            }
+            const csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${filename}.csv`);
+            document.body.appendChild(link);
+            link.click();
+        };
+
+        // --- PDF GENERATION ENGINE ---
+
+        async function getSchoolInfo() {
+            const snap = await getDoc(doc(db, "schools", currentSchoolId));
+            return snap.exists() ? snap.data() : {};
+        }
+
+        window.generateNewsletterPDF = async () => {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            const school = await getSchoolInfo();
+            const primaryColor = [128, 0, 0]; // Maroon
+
+            // Branded Header
+            docPdf.setFillColor(...primaryColor);
+            docPdf.rect(0, 0, 210, 40, 'F');
+            docPdf.setTextColor(255, 255, 255);
+            docPdf.setFontSize(22);
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
+            docPdf.setFontSize(10);
+            docPdf.setFont("helvetica", "italic");
+            docPdf.text(school.motto || "", 105, 28, { align: "center" });
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(school.contact || "", 105, 34, { align: "center" });
+
+            docPdf.setTextColor(0, 0, 0);
+            docPdf.setFontSize(16);
+            docPdf.text("Recent Announcements", 20, 55);
+            docPdf.setDrawColor(...primaryColor);
+            docPdf.line(20, 57, 80, 57);
+
+            // Content
+            const annSnap = await getDocs(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc"), limit(10)));
+            let y = 70;
+            annSnap.forEach(d => {
+                const a = d.data();
+                if (y > 260) { docPdf.addPage(); y = 20; }
+                
+                docPdf.setFontSize(12);
+                docPdf.setFont("helvetica", "bold");
+                docPdf.text(a.title, 20, y);
+                docPdf.setFontSize(9);
+                docPdf.setTextColor(100, 100, 100);
+                docPdf.text(new Date(a.date).toLocaleDateString(), 190, y, { align: "right" });
+                
+                y += 7;
+                docPdf.setTextColor(50, 50, 50);
+                docPdf.setFont("helvetica", "normal");
+                const splitText = docPdf.splitTextToSize(a.content, 170);
+                docPdf.text(splitText, 20, y);
+                
+                y += (splitText.length * 5) + 10;
+            });
+
+            docPdf.save(`Newsletter_${new Date().toLocaleDateString()}.pdf`);
+        };
+
+        window.generateFeeReceiptPDF = async (student, amount, method, term, year, studentDocId) => {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            const school = await getSchoolInfo();
+            const feeSummary = await getStudentFeeSummary(studentDocId, student.classId, term, year);
+            const primaryColor = hexToRgb(schoolThemeColor);
+
+            // Branded Header
+            docPdf.setFillColor(...primaryColor);
+            docPdf.rect(0, 0, 210, 40, 'F');
+            docPdf.setTextColor(255, 255, 255);
+            docPdf.setFontSize(22);
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text(school.schoolName || "OFFICIAL FEE RECEIPT", 105, 18, { align: "center" });
+            docPdf.setFontSize(10);
+            docPdf.setFont("helvetica", "italic");
+            docPdf.text(school.motto || "", 105, 26, { align: "center" });
+            docPdf.setFontSize(9);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(school.contact || "", 105, 32, { align: "center" });
+
+            // Document Info
+            docPdf.setTextColor(0, 0, 0);
+            docPdf.text(`Receipt No: RCP-${Date.now().toString().slice(-6)}`, 20, 50);
+            docPdf.text(`Date: ${new Date().toLocaleDateString()}`, 190, 50, { align: "right" });
+
+            // Student Info Box
+            docPdf.setDrawColor(200, 200, 200);
+            docPdf.rect(20, 55, 170, 30);
+            docPdf.setFontSize(12);
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text("STUDENT DETAILS", 25, 62);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.setFontSize(10);
+            docPdf.text(`Name: ${student.name}`, 25, 70);
+            docPdf.text(`Student ID: ${student.studentId}`, 25, 77);
+            docPdf.text(`Period: ${term} ${year}`, 120, 70);
+
+            docPdf.autoTable({
+                startY: 90,
+                head: [['Description', 'Payment Method', 'Amount Paid (KES)']],
+                body: [[`School Fee Installment - ${term} ${year}`, method, amount.toLocaleString()]],
+                theme: 'grid',
+                headStyles: { fillColor: primaryColor }
+            });
+
+            // Summary Section
+            let finalY = docPdf.lastAutoTable.finalY + 12;
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text(`Payment Summary:`, 20, finalY);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(`Total Term Fees: ${fmtKES(feeSummary.total)}`, 20, finalY + 7);
+            docPdf.text(`Total Paid to Date: ${fmtKES(feeSummary.paid)}`, 20, finalY + 14);
+            docPdf.setTextColor(...(feeSummary.balance > 0 ? [231, 76, 60] : [46, 204, 113]));
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, finalY + 21);
+
+            docPdf.setTextColor(0, 0, 0);
+            const signY = finalY + 45;
+            docPdf.text("Authorized Signature: _______________________", 20, signY);
+            docPdf.text("Official School Stamp", 140, signY);
+            docPdf.save(`${student.name.replace(/\s/g, '_')}_Receipt.pdf`);
+        };
+
+        window.reprintFeeReceipt = async (feeId) => {
+            const feeSnap = await getDoc(doc(db, "fees", feeId));
+            const f = feeSnap.data();
+            const studSnap = await getDoc(doc(db, "students", f.studentId));
+            await generateFeeReceiptPDF(studSnap.data(), f.amount, f.method, f.term, f.year, f.studentId);
+        };
+
+        // New: View Fee Statement (Overlay)
+        window.viewFeeStatement = async (studentId, term, year) => {
+            openModal('modal-fee-statement');
+            document.getElementById('fee-statement-body').innerHTML = `
+                <div class="loading-state"><div class="spinner"></div><p>Loading fee statement...</p></div>`;
+            
+            try {
+                const studentSnap = await getDoc(doc(db, "students", studentId));
+                if (!studentSnap.exists()) { throw new Error("Student not found."); }
+                const student = studentSnap.data();
+
+                const classSnap = await getDoc(doc(db, "classes", student.classId));
+                const className = classSnap.exists() ? classSnap.data().name : "N/A";
+                const school = await getSchoolInfo();
+
+                const feeSummary = await getStudentFeeSummary(studentId, student.classId, term, year);
+
+                const fsQuery = query(collection(db, "fee_structures"), 
+                    where("schoolId", "==", currentSchoolId), 
+                    where("classId", "==", student.classId), 
+                    where("term", "==", term), 
+                    where("year", "==", year)
+                );
+                const fsSnap = await getDocs(fsQuery);
+                const fsData = fsSnap.docs[0]?.data();
+
+                const paymentsSnap = await getDocs(query(collection(db, "fees"),
+                    where("schoolId", "==", currentSchoolId),
+                    where("studentId", "==", studentId),
+                    where("term", "==", term),
+                    where("year", "==", year),
+                    orderBy("date", "asc")
+                ));
+
+                let paymentsHtml = "";
+                paymentsSnap.forEach(d => {
+                    const p = d.data();
+                    paymentsHtml += `
+                        <tr>
+                            <td>${new Date(p.date).toLocaleDateString()}</td>
+                            <td>${p.method}</td>
+                            <td>${p.reference || 'N/A'}</td>
+                            <td style="text-align:right;">${fmtKES(p.amount)}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('fee-statement-body').innerHTML = `
+                    <div style="font-family:'Space Mono',monospace; font-size:0.8rem; text-align:center; margin-bottom:1.5rem;">
+                        <h4 style="color:var(--primary); font-size:1.5rem; margin-bottom:0.5rem;">${school.schoolName}</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">${school.motto || ''} | ${school.contact || ''}</p>
+                        <h5 style="margin-top:1.5rem; font-size:1.2rem; color:var(--primary-dark);">STUDENT FEE STATEMENT</h5>
+                        <p style="font-weight:bold;">${term} - Academic Year ${year}</p>
+                    </div>
+                    
+                    <div class="grid gap-10" style="grid-template-columns:1fr 1fr; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid var(--border);">
+                        <div>
+                            <p style="font-weight:bold;">Student Name: <span style="font-weight:normal;">${student.name}</span></p>
+                            <p style="font-weight:bold;">Student ID: <span style="font-weight:normal;">${student.studentId}</span></p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p style="font-weight:bold;">Class: <span style="font-weight:normal;">${className}</span></p>
+                            <p style="font-weight:bold;">Date: <span style="font-weight:normal;">${new Date().toLocaleDateString()}</span></p>
+                        </div>
+                    </div>
+
+                    <h4 style="color:var(--primary); margin-bottom:1rem;">Payment History</h4>
+                    <table class="table-responsive" style="margin-bottom:1.5rem;">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Method</th>
+                                <th>Reference</th>
+                                <th style="text-align:right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${paymentsHtml || '<tr><td colspan="4" style="text-align:center;">No payments found for this period.</td></tr>'}
+                        </tbody>
+                    </table>
+
+                    <div id="statement-breakdown" style="margin-bottom:1.5rem; padding:15px; background:var(--bg-light); border-radius:12px; border:1px solid var(--border);">
+                        <h4 style="color:var(--primary); margin-bottom:10px; font-size:0.9rem;">Fee Breakdown</h4>
+                        <div class="flex justify-between" style="margin-bottom:5px; font-size:0.85rem;">
+                            <span>Tuition Fee:</span>
+                            <span>${fmtKES(fsData?.tuition || 0)}</span>
+                        </div>
+                        ${(fsData?.extraFees || []).map(ef => `
+                            <div class="flex justify-between" style="margin-bottom:5px; font-size:0.85rem;">
+                                <span>${ef.name}:</span>
+                                <span>${fmtKES(ef.amount)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="card" style="background:var(--bg-light); border:1px solid var(--border);">
+                        <div class="flex justify-between align-center" style="margin-bottom:5px;">
+                            <span>Total Expected Fees:</span>
+                            <span style="font-weight:bold;">${fmtKES(feeSummary.total)}</span>
+                        </div>
+                        <div class="flex justify-between align-center" style="margin-bottom:5px;">
+                            <span>Total Paid:</span>
+                            <span style="font-weight:bold; color:var(--success);">${fmtKES(feeSummary.paid)}</span>
+                        </div>
+                        <div class="flex justify-between align-center" style="border-top:1.5px solid var(--border); margin-top:10px; padding-top:10px;">
+                            <span style="font-weight:bold;">Balance Due:</span>
+                            <span style="font-weight:800; color:${feeSummary.balance > 0 ? 'var(--danger)' : 'var(--success)'};">${fmtKES(feeSummary.balance)}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Link the print button in the modal to generate a PDF
+                document.getElementById('print-fee-statement-btn').onclick = () => {
+                    generateFeeStatementPDF(student, className, feeSummary, paymentsSnap, term, year, school);
+                };
+
+            } catch (err) {
+                showToast(err.message, "error");
+                closeModal('modal-fee-statement');
+            }
+        };
+
+        // --- NEWSLETTER PDF ENGINE ---
+        window.openReportModal = (studentId) => {
+            document.getElementById('report-student-id').value = studentId;
+            document.getElementById('report-year').value = new Date().getFullYear();
+            openModal('modal-report-params');
+        };
+
+        window.generateNewsletterPDF = async () => {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            const school = await getSchoolInfo();
+            const primaryColor = hexToRgb(schoolThemeColor);
+
+            showLoader(true);
+            try {
+                // Branded Header
+                docPdf.setFillColor(...primaryColor);
+                docPdf.rect(0, 0, 210, 40, 'F');
+                docPdf.setTextColor(255, 255, 255);
+                docPdf.setFontSize(22);
+                docPdf.setFont("helvetica", "bold");
+                docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
+                docPdf.setFontSize(10);
+                docPdf.setFont("helvetica", "italic");
+                docPdf.text(school.motto || "", 105, 28, { align: "center" });
+                docPdf.setFont("helvetica", "normal");
+                docPdf.text(school.contact || "", 105, 34, { align: "center" });
+
+                docPdf.setTextColor(0, 0, 0);
+                docPdf.setFontSize(16);
+                docPdf.text("Recent Announcements", 20, 55);
+                docPdf.setDrawColor(...primaryColor);
+                docPdf.line(20, 57, 80, 57);
+
+                // Content
+                const annSnap = await getDocs(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc"), limit(10)));
+                let y = 70;
+                annSnap.forEach(d => {
+                    const a = d.data();
+                    if (y > 260) { docPdf.addPage(); y = 20; }
+                    
+                    docPdf.setFontSize(12);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(a.title, 20, y);
+                    docPdf.setFontSize(9);
+                    docPdf.setTextColor(100, 100, 100);
+                    docPdf.text(new Date(a.date).toLocaleDateString(), 190, y, { align: "right" });
+                    
+                    y += 7;
+                    docPdf.setTextColor(50, 50, 50);
+                    docPdf.setFont("helvetica", "normal");
+                    const splitText = docPdf.splitTextToSize(a.content, 170);
+                    docPdf.text(splitText, 20, y);
+                    
+                    y += (splitText.length * 5) + 10;
+                });
+
+                docPdf.save(`Newsletter_${new Date().toLocaleDateString()}.pdf`);
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating newsletter: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+
+        // --- REPORT CARD ENGINE ---
+        window.generateReportFormPDF = async () => {
+            const studentId = document.getElementById('report-student-id').value;
+            const term = document.getElementById('report-term').value;
+            const year = parseInt(document.getElementById('report-year').value);
+            if(!studentId || !term || !year) return showToast("Invalid report parameters", "error");
+
+            showLoader(true);
+            try {
+                const { jsPDF } = window.jspdf;
+                const docPdf = new jsPDF();
+                const school = await getSchoolInfo();
+                const primaryColor = [128, 0, 0]; // Maroon
+
+                const studentSnap = await getDoc(doc(db, "students", studentId));
+                if(!studentSnap.exists()) throw new Error("Student not found");
+                const student = studentSnap.data();
+
+                const classSnap = await getDoc(doc(db, "classes", student.classId));
+                const className = classSnap.exists() ? classSnap.data().name : "N/A";
+
+                // Rank Calculation
+                const rankings = [];
+                const studSnap = await getDocs(query(collection(db, "students"), where("classId", "==", student.classId)));
+                for(let s of studSnap.docs) {
+                    const exSnap = await getDocs(query(collection(db, "exams"), where("studentId", "==", s.id), where("term", "==", term), where("year", "==", year)));
+                    let total = 0; let count = 0;
+                    exSnap.forEach(ed => { total += (ed.data().marks || 0); count++; });
+                    rankings.push({ id: s.id, avg: count > 0 ? (total/count) : 0 });
+                }
+                rankings.sort((a,b) => b.avg - a.avg);
+                const position = rankings.findIndex(r => r.id === studentId) + 1;
+                const totalInClass = rankings.length;
+
+                // Fetch fee summary for the student
+                const feeSummary = await getStudentFeeSummary(studentId, student.classId, term, year);
+
+                // Branded Header
+                docPdf.setFillColor(...primaryColor);
+                docPdf.rect(0, 0, 210, 40, 'F');
+                docPdf.setTextColor(255, 255, 255);
+                docPdf.setFontSize(22);
+                docPdf.setFont("helvetica", "bold");
+                docPdf.text(school.schoolName || "STUDENT REPORT", 105, 18, { align: "center" });
+                docPdf.setFontSize(10);
+                docPdf.setFont("helvetica", "italic");
+                docPdf.text(school.motto || "", 105, 26, { align: "center" });
+                docPdf.setFontSize(9);
+                docPdf.setFont("helvetica", "normal");
+                docPdf.text(school.contact || "", 105, 32, { align: "center" });
+
+                // Student Info Box
+                docPdf.setTextColor(0, 0, 0);
+                docPdf.setFontSize(12);
+                docPdf.setFont("helvetica", "bold");
+                docPdf.text(`STUDENT PROGRESS REPORT`, 105, 60, { align: "center" });
+                
+                docPdf.setFontSize(10);
+                docPdf.text(`Student Name: ${student.name}`, 20, 75);
+                docPdf.text(`Admission No: ${student.studentId}`, 20, 82);
+                docPdf.text(`Class: ${className}`, 130, 75);
+                docPdf.text(`Academic Period: ${term} ${year}`, 130, 82);
+
+                // Results Table
+                const examSnap = await getDocs(query(collection(db, "exams"), 
+                    where("schoolId", "==", currentSchoolId), 
+                    where("studentId", "==", studentId),
+                    where("term", "==", term),
+                    where("year", "==", year)
+                ));
+                
+                const rows = [];
+                let totalMarks = 0;
+                examSnap.forEach(d => {
+                    const e = d.data();
+                    const m = e.marks || 0;
+                    totalMarks += m;
+                    rows.push([e.subject, m, getGrade(m)]);
+                });
+
+                const average = rows.length > 0 ? (totalMarks / rows.length).toFixed(2) : 0;
+
+                docPdf.autoTable({
+                    startY: 95,
+                    head: [['Subject', 'Marks Obtained', 'Grade']],
+                    body: rows,
+                    theme: 'striped',
+                    headStyles: { fillColor: primaryColor }
+                });
+
+                // Summary Section
+                const finalY = docPdf.lastAutoTable.finalY + 12;
+                docPdf.setFont("helvetica", "bold");
+                docPdf.text(`Total Score: ${totalMarks}`, 20, finalY);
+                docPdf.text(`Mean Average: ${average}%`, 80, finalY);
+                docPdf.text(`Final Grade: ${getGrade(average)}`, 140, finalY);
+                docPdf.text(`Class Rank: ${position} out of ${totalInClass}`, 20, finalY + 8);
+                
+                docPdf.text(`Fee Balance: ${fmtKES(feeSummary.balance)}`, 130, finalY + 8);
+
+                docPdf.setFont("helvetica", "italic");
+                docPdf.text(`Teacher's Remark: ${getRemark(average)}`, 20, finalY + 18);
+
+                const signY = finalY + 40;
+                docPdf.setFont("helvetica", "normal");
+                docPdf.text("Class Teacher's Signature: ________________________________", 20, signY);
+                docPdf.text("Principal's Signature: _______________________", 20, signY + 15);
+                docPdf.text("Official School Stamp", 140, signY + 15);
+
+                // LEGITIMACY QR CODE
+                const verifyData = `VERIFIED: ${school.schoolName} | Student: ${student.name} | Period: ${term} ${year} | Avg: ${average}% | Rank: ${position}/${totalInClass}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyData)}`;
+                
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = qrUrl;
+                await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; });
+                
+                if(img.complete && img.naturalWidth !== 0) {
+                    docPdf.addImage(img, 'PNG', 165, finalY + 10, 25, 25);
+                    docPdf.setFontSize(7);
+                    docPdf.text("Scan to Verify", 177.5, finalY + 38, { align: "center" });
+                }
+
+                docPdf.save(`Report_${student.name.replace(/\s/g, '_')}.pdf`);
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating report: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+
+        // --- BULK PERSONALIZED NEWSLETTER ENGINE ---
+        window.generateBulkClosingNewsletters = async (e) => {
+            if(e) e.preventDefault();
+            const term = document.getElementById('bulk-news-term').value;
+            const year = parseInt(document.getElementById('bulk-news-year').value);
+            
+            if(!term || !year) return;
+            
+            closeModal('modal-bulk-newsletter');
+            
+            showLoader(true);
+            try {
+                const { jsPDF } = window.jspdf;
+                const docPdf = new jsPDF();
+                const school = await getSchoolInfo();
+                const primaryColor = hexToRgb(schoolThemeColor);
+
+                // 1. Fetch Master Data
+                const studentsSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
+                const classesSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+                const annSnap = await getDocs(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc"), limit(5)));
+                
+                if(studentsSnap.empty) throw new Error("No students found to generate newsletters.");
+
+                const classMap = {};
+                classesSnap.forEach(d => classMap[d.id] = d.data().name);
+
+                // 2. Pre-calculate Ranks per Class (Optimized to save Firestore reads)
+                const classRanks = {};
+                for(let cDoc of classesSnap.docs) {
+                    const classId = cDoc.id;
+                    const rankings = [];
+                    const classStudents = studentsSnap.docs.filter(s => s.data().classId === classId);
+                    
+                    for(let s of classStudents) {
+                        const exSnap = await getDocs(query(collection(db, "exams"), 
+                            where("studentId", "==", s.id), 
+                            where("term", "==", term), 
+                            where("year", "==", year)
+                        ));
+                        let total = 0; let count = 0;
+                        exSnap.forEach(ed => { total += (ed.data().marks || 0); count++; });
+                        rankings.push({ id: s.id, avg: count > 0 ? (total/count) : 0 });
+                    }
+                    rankings.sort((a,b) => b.avg - a.avg);
+                    classRanks[classId] = rankings;
+                }
+
+                // 3. Process Each Student
+                let isFirstPage = true;
+                for(let sDoc of studentsSnap.docs) {
+                    const student = sDoc.data();
+                    const studentId = sDoc.id;
+                    const rankings = classRanks[student.classId] || [];
+                    const studRank = rankings.find(r => r.id === studentId);
+                    const position = rankings.findIndex(r => r.id === studentId) + 1;
+                    const feeSummary = await getStudentFeeSummary(studentId, student.classId, term, year);
+
+                    if(!isFirstPage) docPdf.addPage();
+                    isFirstPage = false;
+
+                    // Branded Header
+                    docPdf.setFillColor(...primaryColor);
+                    docPdf.rect(0, 0, 210, 40, 'F');
+                    docPdf.setTextColor(255, 255, 255);
+                    docPdf.setFontSize(22);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 18, { align: "center" });
+                    docPdf.setFontSize(10);
+                    docPdf.text(school.motto || "", 105, 26, { align: "center" });
+                    docPdf.text(school.contact || "", 105, 32, { align: "center" });
+
+                    // Closing Message Section
+                    docPdf.setTextColor(0, 0, 0);
+                    docPdf.setFontSize(14);
+                    docPdf.text("End of Term Closing Notice", 20, 55);
+                    docPdf.setDrawColor(...primaryColor);
+                    docPdf.line(20, 57, 85, 57);
+
+                    let annY = 65;
+                    annSnap.forEach(d => {
+                        const a = d.data();
+                        docPdf.setFontSize(10);
+                        docPdf.setFont("helvetica", "bold");
+                        docPdf.text(a.title, 20, annY);
+                        docPdf.setFont("helvetica", "normal");
+                        const splitContent = docPdf.splitTextToSize(a.content, 170);
+                        docPdf.text(splitContent, 20, annY + 5);
+                        annY += (splitContent.length * 5) + 10;
+                    });
+
+                    // Student Personalized Section
+                    const statsY = annY + 5;
+                    docPdf.setFillColor(245, 245, 245);
+                    docPdf.rect(15, statsY, 180, 45, 'F');
+                    docPdf.setDrawColor(200, 200, 200);
+                    docPdf.rect(15, statsY, 180, 45, 'S');
+
+                    docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`STUDENT PROGRESS: ${student.name}`, 20, statsY + 10);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Admission No: ${student.studentId}`, 20, statsY + 18);
+                    docPdf.text(`Class: ${classMap[student.classId] || 'N/A'}`, 20, statsY + 24);
+                    
+                    docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
+                    docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
+                    docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
+                    docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
+
+                    // Financial Section
+                    const feeY = statsY + 55;
+                    docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text("Financial Statement", 20, feeY);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
+                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
+                    
+                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
+                    docPdf.setTextColor(0, 0, 0);
+
+                    // Footer
+                    docPdf.setFont("helvetica", "italic");
+                    docPdf.setFontSize(9);
+                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
+                }
+
+                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
+                showToast("Bulk newsletters generated successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating bulk newsletters: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+    </script>
+</body>
+</html>         showLoader(false);
+            }
+        };
+
+        // --- BULK PERSONALIZED NEWSLETTER ENGINE ---
+        window.generateBulkClosingNewsletters = async () => {
+            const term = prompt("Enter Academic Term (e.g. Term 1):", "Term 1");
+            const yearInput = prompt("Enter Academic Year (e.g. 2025):", "2025");
+            const year = parseInt(yearInput);
+
+            if(!term || !year) return;
+            
+            showLoader(true);
+            try {
+                const { jsPDF } = window.jspdf;
+                const docPdf = new jsPDF();
+                const school = await getSchoolInfo();
+                const primaryColor = hexToRgb(schoolThemeColor);
+
+                // 1. Fetch Master Data
+                const studentsSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
+                const classesSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
+                const annSnap = await getDocs(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc"), limit(5)));
+                
+                if(studentsSnap.empty) throw new Error("No students found to generate newsletters.");
+
+                const classMap = {};
+                classesSnap.forEach(d => classMap[d.id] = d.data().name);
+
+                // 2. Pre-calculate Ranks per Class (Optimized to save Firestore reads)
+                const classRanks = {};
+                for(let cDoc of classesSnap.docs) {
+                    const classId = cDoc.id;
+                    const rankings = [];
+                    const classStudents = studentsSnap.docs.filter(s => s.data().classId === classId);
+                    
+                    for(let s of classStudents) {
+                        const exSnap = await getDocs(query(collection(db, "exams"), 
+                            where("studentId", "==", s.id), 
+                            where("term", "==", term), 
+                            where("year", "==", year)
+                        ));
+                        let total = 0; let count = 0;
+                        exSnap.forEach(ed => { total += (ed.data().marks || 0); count++; });
+                        rankings.push({ id: s.id, avg: count > 0 ? (total/count) : 0 });
+                    }
+                    rankings.sort((a,b) => b.avg - a.avg);
+                    classRanks[classId] = rankings;
+                }
+
+                // 3. Process Each Student
+                let isFirstPage = true;
+                for(let sDoc of studentsSnap.docs) {
+                    const student = sDoc.data();
+                    const studentId = sDoc.id;
+                    const rankings = classRanks[student.classId] || [];
+                    const studRank = rankings.find(r => r.id === studentId);
+                    const position = rankings.findIndex(r => r.id === studentId) + 1;
+                    const feeSummary = await getStudentFeeSummary(studentId, student.classId, term, year);
+
+                    if(!isFirstPage) docPdf.addPage();
+                    isFirstPage = false;
+
+                    // Branded Header
+                    docPdf.setFillColor(...primaryColor);
+                    docPdf.rect(0, 0, 210, 40, 'F');
+                    docPdf.setTextColor(255, 255, 255);
+                    docPdf.setFontSize(22);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 18, { align: "center" });
+                    docPdf.setFontSize(10);
+                    docPdf.text(school.motto || "", 105, 26, { align: "center" });
+                    docPdf.text(school.contact || "", 105, 32, { align: "center" });
+
+                    // Closing Message Section
+                    docPdf.setTextColor(0, 0, 0);
+                    docPdf.setFontSize(14);
+                    docPdf.text("End of Term Closing Notice", 20, 55);
+                    docPdf.setDrawColor(...primaryColor);
+                    docPdf.line(20, 57, 85, 57);
+
+                    let annY = 65;
+                    annSnap.forEach(d => {
+                        const a = d.data();
+                        docPdf.setFontSize(10);
+                        docPdf.setFont("helvetica", "bold");
+                        docPdf.text(a.title, 20, annY);
+                        docPdf.setFont("helvetica", "normal");
+                        const splitContent = docPdf.splitTextToSize(a.content, 170);
+                        docPdf.text(splitContent, 20, annY + 5);
+                        annY += (splitContent.length * 5) + 10;
+                    });
+
+                    // Student Personalized Section
+                    const statsY = annY + 5;
+                    docPdf.setFillColor(245, 245, 245);
+                    docPdf.rect(15, statsY, 180, 45, 'F');
+                    docPdf.setDrawColor(200, 200, 200);
+                    docPdf.rect(15, statsY, 180, 45, 'S');
+
+                    docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`STUDENT PROGRESS: ${student.name}`, 20, statsY + 10);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Admission No: ${student.studentId}`, 20, statsY + 18);
+                    docPdf.text(`Class: ${classMap[student.classId] || 'N/A'}`, 20, statsY + 24);
+                    
+                    docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
+                    docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
+                    docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
+                    docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
+
+                    // Financial Section
+                    const feeY = statsY + 55;
+                    docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text("Financial Statement", 20, feeY);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
+                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
+                    
+                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
+                    docPdf.setTextColor(0, 0, 0);
+
+                    // Footer
+                    docPdf.setFont("helvetica", "italic");
+                    docPdf.setFontSize(9);
+                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
+                }
+
+                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
+                showToast("Bulk newsletters generated successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating bulk newsletters: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+    </script>
+</body>
+</html>             docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text("Financial Statement", 20, feeY);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
+                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
+                    
+                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
+                    docPdf.setTextColor(0, 0, 0);
+
+                    // Footer
+                    docPdf.setFont("helvetica", "italic");
+                    docPdf.setFontSize(9);
+                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
+                }
+
+                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
+                showToast("Bulk newsletters generated successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating bulk newsletters: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
+    </script>
+</body>
+</html>             docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
+                    docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
+                    docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
+                    docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
+
+                    // Financial Section
+                    const feeY = statsY + 55;
+                    docPdf.setFontSize(11);
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text("Financial Statement", 20, feeY);
+                    docPdf.setFont("helvetica", "normal");
+                    docPdf.setFontSize(10);
+                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
+                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
+                    
+                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
+                    docPdf.setFont("helvetica", "bold");
+                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
+                    docPdf.setTextColor(0, 0, 0);
+
+                    // Footer
+                    docPdf.setFont("helvetica", "italic");
+                    docPdf.setFontSize(9);
+                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
+                }
+
+                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
+                showToast("Bulk newsletters generated successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Error generating bulk newsletters: " + err.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        };
     </script>
 </body>
 </html>
