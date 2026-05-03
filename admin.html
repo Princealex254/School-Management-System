@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Admin | Prince Alex Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #800000;
+            --primary-dark: #600000;
+            --secondary: #ffffff;
+            --bg-light: #f8f9fa;
+            --bg-dark: #0f0f0f;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .card { background: var(--secondary); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 2rem; }
+        
+        .btn { padding: 0.8rem 1.5rem; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: var(--transition); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(128, 0, 0, 0.2); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+        .btn-danger { background: #e74c3c; color: white; }
+
+        #auth-section { 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: linear-gradient(135deg, #1e272e 0%, #000 100%), 
+                        url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); 
+        }
+        .auth-card { 
+            width: 100%; 
+            max-width: 460px; 
+            background: white; 
+            padding: 4.5rem 3.5rem; 
+            border-radius: 24px; 
+            text-align: center; 
+            border-top: 8px solid var(--primary); 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .auth-card h2 { color: var(--primary); margin-bottom: 0.75rem; font-weight: 800; font-size: 2rem; }
+        .auth-card p.auth-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem; }
+        .auth-form-group { position: relative; margin-bottom: 1.8rem; text-align: left; }
+        .auth-form-group i { 
+            position: absolute; 
+            left: 20px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            color: var(--text-muted); 
+            font-size: 1.2rem;
+        }
+        .auth-form-group input { 
+            width: 100%; 
+            padding: 18px 18px 18px 56px; 
+            border: 2px solid var(--border); 
+            border-radius: 16px; 
+            outline: none; 
+            transition: var(--transition);
+            font-size: 1rem;
+            background: var(--bg-light);
+        }
+        .auth-form-group input:focus { 
+            border-color: var(--primary); 
+            background: white;
+            box-shadow: 0 0 0 6px rgba(128, 0, 0, 0.06); 
+        }
+
+        /* --- LAYOUT --- */
+        #app-section { display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--primary); color: white; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; }
+        .sidebar-header { padding: 2.5rem 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
+        .menu-item { padding: 1.35rem 2.2rem; display: flex; align-items: center; gap: 18px; cursor: pointer; color: rgba(255,255,255,0.6); transition: var(--transition); font-weight: 600; margin: 8px 15px; border-radius: 16px; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.15); color: white; border-left: 5px solid white; transform: translateX(5px); }
+
+        .main-wrapper { flex: 1; margin-left: var(--sidebar-width); }
+        .navbar { height: var(--header-height); background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; border-bottom: 1px solid var(--border); }
+        .content-body { padding: 2rem; }
+
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; min-width: 800px; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 20px 15px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+
+        .badge-active { background: #d4f8e2; color: #1e7e34; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .badge-inactive { background: #fceaea; color: #c0392b; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 5000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; width: 90%; max-width: 500px; border-radius: 16px; padding: 2rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem; }
+        .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-light); color: var(--text-main); }
+        /* --- TOAST --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
+        .toast { padding: 12px 24px; border-radius: 12px; color: white; margin-bottom: 10px; box-shadow: var(--shadow); animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem; min-width: 300px; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* --- RESPONSIVE --- */
+        .menu-toggle { display: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); }
+        #sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width); transition: transform var(--transition); }
+            .sidebar.active { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .menu-toggle { display: block; }
+            .navbar { padding: 0 1rem; }
+            .content-body { padding: 1.5rem; }
+        }
+        @media (max-width: 600px) {
+            .auth-card { padding: 2.5rem 1.5rem; }
+            .btn { padding: 0.6rem 1rem; font-size: 0.8rem; }
+            .navbar h3 { font-size: 1rem; }
+            .flex.justify-between.align-center { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Auth Section -->
+    <section id="auth-section">
+        <div class="auth-card">
+            <i class="fas fa-user-shield" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h2>Owner Admin</h2>
+            <p class="auth-sub">Prince Alex Digital Master Control Panel</p>
+            <form onsubmit="handleLogin(event)">
+                <div class="auth-form-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="login-email" placeholder="Master Email Address" required>
+                </div>
+                <div class="auth-form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="Secret Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.05rem; margin-top: 0.5rem;">
+                    Access Master Panel <i class="fas fa-sign-in-alt" style="margin-left: 10px;"></i>
+                </button>
+            </form>
+            <p style="margin-top: 1.5rem; font-size: 0.7rem; color: var(--text-muted); opacity: 0.6;">&copy; 2025 Prince Alex Digital. All rights reserved.</p>
+        </div>
+    </section>
+
+    <!-- App Section -->
+    <section id="app-section" class="hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Master Control</h2>
+                <p style="font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; margin-top: 5px;">Prince Alex Digital</p>
+            </div>
+            <nav>
+                <div class="menu-item active" data-view="schools">
+                    <i class="fas fa-university"></i> Schools
+                </div>
+                <div class="menu-item" data-view="admins">
+                    <i class="fas fa-users-cog"></i> School Admins
+                </div>
+            </nav>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="navbar">
+                <div class="flex align-center gap-10">
+                    <i class="fas fa-bars menu-toggle" onclick="toggleSidebar()"></i>
+                    <h3 id="view-title">School Management</h3>
+                </div>
+                <button class="btn btn-outline" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </header>
+
+            <main class="content-body">
+                <!-- Schools View -->
+                <div id="view-schools" class="view">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Provisioned Schools</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-school')">+ New School</button>
+                    </div>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>School ID</th>
+                                    <th>School Name</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                    <tbody id="school-list-body">
+                        <tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">Initializing master data...</td></tr>
+                    </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Admins View -->
+                <div id="view-admins" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Authorized School Admins</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-admin')">+ Assign Admin</button>
+                    </div>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Admin Email</th>
+                                    <th>Linked School</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-list-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Modal: New School -->
+    <div class="modal-overlay" id="modal-school">
+        <div class="modal">
+            <h3 style="margin-bottom: 1.5rem;">Create New School Entity</h3>
+            <form onsubmit="saveSchool(event)">
+                <input type="hidden" id="edit-sch-id">
+                <div class="form-group">
+                    <label>School Name</label>
+                    <input type="text" class="form-control" id="sch-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" class="form-control" id="sch-loc" required>
+                </div>
+                <div class="form-group">
+                    <label>Theme Color</label>
+                    <input type="color" class="form-control" id="sch-color" value="#800000" style="height: 45px; padding: 5px;">
+                </div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">Create School</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-school')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Admin -->
+    <div class="modal-overlay" id="modal-admin">
+        <div class="modal">
+            <h3 style="margin-bottom: 1.5rem;" id="modal-admin-title">Link Admin to School</h3>
+            <form onsubmit="assignAdmin(event)">
+                <input type="hidden" id="edit-admin-id">
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" class="form-control" id="adm-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Select School</label>
+                    <select class="form-control" id="adm-school" required></select>
+                </div>
+                <!-- New: Role selection dropdown -->
+                <div class="form-group">
+                    <label>Assign Role</label>
+                    <select class="form-control" id="adm-role" required>
+                        <option value="admin">Admin</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-admin-btn">Grant Access</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-admin')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, query, onSnapshot, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGErPBeQ1Fdx9EHPXOHepoEoOx7P2f57o",
+            authDomain: "princealextravel.firebaseapp.com",
+            projectId: "princealextravel",
+            storageBucket: "princealextravel.firebasestorage.app",
+            messagingSenderId: "947577729462",
+            appId: "1:947577729462:web:dd4b4c7cb4a984c5e3d117"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const MASTER_ADMIN_EMAILS = ['senerwaalex@gmail.com', 'noreply@princealex.pro'];
+
+        // --- AUTH ---
+        function getFriendlyErrorMessage(error) {
+            if (typeof error === 'string') return error;
+            switch (error.code) {
+                case 'auth/user-not-found': return "Account not found. Please check your email.";
+                case 'auth/wrong-password': return "Incorrect password. Please try again.";
+                case 'auth/invalid-email': return "The email format is invalid.";
+                case 'auth/invalid-credential': return "Incorrect email or password.";
+                case 'auth/too-many-requests': return "Too many login attempts. Please try again later.";
+                case 'permission-denied': return "Access denied. You don't have permission for this.";
+                default: return error.message || "An unexpected error occurred.";
+            }
+        }
+
+        window.showToast = (msg, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'success' ? 'btn-primary' : 'btn-danger'}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        };
+
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            showLoader(true);
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showToast("Login successful. Accessing Master Panel...");
+            } catch (err) { 
+                showToast(getFriendlyErrorMessage(err), "error"); 
+            }
+            finally { showLoader(false); }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Security: Ensure only recognized owners can access Master Panel
+                if (!MASTER_ADMIN_EMAILS.includes(user.email)) {
+                    alert("Access Denied: You do not have Master Owner permissions.");
+                    await signOut(auth);
+                    window.location.href = 'school-management-saas.html';
+                    return;
+                }
+
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                initListeners();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        // --- UI ---
+        window.toggleSidebar = () => {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('active');
+                overlay.style.display = 'block';
+            }
+        };
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const viewId = item.dataset.view;
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                document.getElementById('view-title').innerText = item.innerText;
+                if (window.innerWidth <= 992) toggleSidebar();
+            });
+        });
+
+        window.openModal = (id) => {
+            document.getElementById(id).classList.add('active');
+            if(id === 'modal-admin') {
+                document.getElementById('modal-admin-title').innerText = "Link Admin to School";
+                document.getElementById('modal-admin-btn').innerText = "Grant Access";
+                document.getElementById('edit-admin-id').value = "";
+                document.getElementById('adm-email').readOnly = false;
+                populateSchoolSelect();
+            }
+        };
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+
+        function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+
+        // --- DATA ---
+        function initListeners() {
+            // Schools Listener
+            onSnapshot(collection(db, "schools"), snap => {
+                const tbody = document.getElementById('school-list-body');
+                tbody.innerHTML = "";
+                snap.forEach(d => {
+                    const s = d.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><code style="background:#eee; padding:2px 5px; border-radius:4px;">${d.id}</code></td>
+                            <td>
+                                <div class="flex align-center gap-10">
+                                    <div style="width:16px; height:16px; border-radius:4px; background:${s.themeColor || '#800000'}; border:1px solid rgba(0,0,0,0.1);"></div>
+                                    <b>${s.schoolName}</b>
+                                </div>
+                            </td>
+                            <td>${s.location || '-'}</td>
+                            <td><span class="${s.status === 'inactive' ? 'badge-inactive' : 'badge-active'}">${s.status || 'active'}</span></td>
+                            <td>${new Date(s.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editSchool('${d.id}')" title="Edit School Theme"></i>
+                                <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; margin-right: 12px;" 
+                                    onclick="manageSchool('${d.id}', '${s.schoolName}')">
+                                    <i class="fas fa-external-link-alt"></i> Manage Data
+                                </button>
+                                <i class="fas ${s.status === 'inactive' ? 'fa-toggle-off' : 'fa-toggle-on'}" 
+                                   style="color:${s.status === 'inactive' ? '#95a5a6' : '#2ecc71'}; cursor:pointer; font-size:1.2rem; margin-right:12px;" 
+                                   onclick="toggleSchoolStatus('${d.id}', '${s.status || 'active'}')" title="Toggle Status"></i>
+                                <i class="fas fa-trash" style="color:#e74c3c; cursor:pointer;" onclick="deleteSchool('${d.id}')"></i>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            // Admins Listener
+            onSnapshot(collection(db, "school_admins"), async snap => {
+                const tbody = document.getElementById('admin-list-body');
+                tbody.innerHTML = "";
+                
+                const schSnap = await getDocs(collection(db, "schools"));
+                const schMap = {};
+                schSnap.forEach(d => schMap[d.id] = d.data().schoolName);
+
+                snap.forEach(d => {
+                    const a = d.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${d.id}</b></td>
+                            <td><span class="badge" style="background:#e0f2f1; color:#00695c; padding:3px 8px; border-radius:4px; font-size:0.75rem;">${schMap[a.schoolId] || 'Unknown'}</span></td>
+                            <td><span class="badge" style="background:#f3f3f3; color:#333; padding:3px 8px; border-radius:4px; font-size:0.75rem; text-transform:capitalize;">${a.role || 'Admin'}</span></td>
+                            <td><span class="${a.status === 'inactive' ? 'badge-inactive' : 'badge-active'}">${a.status || 'active'}</span></td>
+                            <td>
+                                <i class="fas fa-user-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editSchoolAdmin('${d.id}')"></i>
+                                <i class="fas ${a.status === 'inactive' ? 'fa-user-check' : 'fa-user-slash'}" 
+                                   style="color:${a.status === 'inactive' ? '#2ecc71' : '#f39c12'}; cursor:pointer; margin-right:12px;" 
+                                   onclick="toggleAdminStatus('${d.id}', '${a.status || 'active'}')" title="Toggle Status"></i>
+                                <i class="fas fa-user-times" style="color:#e74c3c; cursor:pointer;" onclick="deleteSchoolAdmin('${d.id}')"></i>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        window.editSchool = async (id) => {
+            const snap = await getDoc(doc(db, 'schools', id));
+            if(!snap.exists()) return;
+            const data = snap.data();
+            document.getElementById('edit-sch-id').value = id;
+            document.getElementById('sch-name').value = data.schoolName;
+            document.getElementById('sch-loc').value = data.location;
+            document.getElementById('sch-color').value = data.themeColor || "#800000";
+            
+            document.getElementById('modal-school').querySelector('h3').innerText = "Edit School Entity";
+            document.getElementById('modal-school').querySelector('.btn-primary').innerText = "Update School";
+            document.getElementById('modal-school').classList.add('active');
+        };
+
+        window.deleteSchool = async (id) => {
+            if(!confirm("Permanently delete this school and all associated data?")) return;
+            try {
+                await deleteDoc(doc(db, 'schools', id));
+                showToast("School deleted successfully.");
+            } catch (err) { 
+                showToast(getFriendlyErrorMessage(err), "error"); 
+            }
+        };
+
+        window.deleteSchoolAdmin = async (id) => {
+            if(!confirm("Revoke admin access for this user?")) return;
+            try {
+                await deleteDoc(doc(db, 'school_admins', id));
+                showToast("Admin access revoked.");
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.toggleSchoolStatus = async (id, currentStatus) => {
+            const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+            if (!confirm(`Are you sure you want to set this school to ${newStatus}?`)) return;
+            try {
+                await updateDoc(doc(db, "schools", id), { 
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                });
+                showToast(`School status updated to ${newStatus}.`);
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.toggleAdminStatus = async (email, currentStatus) => {
+            const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+            if (!confirm(`Are you sure you want to set this admin to ${newStatus}?`)) return;
+            try {
+                await updateDoc(doc(db, "school_admins", email), { 
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                });
+                showToast(`Admin status updated to ${newStatus}.`);
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        window.manageSchool = (id, name) => {
+            sessionStorage.setItem('owner_override_school_id', id);
+            sessionStorage.setItem('owner_override_school_name', name);
+            window.location.href = 'school-management-saas.html';
+        };
+
+        window.editSchoolAdmin = async (email) => {
+            const snap = await getDoc(doc(db, "school_admins", email));
+            if(!snap.exists()) return;
+            const data = snap.data();
+            
+            await populateSchoolSelect();
+            
+            document.getElementById('edit-admin-id').value = email;
+            document.getElementById('adm-email').value = email;
+            document.getElementById('adm-email').readOnly = true;
+            document.getElementById('adm-school').value = data.schoolId;
+            document.getElementById('adm-role').value = data.role || 'admin';
+            
+            document.getElementById('modal-admin-title').innerText = "Edit Admin Access";
+            document.getElementById('modal-admin-btn').innerText = "Update Access";
+            document.getElementById('modal-admin').classList.add('active');
+        };
+
+        window.saveSchool = async (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('edit-sch-id').value;
+            const name = document.getElementById('sch-name').value;
+            const loc = document.getElementById('sch-loc').value;
+            const color = document.getElementById('sch-color').value;
+            const id = editId || "SCH-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+            try {
+                const data = {
+                    schoolName: name,
+                    location: loc,
+                    themeColor: color,
+                    updatedAt: new Date().toISOString()
+                };
+                if (!editId) {
+                    data.adminName = "Admin";
+                    data.status = "active";
+                    data.createdAt = new Date().toISOString();
+                }
+                
+                await setDoc(doc(db, "schools", id), data, { merge: true });
+                closeModal('modal-school');
+                e.target.reset();
+                showToast(editId ? `School "${name}" updated.` : `New school "${name}" provisioned successfully.`);
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+
+        async function populateSchoolSelect() {
+            const snap = await getDocs(collection(db, "schools"));
+            const sel = document.getElementById('adm-school');
+            sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().schoolName}</option>`).join('');
+        }
+
+        window.assignAdmin = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adm-email').value;
+            const schoolId = document.getElementById('adm-school').value;
+            const role = document.getElementById('adm-role').value;
+            const isEdit = document.getElementById('edit-admin-id').value !== "";
+
+            try {
+                const data = { schoolId, role };
+                if (!isEdit) {
+                    data.status = "active";
+                    data.createdAt = new Date().toISOString();
+                }
+                
+                await setDoc(doc(db, "school_admins", email), data, { merge: true });
+                closeModal('modal-admin');
+                e.target.reset();
+                showToast(isEdit ? `Access updated for ${email}` : `Access granted to ${email}`);
+            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+        };
+    </script>
+</body>
+</html>
