@@ -441,7 +441,7 @@
                             <td>
                                 <div class="flex align-center gap-10">
                                     <div style="width:16px; height:16px; border-radius:4px; background:${s.themeColor || '#800000'}; border:1px solid rgba(0,0,0,0.1);"></div>
-                                    <b>${s.schoolName}</b>
+                                    <b>${s.name}</b>
                                 </div>
                             </td>
                             <td>${s.location || '-'}</td>
@@ -450,7 +450,7 @@
                             <td>
                                 <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editSchool('${d.id}')" title="Edit School Theme"></i>
                                 <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; margin-right: 12px;" 
-                                    onclick="manageSchool('${d.id}', '${s.schoolName}')">
+                                    onclick="manageSchool('${d.id}', '${s.name}')">
                                     <i class="fas fa-external-link-alt"></i> Manage Data
                                 </button>
                                 <i class="fas ${s.status === 'inactive' ? 'fa-toggle-off' : 'fa-toggle-on'}" 
@@ -467,10 +467,10 @@
             onSnapshot(collection(db, "school_admins"), async snap => {
                 const tbody = document.getElementById('admin-list-body');
                 tbody.innerHTML = "";
-                
+
                 const schSnap = await getDocs(collection(db, "schools"));
                 const schMap = {};
-                schSnap.forEach(d => schMap[d.id] = d.data().schoolName);
+                schSnap.forEach(d => schMap[d.id] = d.data().name);
 
                 snap.forEach(d => {
                     const a = d.data();
@@ -498,7 +498,7 @@
             if(!snap.exists()) return;
             const data = snap.data();
             document.getElementById('edit-sch-id').value = id;
-            document.getElementById('sch-name').value = data.schoolName;
+            document.getElementById('sch-name').value = data.name;
             document.getElementById('sch-loc').value = data.location;
             document.getElementById('sch-color').value = data.themeColor || "#800000";
             
@@ -541,7 +541,7 @@
             const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
             if (!confirm(`Are you sure you want to set this admin to ${newStatus}?`)) return;
             try {
-                await updateDoc(doc(db, "school_admins", email), { 
+                await updateDoc(doc(db, "school_admins", email), {
                     status: newStatus,
                     updatedAt: new Date().toISOString()
                 });
@@ -559,8 +559,6 @@
             const snap = await getDoc(doc(db, "school_admins", email));
             if(!snap.exists()) return;
             const data = snap.data();
-            
-            await populateSchoolSelect();
             
             document.getElementById('edit-admin-id').value = email;
             document.getElementById('adm-email').value = email;
@@ -583,7 +581,7 @@
 
             try {
                 const data = {
-                    schoolName: name,
+                    name: name,
                     location: loc,
                     themeColor: color,
                     updatedAt: new Date().toISOString()
@@ -604,7 +602,7 @@
         async function populateSchoolSelect() {
             const snap = await getDocs(collection(db, "schools"));
             const sel = document.getElementById('adm-school');
-            sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().schoolName}</option>`).join('');
+            sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
         }
 
         window.assignAdmin = async (e) => {
@@ -625,8 +623,9 @@
                 closeModal('modal-admin');
                 e.target.reset();
                 showToast(isEdit ? `Access updated for ${email}` : `Access granted to ${email}`);
-            } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+            } catch (err) {
+                showToast(getFriendlyErrorMessage(err), "error");
+            }
         };
     </script>
 </body>
-</html>
