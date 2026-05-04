@@ -600,6 +600,7 @@
                                         <option value="">All Classes</option>
                                     </select>
                                 </div>
+                                <button class="btn btn-outline" onclick="window.openStudentLookup()"><i class="fas fa-search"></i> Check Student Balance</button>
                                 <button class="btn btn-primary" onclick="document.getElementById('fee-edit-id').value=''; openModal('modal-fee')">Record Payment</button>
                             </div>
                         </div>
@@ -671,6 +672,10 @@
                             <div class="form-group">
                                 <label>School Name</label>
                                 <input type="text" class="form-control" id="set-school-name">
+                            </div>
+                            <div class="form-group">
+                                <label>School Location</label>
+                                <input type="text" class="form-control" id="set-school-location" placeholder="e.g. City, Country">
                             </div>
                             <div class="form-group">
                                 <label>School Motto</label>
@@ -975,6 +980,140 @@
         </div>
     </div>
 
+    <!-- Bulk Personalized Term Reports Modal -->
+    <div class="modal-overlay" id="modal-bulk-term-reports">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Bulk Personalized Term Reports</h3>
+                <span class="close-modal" onclick="closeModal('modal-bulk-term-reports')">&times;</span>
+            </div>
+            <form id="bulk-reports-form">
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Term</label>
+                        <select class="form-control" id="bulk-report-term" required>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Year</label>
+                        <input type="number" class="form-control" id="bulk-report-year" value="2025" required>
+                    </div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term Opening Date</label>
+                        <input type="date" class="form-control" id="bulk-report-opening-date" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term Closing Date</label>
+                        <input type="date" class="form-control" id="bulk-report-closing-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Next Term Opening Date</label>
+                    <input type="date" class="form-control" id="bulk-report-next-term-opening-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Term Summary</label>
+                    <textarea class="form-control" id="bulk-report-term-summary" rows="3" placeholder="Describe how the term was, key achievements, etc." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Teacher General Comment</label>
+                    <textarea class="form-control" id="bulk-report-teacher-comment" rows="2" placeholder="General comment for all students in the report." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Principal Name (for signature)</label>
+                    <input type="text" class="form-control" id="bulk-report-principal-name" placeholder="e.g. Mrs. Jane Doe" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Class Filter</label>
+                        <select class="form-control" id="bulk-report-class-filter">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Performance Filter</label>
+                        <select class="form-control" id="bulk-report-performance-filter">
+                            <option value="all">All Students</option>
+                            <option value="top">Top Performers</option>
+                            <option value="needs-improvement">Needs Improvement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Newsletter Template Type</label>
+                    <select class="form-control" id="bulk-report-template-type">
+                        <option value="performance-report">Performance Report</option>
+                        <option value="fee-reminder">Fee Reminder</option>
+                        <option value="closing-term-report">Closing Term Report</option>
+                    </select>
+                </div>
+                <div class="flex gap-10" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-primary" style="flex: 1;" onclick="generateBulkReports('pdf')">
+                        <i class="fas fa-file-pdf"></i> Generate PDF Reports
+                    </button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="generateBulkReports('whatsapp')">
+                        <i class="fab fa-whatsapp"></i> Generate WhatsApp Messages
+                    </button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="generateBulkReports('email')">
+                        <i class="fas fa-envelope"></i> Generate Email Content
+                    </button>
+                </div>
+                <div id="bulk-report-output" style="margin-top: 1.5rem; max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; display: none;">
+                    <h4 style="color:var(--primary); margin-bottom: 0.5rem;">Generated Content:</h4>
+                    <pre id="bulk-report-output-content" style="white-space: pre-wrap; font-family: 'Space Mono', monospace; font-size: 0.8rem;"></pre>
+                    <div class="flex gap-10" style="margin-top: 1rem;">
+                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="copyOutput()">
+                            <i class="fas fa-copy"></i> Copy All
+                        </button>
+                        <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('bulk-report-output').style.display='none'">
+                            <i class="fas fa-times"></i> Close Output
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Lookup Modal -->
+    <div class="modal-overlay" id="modal-lookup-params">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Check Student Balance</h3>
+                <span class="close-modal" onclick="closeModal('modal-lookup-params')">&times;</span>
+            </div>
+            <form onsubmit="handleLookupSubmit(event)">
+                <div class="form-group" id="lookup-student-search-group">
+                    <label>Search Student</label>
+                    <input type="text" class="form-control" id="lookup-student-search" placeholder="Enter name or Admission ID..." onkeyup="searchStudentForLookup(this.value)">
+                    <div id="lookup-search-results" style="border: 1.5px solid var(--border); border-radius: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; display: none; background: var(--bg-light); z-index: 10;"></div>
+                </div>
+                <input type="hidden" id="lookup-student-id">
+                <div id="lookup-selected-display" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(128, 0, 0, 0.1); border-radius: 8px; font-weight: 700; color: var(--primary); text-align: center;"></div>
+                
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Term</label>
+                        <select class="form-control" id="lookup-term" required>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Year</label>
+                        <input type="number" class="form-control" id="lookup-year" value="2025" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">View Fee Statement</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Fee Statement Modal -->
     <div class="modal-overlay" id="modal-fee-statement">
         <div class="modal" style="max-width: 800px;">
@@ -1174,8 +1313,24 @@
                     return;
                 }
 
-                currentSchoolId = adminSnap.data().schoolId;
-                currentUserRole = adminSnap.data().role; // New: Get the user's role
+                if (adminSnap.exists()) {
+                    const data = adminSnap.data();
+                    currentSchoolId = data.schoolId;
+                    currentUserRole = data.role || 'admin';
+                } else if (isOwner) {
+                    // Owners might be visiting a specific school via override from a master panel
+                    const overrideId = sessionStorage.getItem('owner_override_school_id');
+                    if (overrideId) {
+                        currentSchoolId = overrideId;
+                        document.getElementById('master-access-indicator').classList.remove('hidden');
+                    } else {
+                        alert("Master Admin access detected. Please select a school to manage from the Master Panel first.");
+                        // Redirect to the super-admin/owner dashboard
+                        window.location.href = 'owner-admin.html';
+                        return;
+                    }
+                    currentUserRole = 'admin';
+                }
 
                 // Enforce Teacher Role UI Restrictions
                 if(currentUserRole === 'teacher') {
@@ -1210,10 +1365,11 @@
 
                     const data = settingsSnap.data();
                     applyTheme(data.themeColor);
-                    document.getElementById('school-name-sidebar').innerText = data.schoolName;
+                    document.getElementById('school-name-sidebar').innerText = data.name;
                     
                     // Pre-fill settings form
-                    document.getElementById('set-school-name').value = data.schoolName || '';
+                    document.getElementById('set-school-name').value = data.name || '';
+                    document.getElementById('set-school-location').value = data.location || '';
                     document.getElementById('set-school-motto').value = data.motto || '';
                     document.getElementById('set-school-contact').value = data.contact || '';
                     document.getElementById('set-admin-name').value = data.adminName || '';
@@ -1293,38 +1449,6 @@
         };
 
         // --- DATA OPERATIONS ---
-
-        // Global dropdown refreshers
-        async function refreshSelects() {
-            const classSelects = ['student-class', 'attendance-class-select', 'fs-class', 'filter-fee-class'];
-            const studentsSelects = ['fee-student-select', 'exam-student-select'];
-            const teacherSelects = ['class-teacher-select'];
-
-            // Get Classes
-            const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
-            const classOptions = classSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
-            classSelects.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.innerHTML = `<option value="">Select Class</option>${classOptions}`;
-            });
-
-            // Get Teachers
-            const teachSnap = await getDocs(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)));
-            const teachOptions = teachSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
-            teacherOptionsHTML = teachOptions; 
-            teacherSelects.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.innerHTML = `<option value="">Select Class Teacher</option>${teachOptions}`;
-            });
-
-            // Get Students
-            const studSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
-            const studOptions = studSnap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
-            studentsSelects.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.innerHTML = `<option value="">Select Student</option>${studOptions}`;
-            });
-        }
 
         // 1. Students
         window.saveStudent = async (e) => {
@@ -1591,7 +1715,7 @@
                 }
             }
 
-            const q = query(collection(db, "students"), where("classId", "==", classId));
+            const q = query(collection(db, "students"), where("schoolId", "==", currentSchoolId), where("classId", "==", classId));
             const snap = await getDocs(q);
             
             let html = "";
@@ -1736,30 +1860,62 @@
             if(!canEdit('fees')) return showToast("Permission denied", "error");
             const studentId = document.getElementById('fee-student-select').value;
             const amount = parseFloat(document.getElementById('fee-amount').value);
+            const term = document.getElementById('fee-term').value;
+            const year = parseInt(document.getElementById('fee-year').value);
             const method = document.getElementById('fee-method').value;
-            const data = {
-                schoolId: currentSchoolId,
-                studentId, amount, method,
-                term: document.getElementById('fee-term').value,
-                year: parseInt(document.getElementById('fee-year').value),
-                reference: document.getElementById('fee-ref').value || "N/A",
-                note: document.getElementById('fee-note').value,
-                date: new Date().toISOString()
-            };
+            const editId = document.getElementById('fee-edit-id').value;
+
+            showLoader(true);
             try {
-                const id = document.getElementById('fee-edit-id').value;
-                if(id) {
-                    await updateDoc(doc(db, "fees", id), data);
+                const studentSnap = await getDoc(doc(db, "students", studentId));
+                if (!studentSnap.exists()) throw new Error("Student record missing");
+                const student = studentSnap.data();
+
+                // 1. Get Fee Structure for accurate balance calculation
+                const fsQuery = query(collection(db, "fee_structures"), 
+                    where("schoolId", "==", currentSchoolId), 
+                    where("classId", "==", student.classId), 
+                    where("term", "==", term), 
+                    where("year", "==", year)
+                );
+                const fsSnap = await getDocs(fsQuery);
+                const expected = fsSnap.empty ? 0 : (fsSnap.docs[0].data().total || 0);
+
+                // 2. Calculate total paid so far for this period (excluding current record if editing)
+                const payQuery = query(collection(db, "fees"), 
+                    where("schoolId", "==", currentSchoolId),
+                    where("studentId", "==", studentId),
+                    where("term", "==", term),
+                    where("year", "==", year)
+                );
+                const paySnap = await getDocs(payQuery);
+                let paidSoFar = 0;
+                paySnap.forEach(d => { if(d.id !== editId) paidSoFar += (d.data().amount || 0); });
+
+                const totalPaidToDate = paidSoFar + amount;
+                const balance = expected - totalPaidToDate;
+
+                const data = {
+                    schoolId: currentSchoolId,
+                    studentId, amount, method, term, year,
+                    expected, paid: totalPaidToDate, balance, // Snapshot data for performance
+                    reference: document.getElementById('fee-ref').value || "N/A",
+                    note: document.getElementById('fee-note').value,
+                    date: new Date().toISOString()
+                };
+
+                if(editId) {
+                    await updateDoc(doc(db, "fees", editId), data);
                     showToast("Payment record updated", "success");
                 } else {
                     await addDoc(collection(db, "fees"), data);
                     showToast(`Payment of KES ${amount} recorded`, "success");
                 }
                 
-                const studentSnap = await getDoc(doc(db, "students", studentId));
-                await generateFeeReceiptPDF(studentSnap.data(), amount, method, data.term, data.year, studentId);
+                await generateFeeReceiptPDF(student, amount, method, term, year, studentId);
                 closeModal('modal-fee');
             } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
+            finally { showLoader(false); }
         };
 
         window.editFeeRecord = async (id) => {
@@ -1767,8 +1923,6 @@
             const snap = await getDoc(doc(db, "fees", id));
             if(!snap.exists()) return;
             const data = snap.data();
-            
-            await refreshSelects();
             
             document.getElementById('fee-edit-id').value = id;
             document.getElementById('fee-student-select').value = data.studentId;
@@ -1968,13 +2122,14 @@
                 return;
             }
 
-            const schoolName = document.getElementById('set-school-name').value;
+            const name = document.getElementById('set-school-name').value;
+            const location = document.getElementById('set-school-location').value;
             const motto = document.getElementById('set-school-motto').value;
             const contact = document.getElementById('set-school-contact').value;
             const adminName = document.getElementById('set-admin-name').value;
             
             try {
-                await updateDoc(doc(db, "schools", currentSchoolId), { schoolName, motto, contact, adminName });
+                await updateDoc(doc(db, "schools", currentSchoolId), { name, location, motto, contact, adminName });
                 showToast("Settings updated successfully", "success");
                 setTimeout(() => location.reload(), 1000);
             } catch (err) { showToast(getFriendlyErrorMessage(err), "error"); }
@@ -1983,13 +2138,19 @@
         // --- REALTIME LISTENERS & RENDERING ---
         let lastFeesSnap = null;
         function initRealtimeListeners() {
-            refreshSelects(); 
-
             // Students
             onSnapshot(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)), async snap => {
                 document.getElementById('count-students').innerText = snap.size;
                 const tbody = document.getElementById('student-list-body');
                 tbody.innerHTML = "";
+
+                // Realtime cache and dropdown update
+                allStudents = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+                const studOptions = snap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+                ['fee-student-select', 'exam-student-select'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.innerHTML = `<option value="">Select Student</option>${studOptions}`;
+                });
 
                 // Get class names for display
                 const classSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
@@ -2007,6 +2168,7 @@
                             <td>${s.dob}</td>
                             <td>${s.parentContact}</td>
                             <td>
+                                <i class="fas fa-file-invoice-dollar" style="color:var(--success); cursor:pointer; margin-right:12px;" title="Fee Statement & Arrears" onclick="window.quickViewFinancials('${d.id}')"></i>
                                 <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-right:12px;" onclick="editStudent('${d.id}')"></i>
                                 ${hasPermission('delete') ? `
                                     <i class="fas fa-trash" style="color:var(--danger); cursor:pointer;" onclick="deleteStudent('${d.id}')"></i>
@@ -2017,8 +2179,86 @@
                 });
             });
 
+            // Helper for quick financial lookup from student directory
+            window.quickViewFinancials = (studentId) => {
+                const student = allStudents.find(s => s.docId === studentId);
+                if(student) {
+                    document.getElementById('lookup-student-id').value = studentId;
+                    document.getElementById('lookup-selected-display').innerText = `Selected: ${student.name}`;
+                    document.getElementById('lookup-selected-display').classList.remove('hidden');
+                    document.getElementById('lookup-student-search-group').classList.add('hidden');
+                    document.getElementById('lookup-year').value = new Date().getFullYear();
+                    openModal('modal-lookup-params');
+                }
+            };
+
+            // Global search for financials in Fees view
+            window.openStudentLookup = () => {
+                document.getElementById('lookup-student-search').value = '';
+                document.getElementById('lookup-student-id').value = '';
+                document.getElementById('lookup-search-results').style.display = 'none';
+                document.getElementById('lookup-selected-display').classList.add('hidden');
+                document.getElementById('lookup-student-search-group').classList.remove('hidden');
+                document.getElementById('lookup-year').value = new Date().getFullYear();
+                openModal('modal-lookup-params');
+            };
+
+            window.searchStudentForLookup = (queryInput) => {
+                const resultsDiv = document.getElementById('lookup-search-results');
+                if(!queryInput || queryInput.length < 2) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
+                const filtered = allStudents.filter(s => 
+                    (s.name && s.name.toLowerCase().includes(queryInput.toLowerCase())) || 
+                    (s.studentId && s.studentId.toLowerCase().includes(queryInput.toLowerCase()))
+                );
+                if(filtered.length > 0) {
+                    resultsDiv.innerHTML = filtered.map(s => `
+                        <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border);" onclick="selectStudentForLookup('${s.docId}', '${s.name.replace(/'/g, "\\'")}')">
+                            <b>${s.name}</b> (${s.studentId})
+                        </div>
+                    `).join('');
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.innerHTML = '<div style="padding: 10px;">No matching students found</div>';
+                    resultsDiv.style.display = 'block';
+                }
+            };
+
+            window.selectStudentForLookup = (id, name) => {
+                document.getElementById('lookup-student-id').value = id;
+                document.getElementById('lookup-student-search').value = name;
+                document.getElementById('lookup-search-results').style.display = 'none';
+                const display = document.getElementById('lookup-selected-display');
+                display.innerText = `Selected: ${name}`;
+                display.classList.remove('hidden');
+            };
+
+            window.copyOutput = () => {
+                navigator.clipboard.writeText(document.getElementById('bulk-report-output-content').innerText);
+                showToast("Content copied to clipboard!", "success");
+            };
+
+            window.handleLookupSubmit = (e) => {
+                e.preventDefault();
+                const studentId = document.getElementById('lookup-student-id').value;
+                const term = document.getElementById('lookup-term').value;
+                const year = document.getElementById('lookup-year').value;
+                if(!studentId) return showToast("Please select a student first", "error");
+                closeModal('modal-lookup-params');
+                viewFeeStatement(studentId, term, parseInt(year));
+            };
+
             // Teachers
             onSnapshot(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)), snap => {
+                // Realtime cache and dropdown update
+                allTeachers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const teachOptions = snap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+                teacherOptionsHTML = teachOptions;
+                const ts = document.getElementById('class-teacher-select');
+                if(ts) ts.innerHTML = `<option value="">Select Class Teacher</option>${teachOptions}`;
+
                 getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId))).then(classSnap => {
                     const teacherLoadMap = {};
                     classSnap.forEach(cd => {
@@ -2054,10 +2294,18 @@
 
             // Classes
             onSnapshot(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)), async snap => {
+                allClasses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 document.getElementById('count-classes').innerText = snap.size;
                 const tbody = document.getElementById('class-list-body');
                 tbody.innerHTML = "";
                 
+                // Realtime dropdown update
+                const classOptions = snap.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+                ['student-class', 'attendance-class-select', 'fs-class', 'filter-fee-class'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.innerHTML = `<option value="">Select Class</option>${classOptions}`;
+                });
+
                 const teachSnap = await getDocs(query(collection(db, "teachers"), where("schoolId", "==", currentSchoolId)));
                 const teachMap = {};
                 teachSnap.forEach(d => teachMap[d.id] = d.data().name);
@@ -2108,16 +2356,19 @@
 
                     if (!tbody) continue;
                     totalCollected += f.amount;
-                    const summary = await getStudentFeeSummary(f.studentId, student.classId, f.term, f.year);
+                    
+                    // Use stored snapshots if available to avoid slow sub-queries
+                    const expectedVal = f.expected !== undefined ? f.expected : 0;
+                    const balanceVal = f.balance !== undefined ? f.balance : 0;
 
                     tbody.innerHTML += `
                         <tr>
                             <td>${new Date(f.date).toLocaleDateString()}</td>
                             <td><b>${student.name}</b></td>
                             <td>${f.term} ${f.year}</td>
-                            <td>${summary.total.toLocaleString()}</td>
+                            <td>${expectedVal.toLocaleString()}</td>
                             <td style="color:var(--success); font-weight:700;">${f.amount.toLocaleString()}</td>
-                            <td style="color:${summary.balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${summary.balance.toLocaleString()}</td>
+                            <td style="color:${balanceVal > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${balanceVal.toLocaleString()}</td>
                             <td>
                                 <span class="badge badge-success">${f.method}</span>
                                 <i class="fas fa-edit" style="color:var(--primary); cursor:pointer; margin-left:10px;" title="Edit Payment" onclick="editFeeRecord('${d.id}')"></i>
@@ -2232,12 +2483,11 @@
 
         // --- UTILS ---
         window.openModal = (id) => {
-            if(id === 'modal-student' || id === 'modal-teacher' || id === 'modal-class' || id === 'modal-fee' || id === 'modal-exam' || id === 'modal-announcement' || id === 'modal-fee-structure' || id === 'modal-bulk-newsletter') {
+            if(id === 'modal-student' || id === 'modal-teacher' || id === 'modal-class' || id === 'modal-fee' || id === 'modal-exam' || id === 'modal-announcement' || id === 'modal-fee-structure' || id === 'modal-bulk-newsletter' || id === 'modal-lookup-params' || id === 'modal-bulk-term-reports') {
                 if(!hasPermission('edit')) {
                     showToast("Permission denied", "error");
                     return;
                 }
-                refreshSelects();
                 // Clear dynamic subject-teacher rows when opening class modal for new entry
                 if (id === 'modal-class') {
                     document.getElementById('class-subject-teacher-rows').innerHTML = '';
@@ -2248,9 +2498,15 @@
                 if (id === 'modal-fee-structure') {
                     document.getElementById('fs-extra-fees-container').innerHTML = '';
                 }
+                if (id === 'modal-bulk-term-reports') {
+                    populateBulkReportForm();
+                    window.populateBulkReportForm();
+                    document.getElementById('bulk-report-output').style.display = 'none';
+                }
             }
             document.getElementById(id).classList.add('active');
         };
+
         window.closeModal = (id) => {
             document.getElementById(id).classList.remove('active');
             // Reset forms
@@ -2319,7 +2575,7 @@
             docPdf.setTextColor(255, 255, 255);
             docPdf.setFontSize(22);
             docPdf.setFont("helvetica", "bold");
-            docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
+            docPdf.text(school.name || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
             docPdf.setFontSize(10);
             docPdf.setFont("helvetica", "italic");
             docPdf.text(school.motto || "", 105, 28, { align: "center" });
@@ -2371,7 +2627,7 @@
             docPdf.setTextColor(255, 255, 255);
             docPdf.setFontSize(22);
             docPdf.setFont("helvetica", "bold");
-            docPdf.text(school.schoolName || "OFFICIAL FEE RECEIPT", 105, 18, { align: "center" });
+            docPdf.text(school.name || "OFFICIAL FEE RECEIPT", 105, 18, { align: "center" });
             docPdf.setFontSize(10);
             docPdf.setFont("helvetica", "italic");
             docPdf.text(school.motto || "", 105, 26, { align: "center" });
@@ -2478,7 +2734,7 @@
 
                 document.getElementById('fee-statement-body').innerHTML = `
                     <div style="font-family:'Space Mono',monospace; font-size:0.8rem; text-align:center; margin-bottom:1.5rem;">
-                        <h4 style="color:var(--primary); font-size:1.5rem; margin-bottom:0.5rem;">${school.schoolName}</h4>
+                        <h4 style="color:var(--primary); font-size:1.5rem; margin-bottom:0.5rem;">${school.name || school.schoolName}</h4>
                         <p style="color:var(--text-muted); font-size:0.9rem;">${school.motto || ''} | ${school.contact || ''}</p>
                         <h5 style="margin-top:1.5rem; font-size:1.2rem; color:var(--primary-dark);">STUDENT FEE STATEMENT</h5>
                         <p style="font-weight:bold;">${term} - Academic Year ${year}</p>
@@ -2572,7 +2828,7 @@
                 docPdf.setTextColor(255, 255, 255);
                 docPdf.setFontSize(22);
                 docPdf.setFont("helvetica", "bold");
-                docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
+                docPdf.text(school.name || "SCHOOL NEWSLETTER", 105, 20, { align: "center" });
                 docPdf.setFontSize(10);
                 docPdf.setFont("helvetica", "italic");
                 docPdf.text(school.motto || "", 105, 28, { align: "center" });
@@ -2640,9 +2896,9 @@
 
                 // Rank Calculation
                 const rankings = [];
-                const studSnap = await getDocs(query(collection(db, "students"), where("classId", "==", student.classId)));
+                const studSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId), where("classId", "==", student.classId)));
                 for(let s of studSnap.docs) {
-                    const exSnap = await getDocs(query(collection(db, "exams"), where("studentId", "==", s.id), where("term", "==", term), where("year", "==", year)));
+                    const exSnap = await getDocs(query(collection(db, "exams"), where("schoolId", "==", currentSchoolId), where("studentId", "==", s.id), where("term", "==", term), where("year", "==", year)));
                     let total = 0; let count = 0;
                     exSnap.forEach(ed => { total += (ed.data().marks || 0); count++; });
                     rankings.push({ id: s.id, avg: count > 0 ? (total/count) : 0 });
@@ -2660,7 +2916,7 @@
                 docPdf.setTextColor(255, 255, 255);
                 docPdf.setFontSize(22);
                 docPdf.setFont("helvetica", "bold");
-                docPdf.text(school.schoolName || "STUDENT REPORT", 105, 18, { align: "center" });
+                docPdf.text(school.name || "STUDENT REPORT", 105, 18, { align: "center" });
                 docPdf.setFontSize(10);
                 docPdf.setFont("helvetica", "italic");
                 docPdf.text(school.motto || "", 105, 26, { align: "center" });
@@ -2727,7 +2983,7 @@
                 docPdf.text("Official School Stamp", 140, signY + 15);
 
                 // LEGITIMACY QR CODE
-                const verifyData = `VERIFIED: ${school.schoolName} | Student: ${student.name} | Period: ${term} ${year} | Avg: ${average}% | Rank: ${position}/${totalInClass}`;
+                const verifyData = `VERIFIED: ${school.name} | Student: ${student.name} | Period: ${term} ${year} | Avg: ${average}% | Rank: ${position}/${totalInClass}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyData)}`;
                 
                 const img = new Image();
@@ -2786,6 +3042,7 @@
                     
                     for(let s of classStudents) {
                         const exSnap = await getDocs(query(collection(db, "exams"), 
+                            where("schoolId", "==", currentSchoolId),
                             where("studentId", "==", s.id), 
                             where("term", "==", term), 
                             where("year", "==", year)
@@ -2817,7 +3074,7 @@
                     docPdf.setTextColor(255, 255, 255);
                     docPdf.setFontSize(22);
                     docPdf.setFont("helvetica", "bold");
-                    docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 18, { align: "center" });
+                    docPdf.text(school.name || "SCHOOL NEWSLETTER", 105, 18, { align: "center" });
                     docPdf.setFontSize(10);
                     docPdf.text(school.motto || "", 105, 26, { align: "center" });
                     docPdf.text(school.contact || "", 105, 32, { align: "center" });
@@ -2857,218 +3114,6 @@
                     docPdf.text(`Class: ${classMap[student.classId] || 'N/A'}`, 20, statsY + 24);
                     
                     docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
-                    docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
-                    docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
-                    docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
-
-                    // Financial Section
-                    const feeY = statsY + 55;
-                    docPdf.setFontSize(11);
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text("Financial Statement", 20, feeY);
-                    docPdf.setFont("helvetica", "normal");
-                    docPdf.setFontSize(10);
-                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
-                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
-                    
-                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
-                    docPdf.setTextColor(0, 0, 0);
-
-                    // Footer
-                    docPdf.setFont("helvetica", "italic");
-                    docPdf.setFontSize(9);
-                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
-                }
-
-                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
-                showToast("Bulk newsletters generated successfully!", "success");
-            } catch (err) {
-                console.error(err);
-                showToast("Error generating bulk newsletters: " + err.message, "error");
-            } finally {
-                showLoader(false);
-            }
-        };
-    </script>
-</body>
-</html>         showLoader(false);
-            }
-        };
-
-        // --- BULK PERSONALIZED NEWSLETTER ENGINE ---
-        window.generateBulkClosingNewsletters = async () => {
-            const term = prompt("Enter Academic Term (e.g. Term 1):", "Term 1");
-            const yearInput = prompt("Enter Academic Year (e.g. 2025):", "2025");
-            const year = parseInt(yearInput);
-
-            if(!term || !year) return;
-            
-            showLoader(true);
-            try {
-                const { jsPDF } = window.jspdf;
-                const docPdf = new jsPDF();
-                const school = await getSchoolInfo();
-                const primaryColor = hexToRgb(schoolThemeColor);
-
-                // 1. Fetch Master Data
-                const studentsSnap = await getDocs(query(collection(db, "students"), where("schoolId", "==", currentSchoolId)));
-                const classesSnap = await getDocs(query(collection(db, "classes"), where("schoolId", "==", currentSchoolId)));
-                const annSnap = await getDocs(query(collection(db, "announcements"), where("schoolId", "==", currentSchoolId), orderBy("date", "desc"), limit(5)));
-                
-                if(studentsSnap.empty) throw new Error("No students found to generate newsletters.");
-
-                const classMap = {};
-                classesSnap.forEach(d => classMap[d.id] = d.data().name);
-
-                // 2. Pre-calculate Ranks per Class (Optimized to save Firestore reads)
-                const classRanks = {};
-                for(let cDoc of classesSnap.docs) {
-                    const classId = cDoc.id;
-                    const rankings = [];
-                    const classStudents = studentsSnap.docs.filter(s => s.data().classId === classId);
-                    
-                    for(let s of classStudents) {
-                        const exSnap = await getDocs(query(collection(db, "exams"), 
-                            where("studentId", "==", s.id), 
-                            where("term", "==", term), 
-                            where("year", "==", year)
-                        ));
-                        let total = 0; let count = 0;
-                        exSnap.forEach(ed => { total += (ed.data().marks || 0); count++; });
-                        rankings.push({ id: s.id, avg: count > 0 ? (total/count) : 0 });
-                    }
-                    rankings.sort((a,b) => b.avg - a.avg);
-                    classRanks[classId] = rankings;
-                }
-
-                // 3. Process Each Student
-                let isFirstPage = true;
-                for(let sDoc of studentsSnap.docs) {
-                    const student = sDoc.data();
-                    const studentId = sDoc.id;
-                    const rankings = classRanks[student.classId] || [];
-                    const studRank = rankings.find(r => r.id === studentId);
-                    const position = rankings.findIndex(r => r.id === studentId) + 1;
-                    const feeSummary = await getStudentFeeSummary(studentId, student.classId, term, year);
-
-                    if(!isFirstPage) docPdf.addPage();
-                    isFirstPage = false;
-
-                    // Branded Header
-                    docPdf.setFillColor(...primaryColor);
-                    docPdf.rect(0, 0, 210, 40, 'F');
-                    docPdf.setTextColor(255, 255, 255);
-                    docPdf.setFontSize(22);
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text(school.schoolName || "SCHOOL NEWSLETTER", 105, 18, { align: "center" });
-                    docPdf.setFontSize(10);
-                    docPdf.text(school.motto || "", 105, 26, { align: "center" });
-                    docPdf.text(school.contact || "", 105, 32, { align: "center" });
-
-                    // Closing Message Section
-                    docPdf.setTextColor(0, 0, 0);
-                    docPdf.setFontSize(14);
-                    docPdf.text("End of Term Closing Notice", 20, 55);
-                    docPdf.setDrawColor(...primaryColor);
-                    docPdf.line(20, 57, 85, 57);
-
-                    let annY = 65;
-                    annSnap.forEach(d => {
-                        const a = d.data();
-                        docPdf.setFontSize(10);
-                        docPdf.setFont("helvetica", "bold");
-                        docPdf.text(a.title, 20, annY);
-                        docPdf.setFont("helvetica", "normal");
-                        const splitContent = docPdf.splitTextToSize(a.content, 170);
-                        docPdf.text(splitContent, 20, annY + 5);
-                        annY += (splitContent.length * 5) + 10;
-                    });
-
-                    // Student Personalized Section
-                    const statsY = annY + 5;
-                    docPdf.setFillColor(245, 245, 245);
-                    docPdf.rect(15, statsY, 180, 45, 'F');
-                    docPdf.setDrawColor(200, 200, 200);
-                    docPdf.rect(15, statsY, 180, 45, 'S');
-
-                    docPdf.setFontSize(11);
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text(`STUDENT PROGRESS: ${student.name}`, 20, statsY + 10);
-                    docPdf.setFont("helvetica", "normal");
-                    docPdf.setFontSize(10);
-                    docPdf.text(`Admission No: ${student.studentId}`, 20, statsY + 18);
-                    docPdf.text(`Class: ${classMap[student.classId] || 'N/A'}`, 20, statsY + 24);
-                    
-                    docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
-                    docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
-                    docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
-                    docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
-
-                    // Financial Section
-                    const feeY = statsY + 55;
-                    docPdf.setFontSize(11);
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text("Financial Statement", 20, feeY);
-                    docPdf.setFont("helvetica", "normal");
-                    docPdf.setFontSize(10);
-                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
-                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
-                    
-                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
-                    docPdf.setTextColor(0, 0, 0);
-
-                    // Footer
-                    docPdf.setFont("helvetica", "italic");
-                    docPdf.setFontSize(9);
-                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
-                }
-
-                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
-                showToast("Bulk newsletters generated successfully!", "success");
-            } catch (err) {
-                console.error(err);
-                showToast("Error generating bulk newsletters: " + err.message, "error");
-            } finally {
-                showLoader(false);
-            }
-        };
-    </script>
-</body>
-</html>             docPdf.setFontSize(11);
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text("Financial Statement", 20, feeY);
-                    docPdf.setFont("helvetica", "normal");
-                    docPdf.setFontSize(10);
-                    docPdf.text(`Total Fees for ${term}: ${fmtKES(feeSummary.total)}`, 20, feeY + 8);
-                    docPdf.text(`Total Paid: ${fmtKES(feeSummary.paid)}`, 20, feeY + 14);
-                    
-                    docPdf.setTextColor(...(feeSummary.balance > 0 ? [128, 0, 0] : [0, 100, 0]));
-                    docPdf.setFont("helvetica", "bold");
-                    docPdf.text(`Outstanding Balance: ${fmtKES(feeSummary.balance)}`, 20, feeY + 22);
-                    docPdf.setTextColor(0, 0, 0);
-
-                    // Footer
-                    docPdf.setFont("helvetica", "italic");
-                    docPdf.setFontSize(9);
-                    docPdf.text("This is an official document generated by the School Management System.", 105, 280, { align: "center" });
-                }
-
-                docPdf.save(`Closing_Newsletters_${term.replace(/\s/g, '_')}_${year}.pdf`);
-                showToast("Bulk newsletters generated successfully!", "success");
-            } catch (err) {
-                console.error(err);
-                showToast("Error generating bulk newsletters: " + err.message, "error");
-            } finally {
-                showLoader(false);
-            }
-        };
-    </script>
-</body>
-</html>             docPdf.text(`Mean Average: ${studRank ? studRank.avg.toFixed(1) : 0}%`, 110, statsY + 18);
                     docPdf.text(`Position: ${position} out of ${rankings.length}`, 110, statsY + 24);
                     docPdf.text(`Grade: ${getGrade(studRank ? studRank.avg : 0)}`, 110, statsY + 30);
                     docPdf.text(`Remark: ${getRemark(studRank ? studRank.avg : 0)}`, 20, statsY + 30);
