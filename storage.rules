@@ -1,0 +1,55 @@
+rules_version = '2';
+// =============================================================
+// Cloud Storage Rules — School-isolated uploads
+// Project: princealextravel
+//
+//  - Any signed-in user may READ files (student photos / logos are
+//    shown through <img> tags). Download-token URLs always work.
+//  - WRITE (upload) is allowed ONLY when the path belongs to the
+//    user's own school.
+//  - App upload paths (must match js/app.js):
+//      students/{schoolId}/{fileName}
+//      school_logos/{schoolId}/{fileName}
+// =============================================================
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return signedIn() && (
+        request.auth.token.email in ['senerwaalex@gmail.com', 'noreply@princealex.pro']
+      );
+    }
+
+    function userSchoolId() {
+      return firestore.get(/databases/(default)/documents/school_admins/$(request.auth.token.email)).data.schoolId;
+    }
+
+    // Signed-in users can read (files are linked by download URL).
+    match /{allPaths=**} {
+      allow read: if signedIn();
+    }
+
+    // Student photos — path is students/{schoolId}/{file}
+    match /students/{schoolId}/{fileName} {
+      allow write: if signedIn()
+        && (isOwner() || userSchoolId() == schoolId)
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // School logos — path is school_logos/{schoolId}/{file}
+    match /school_logos/{schoolId}/{fileName} {
+      allow write: if signedIn()
+        && (isOwner() || userSchoolId() == schoolId)
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Deny all other writes.
+    match /{allPaths=**} {
+      allow write: if false;
+    }
+  }
+}

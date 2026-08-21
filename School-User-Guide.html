@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School User Guide | Prince Alex Digital School Management System</title>
+<meta name="description" content="Step-by-step user guide for schools using the Prince Alex Digital School Management System.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --primary:#800000; --primary-dark:#5c0000; --primary-soft:#fdf2f2;
+  --gold:#c9a227; --gold-soft:#fdf8e7;
+  --ink:#22262e; --muted:#6b7280; --bg:#f6f4f1; --card:#ffffff;
+  --border:#e7e2da; --success:#1e8e5a; --success-soft:#e9f7f0;
+  --warn:#b45309; --warn-soft:#fef3e2; --danger:#c0392b; --danger-soft:#fdecea;
+  --blue:#2563eb; --blue-soft:#eaf1fe;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;font-size:15.5px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* ===== COVER ===== */
+.cover{background:linear-gradient(140deg,var(--primary-dark) 0%,var(--primary) 55%,#a01515 100%);color:#fff;padding:64px 0 56px;position:relative;overflow:hidden}
+.cover::after{content:"\f19d";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:-30px;bottom:-50px;font-size:280px;opacity:.06}
+.cover .wrap{position:relative;z-index:1}
+.brandline{display:flex;align-items:center;gap:14px;margin-bottom:42px}
+.brandline .logo{width:52px;height:52px;border-radius:14px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--primary-dark)}
+.brandline b{font-size:1.05rem;display:block;letter-spacing:.3px}
+.brandline small{opacity:.75;font-size:.72rem;text-transform:uppercase;letter-spacing:2px}
+.cover .doc-type{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);padding:6px 16px;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:18px}
+.cover h1{font-size:clamp(2rem,4.5vw,3.1rem);font-weight:800;line-height:1.15;max-width:640px}
+.cover h1 span{color:var(--gold)}
+.cover p.lead{margin-top:16px;max-width:560px;opacity:.92;font-size:1.02rem}
+.cover-meta{display:flex;flex-wrap:wrap;gap:26px;margin-top:38px;font-size:.82rem}
+.cover-meta div{display:flex;align-items:center;gap:9px}
+.cover-meta i{color:var(--gold)}
+
+/* ===== LAYOUT ===== */
+.layout{display:grid;grid-template-columns:262px 1fr;gap:34px;padding:38px 0 70px;align-items:start}
+nav.toc{position:sticky;top:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 20px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+nav.toc h4{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+nav.toc a{display:flex;gap:10px;align-items:baseline;color:var(--ink);text-decoration:none;font-size:.86rem;font-weight:600;padding:7px 10px;border-radius:8px;transition:.15s}
+nav.toc a i{color:var(--primary);font-size:.75rem;width:14px}
+nav.toc a:hover{background:var(--primary-soft);color:var(--primary)}
+main.content{min-width:0}
+/* ===== SECTIONS ===== */
+section.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:34px 36px;margin-bottom:26px;box-shadow:0 2px 10px rgba(0,0,0,.04);scroll-margin-top:20px}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+.sec-num{flex:none;width:44px;height:44px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.15rem}
+.sec-head h2{font-size:1.45rem;font-weight:800;color:var(--primary-dark)}
+.sec-sub{color:var(--muted);font-size:.92rem;margin-bottom:22px;max-width:640px}
+h3.sub{font-size:1.05rem;font-weight:800;color:var(--primary);margin:26px 0 10px;display:flex;align-items:center;gap:9px}
+h3.sub i{font-size:.95rem}
+p{margin-bottom:12px}
+ul.plain{margin:0 0 14px 20px}
+ul.plain li{margin-bottom:7px}
+b{color:var(--primary-dark)}
+
+/* ===== STEPS ===== */
+ol.steps{list-style:none;counter-reset:step;margin:14px 0 6px}
+ol.steps>li{counter-increment:step;position:relative;padding:0 0 20px 52px}
+ol.steps>li::before{content:counter(step);position:absolute;left:0;top:0;width:32px;height:32px;border-radius:50%;background:var(--primary-soft);color:var(--primary);border:2px solid var(--primary);font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+ol.steps>li::after{content:"";position:absolute;left:15.5px;top:36px;bottom:2px;width:2px;background:var(--border)}
+ol.steps>li:last-child::after{display:none}
+ol.steps>li b.t{display:block;font-weight:700;margin-bottom:3px}
+ol.steps>li .d{color:#414854;font-size:.93rem}
+ol.steps>li .d p{margin-bottom:6px}
+
+/* ===== CLICK PATH ===== */
+.path{display:inline-flex;flex-wrap:wrap;align-items:center;gap:7px;background:#f3f1ec;border:1px solid var(--border);border-radius:9px;padding:7px 13px;font-size:.82rem;font-weight:700;margin:6px 0 12px}
+.path .seg{color:var(--primary-dark)}
+.path i{color:var(--gold);font-size:.7rem}
+
+/* ===== UI BUTTON CHIPS ===== */
+.ui-btn{display:inline-block;background:var(--primary);color:#fff;border-radius:8px;padding:3px 12px;font-size:.8rem;font-weight:700;box-shadow:0 2px 0 var(--primary-dark);white-space:nowrap}
+.ui-btn.outline{background:#fff;color:var(--primary);border:1.5px solid var(--primary);box-shadow:none}
+.ui-btn.gold{background:var(--gold);color:#3d3000;box-shadow:0 2px 0 #a5851b}
+
+/* ===== CALLOUTS ===== */
+.callout{display:flex;gap:13px;border-radius:12px;padding:15px 17px;margin:16px 0;font-size:.9rem;border:1px solid}
+.callout i{margin-top:3px;font-size:1rem}
+.callout b{display:block;margin-bottom:2px}
+.callout.tip{background:var(--success-soft);border-color:#bfe6d4;color:#14532d}
+.callout.tip i,.callout.tip b{color:var(--success)}
+.callout.note{background:var(--blue-soft);border-color:#c4d8fb;color:#1e3a8a}
+.callout.note i,.callout.note b{color:var(--blue)}
+.callout.warn{background:var(--warn-soft);border-color:#f5d9a8;color:#7c3a03}
+.callout.warn i,.callout.warn b{color:var(--warn)}
+.callout.danger{background:var(--danger-soft);border-color:#f3c1ba;color:#7f1d1d}
+.callout.danger i,.callout.danger b{color:var(--danger)}
+
+/* ===== TABLES ===== */
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--border);border-radius:12px}
+table.g{width:100%;border-collapse:collapse;font-size:.87rem;min-width:520px}
+table.g th{background:var(--primary);color:#fff;text-align:left;padding:11px 14px;font-size:.78rem;letter-spacing:.6px;text-transform:uppercase}
+table.g td{padding:11px 14px;border-top:1px solid var(--border);vertical-align:top}
+table.g tr:nth-child(even) td{background:#faf8f5}
+table.g td b{color:var(--primary-dark)}
+
+/* ===== MISC COMPONENTS ===== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+.mini{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:#fbfaf8}
+.mini h4{font-size:.92rem;font-weight:800;color:var(--primary-dark);display:flex;gap:9px;align-items:center;margin-bottom:7px}
+.mini h4 i{color:var(--gold)}
+.mini p{font-size:.85rem;color:#414854;margin:0}
+.badge{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.badge.owner{background:var(--gold-soft);color:#7a5d00;border:1px solid #e7d28a}
+.badge.admin{background:var(--blue-soft);color:#1e40af;border:1px solid #b9d0fa}
+.badge.teacher{background:var(--success-soft);color:#14532d;border:1px solid #b3e0cb}
+.checklist{list-style:none;margin:12px 0}
+.checklist li{display:flex;gap:11px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:.92rem}
+.checklist li:last-child{border-bottom:none}
+.checklist li i{color:var(--success);margin-top:4px}
+.kbd{font-family:'Space Mono',monospace;font-size:.8rem;background:#f3f1ec;border:1px solid var(--border);border-bottom-width:2.5px;border-radius:6px;padding:1px 7px}
+.print-btn{position:fixed;right:22px;bottom:22px;background:var(--gold);color:#3d3000;border:none;border-radius:100px;padding:13px 22px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.22);z-index:50}
+.print-btn:hover{transform:translateY(-2px)}
+footer.foot{background:var(--primary-dark);color:#fff;padding:40px 0;text-align:center;font-size:.88rem}
+footer.foot .flinks{display:flex;justify-content:center;flex-wrap:wrap;gap:26px;margin-bottom:16px}
+footer.foot a{color:var(--gold);text-decoration:none;font-weight:700}
+footer.foot small{opacity:.65;display:block;margin-top:10px}
+
+/* ===== RESPONSIVE & PRINT ===== */
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{position:static}section.card{padding:26px 20px}.grid2{grid-template-columns:1fr}}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  .print-btn,nav.toc{display:none}
+  .layout{display:block;padding:0}
+  .cover{padding:40px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section.card{box-shadow:none;border:none;border-top:2px solid var(--primary);border-radius:0;padding:18px 0}
+  h3.sub{page-break-after:avoid}
+  .callout,table.g,ol.steps>li,.mini,.table-wrap{page-break-inside:avoid}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print Guide</button>
+
+<!-- ================= COVER ================= -->
+<header class="cover">
+  <div class="wrap">
+    <div class="brandline">
+      <div class="logo"><i class="fas fa-graduation-cap"></i></div>
+      <div><b>Prince Alex Digital</b><small>School Management System</small></div>
+    </div>
+    <span class="doc-type">Official User Guide</span>
+    <h1>Step-by-Step Guide for <span>Schools</span></h1>
+    <p class="lead">Everything your school office needs to run student records, attendance, fees, exams and parent communication — one clear step at a time.</p>
+    <div class="cover-meta">
+      <div><i class="fas fa-code-branch"></i> Version 1.0 — August 2026</div>
+      <div><i class="fas fa-phone"></i> 0717 384 875</div>
+      <div><i class="fas fa-envelope"></i> princealexdigital@gmail.com</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="layout">
+
+<!-- ================= TABLE OF CONTENTS ================= -->
+<nav class="toc">
+  <h4><i class="fas fa-list-ul"></i> Contents</h4>
+  <a href="#s1"><i class="fas fa-angle-right"></i> 1. About This Guide</a>
+  <a href="#s2"><i class="fas fa-angle-right"></i> 2. Getting Started</a>
+  <a href="#s3"><i class="fas fa-angle-right"></i> 3. First-Time Setup</a>
+  <a href="#s4"><i class="fas fa-angle-right"></i> 4. Managing Students</a>
+  <a href="#s5"><i class="fas fa-angle-right"></i> 5. Daily Attendance</a>
+  <a href="#s6"><i class="fas fa-angle-right"></i> 6. Fees &amp; Payments</a>
+  <a href="#s7"><i class="fas fa-angle-right"></i> 7. Exams &amp; Reports</a>
+  <a href="#s8"><i class="fas fa-angle-right"></i> 8. Announcements</a>
+  <a href="#s9"><i class="fas fa-angle-right"></i> 9. Timetable</a>
+  <a href="#s10"><i class="fas fa-angle-right"></i> 10. Other Modules</a>
+  <a href="#s11"><i class="fas fa-angle-right"></i> 11. Users &amp; Permissions</a>
+  <a href="#s12"><i class="fas fa-angle-right"></i> 12. Settings Reference</a>
+  <a href="#s13"><i class="fas fa-angle-right"></i> 13. Best Practices</a>
+  <a href="#s14"><i class="fas fa-angle-right"></i> 14. FAQ &amp; Troubleshooting</a>
+  <a href="#s15"><i class="fas fa-angle-right"></i> 15. Quick Routine Card</a>
+</nav>
+
+<main class="content">
+<!-- ============ SECTION 1 ============ -->
+<section class="card" id="s1">
+  <div class="sec-head"><div class="sec-num">1</div><h2>About This Guide</h2></div>
+  <p class="sec-sub">Who this guide is for, what you need, and how to read the steps.</p>
+
+  <p>Welcome to the <b>Prince Alex Digital School Management System</b> — a secure, cloud-based platform that lets your school manage <b>students, teachers, classes, attendance, fees, exams, results and parent communication</b> from one dashboard. This guide is written for the people who will use the system every day: school owners, head teachers, secretaries, bursars and class teachers.</p>
+
+  <h3 class="sub"><i class="fas fa-box-open"></i> What You Need Before You Begin</h3>
+  <ul class="plain">
+    <li><b>A device</b> — computer, tablet or smartphone with a modern browser (Chrome, Edge, Firefox or Safari).</li>
+    <li><b>Internet connection</b> — the system runs in the cloud, so your data is safe even if the device changes.</li>
+    <li><b>Login credentials</b> — your school's email address and password, issued during onboarding by Prince Alex Digital.</li>
+    <li><b>Your school details</b> — logo, motto, address, phone numbers and fee structures, ready for first-time setup.</li>
+  </ul>
+
+  <h3 class="sub"><i class="fas fa-book-open"></i> How to Read the Steps</h3>
+  <p>Throughout this guide you will see <b>click paths</b> showing exactly where to go, like this:</p>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Students</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">+ Add Student</span></span></span>
+  <p>Buttons appear as chips <span class="ui-btn">like this</span>, and coloured notes highlight important advice:</p>
+  <div class="callout tip"><i class="fas fa-lightbulb"></i><div><b>TIP</b>Green boxes are shortcuts and good habits.</div></div>
+  <div class="callout warn"><i class="fas fa-triangle-exclamation"></i><div><b>IMPORTANT</b>Amber boxes warn about things that can cause problems.</div></div>
+  <div class="callout note"><i class="fas fa-circle-info"></i><div><b>NOTE</b>Blue boxes give extra background information.</div></div>
+</section>
+<!-- ============ SECTION 2 ============ -->
+<section class="card" id="s2">
+  <div class="sec-head"><div class="sec-num">2</div><h2>Getting Started</h2></div>
+  <p class="sec-sub">Logging in, finding your way around the dashboard, and logging out safely.</p>
+
+  <h3 class="sub"><i class="fas fa-right-to-bracket"></i> 2.1 Logging In</h3>
+  <ol class="steps">
+    <li><b class="t">Open the system</b><div class="d"><p>Open your browser and go to your school's system address (provided during onboarding). You will land on the welcome page.</p></div></li>
+    <li><b class="t">Open the login form</b><div class="d"><p>Click the <span class="ui-btn gold"><i class="fas fa-sign-in-alt"></i> Login</span> button at the top of the page (or the graduation-cap logo).</p></div></li>
+    <li><b class="t">Enter your credentials</b><div class="d"><p>Type the <b>email address</b> and <b>password</b> issued to your school, then click <span class="ui-btn"><i class="fas fa-sign-in-alt"></i> Login</span>.</p></div></li>
+    <li><b class="t">Land on your dashboard</b><div class="d"><p>You are taken straight to the <b>Dashboard</b> — your school's private workspace.</p></div></li>
+  </ol>
+
+  <div class="callout tip"><i class="fas fa-key"></i><div><b>Forgot your password?</b>On the login screen, open the reset-password link and follow the instructions sent to your email. Still stuck? Call or WhatsApp <b>0717 384 875</b>.</div></div>
+
+  <h3 class="sub"><i class="fas fa-gauge-high"></i> 2.2 Understanding the Dashboard</h3>
+  <p>The dashboard is your school at a glance. It updates automatically as staff work:</p>
+  <div class="table-wrap">
+    <table class="g">
+      <tr><th>Card</th><th>What It Shows</th></tr>
+      <tr><td><b>Total Students</b></td><td>Number of students on roll.</td></tr>
+      <tr><td><b>Total Teachers</b></td><td>Number of teachers in the faculty list.</td></tr>
+      <tr><td><b>Total Collected</b></td><td>All fee payments received (KES).</td></tr>
+      <tr><td><b>Total Expected</b></td><td>Fees due according to your fee structures.</td></tr>
+      <tr><td><b>Outstanding Balance</b></td><td>What is still owed (Expected − Collected).</td></tr>
+      <tr><td><b>Classes</b></td><td>Number of classes/grades created.</td></tr>
+      <tr><td><b>Recent Announcements</b></td><td>Notices posted in the school and by Prince Alex Digital.</td></tr>
+      <tr><td><b>Attendance Summary</b></td><td>Today's Present / Late / Absent / Excused breakdown.</td></tr>
+    </table>
+  </div>
+
+  <h3 class="sub"><i class="fas fa-compass"></i> 2.3 Navigating the Sidebar</h3>
+  <p>All modules live in the <b>left sidebar</b>. Click any item to open it — the page title at the top changes with you. On a phone, tap the bars icon <i class="fas fa-bars"></i> to slide the menu open. The menu is grouped:</p>
+  <ul class="plain">
+    <li><b>Core:</b> Dashboard, Students, Teachers, Classes &amp; Subjects, Timetable, Attendance</li>
+    <li><b>Finance:</b> Fee Structure, Fees Management, Fee Summary</li>
+    <li><b>Academics:</b> Exams &amp; Results, Announcements, Library, Transport, Hostel, Inventory</li>
+    <li><b>School Operations:</b> Academic Years &amp; Terms, Streams, Subjects, Teacher Assignments</li>
+    <li><b>Administration:</b> School Admins, Roles &amp; Permissions, Activity Logs, Settings</li>
+  </ul>
+  <div class="callout note"><i class="fas fa-user-shield"></i><div><b>Why can't I see every menu item?</b>Menus depend on the permissions granted to your account (see <a href="#s11"><b>Section 11</b></a>). Teachers only see the classes assigned to them.</div></div>
+
+  <h3 class="sub"><i class="fas fa-right-from-bracket"></i> 2.4 Logging Out</h3>
+  <ol class="steps">
+    <li><b class="t">Open the account menu</b><div class="d"><p>Click your profile avatar at the top-right of the screen.</p></div></li>
+    <li><b class="t">Click Logout</b><div class="d"><p>Always log out when leaving a shared computer — especially in a busy school office.</p></div></li>
+  </ol>
+</section>
+<!-- ============ SECTION 3 ============ -->
+<section class="card" id="s3">
+  <div class="sec-head"><div class="sec-num">3</div><h2>First-Time Setup</h2></div>
+  <p class="sec-sub">Do these nine things once, in order, and the rest of the system will run itself. Only the <span class="badge owner">School Owner</span> account can complete every step.</p>
+
+  <h3 class="sub"><i class="fas fa-cog"></i> Step 1 — Configure Your School Settings</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Settings</span></span>
+  <ol class="steps">
+    <li><b class="t">Fill in the School Profile</b><div class="d"><p>Upload your school logo, then enter the school name, motto, address, phone contacts, current term and academic year, and the Principal / Head Teacher's name. These details appear on report cards and fee statements.</p></div></li>
+    <li><b class="t">Choose how admission numbers are created</b><div class="d"><p>Under <b>Admission Number Configuration</b>, pick <b>Automatically generated</b> (e.g. <span class="kbd">ABC/2026/0001</span> using your own prefix) or <b>Entered manually</b>. Numbers are kept unique within your school either way.</p></div></li>
+    <li><b class="t">Set up marks &amp; grades</b><div class="d"><p>Tick <b>Use letter grades (A–E)</b> if you want letter grades on results, then set the minimum mark for each grade (e.g. A from 80). Leave it unticked if your school uses marks only.</p></div></li>
+    <li><b class="t">Save</b><div class="d"><p>Click <span class="ui-btn"><i class="fas fa-save"></i> Save Settings</span>.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-calendar-plus"></i> Step 2 — Create the Academic Year &amp; Terms</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Academic Years &amp; Terms</span></span>
+  <ol class="steps">
+    <li><b class="t">Add the academic year</b><div class="d"><p>Click <span class="ui-btn">+ Add Academic Year</span>, enter the year with its start and end dates.</p></div></li>
+    <li><b class="t">Add the terms</b><div class="d"><p>Click <span class="ui-btn">+ Add Term</span> for each term (e.g. Term 1, Term 2, Term 3) with start and end dates.</p></div></li>
+    <li><b class="t">Mark the active year and term</b><div class="d"><p>Use the <b>Active</b> toggle on the row of the current year and term. Attendance, fees and exams all follow the active term.</p></div></li>
+  </ol>
+  <div class="callout warn"><i class="fas fa-triangle-exclamation"></i><div><b>Only one active at a time</b>Keep exactly one academic year active and one term active per year. When a new term begins, come back here and switch the active term before taking attendance or fees.</div></div>
+
+  <h3 class="sub"><i class="fas fa-book"></i> Step 3 — Add Subjects (Learning Areas)</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Subjects</span></span>
+  <ol class="steps">
+    <li><b class="t">Open Subjects and click + Add Subject</b><div class="d"><p>Enter the subject name and code.</p></div></li>
+    <li><b class="t">Select applicable grades</b><div class="d"><p>Choose which classes/grades the subject is taught in. Repeat for every learning area in your curriculum (CBC/CBE learning areas are fully supported).</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-code-branch"></i> Step 4 — Create Streams (Optional)</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Streams</span></span>
+  <ol class="steps">
+    <li><b class="t">Click + Add Stream</b><div class="d"><p>If a grade is large enough to split into groups (e.g. Grade 7 → East / West / North), create each stream, pick its parent grade/class, assign a class teacher and set the capacity.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-school"></i> Step 5 — Create Classes &amp; Map Subject Teachers</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Classes &amp; Subjects</span></span>
+  <ol class="steps">
+    <li><b class="t">Click + Create Class</b><div class="d"><p>Name the class (e.g. Grade 7), choose the class teacher, and map each subject to the teacher who will teach and assess it. The mapping drives exam entry and timetables later.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-chalkboard-user"></i> Step 6 — Add Your Teachers</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Teachers</span></span>
+  <ol class="steps">
+    <li><b class="t">Click + Add Teacher</b><div class="d"><p>Enter the teacher's ID, full name, subjects taught and phone number. The table shows each teacher's current teaching workload automatically.</p></div></li>
+    <li><b class="t">Edit or remove as staff change</b><div class="d"><p>Use the actions on each row of the Faculty Management table to keep records up to date.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-user-check"></i> Step 7 — Assign Teachers to Classes</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Teacher Assignments</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">+ Assign Teacher</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Pick the teacher, grade, stream and subject</b><div class="d"><p>Each assignment links one teacher to one subject in one class/stream.</p></div></li>
+    <li><b class="t">Save</b><div class="d"><p>The assignment list fills up — this is what controls which classes a teacher can see and mark in the system.</p></div></li>
+  </ol>
+  <div class="callout note"><i class="fas fa-eye"></i><div><b>Limited visibility by design</b>A teacher sees only the classes, streams and subjects they are assigned to — unless you grant them wider access in Roles &amp; Permissions (Section 11).</div></div>
+
+  <h3 class="sub"><i class="fas fa-file-invoice"></i> Step 8 — Set Fee Structures</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Fee Structure</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">+ Set Structure</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Choose class, term and year</b><div class="d"><p>Every fee structure is tied to a specific class in a specific term/year.</p></div></li>
+    <li><b class="t">Enter tuition and other fees</b><div class="d"><p>Type the <b>Tuition</b> amount plus any <b>Other Fees</b> (lunch, activity, transport etc.). The total is calculated for you.</p></div></li>
+    <li><b class="t">Repeat per class per term</b><div class="d"><p>Set a structure for every class before the term starts so expected fees are always correct.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-users-gear"></i> Step 9 — Add School Admins &amp; Permissions</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">School Admins</span></span>
+  <ol class="steps">
+    <li><b class="t">Click + Add School Admin</b><div class="d"><p>Create an account for each staff member who needs access (secretary, bursar, deputy…). They log in with their own email and password.</p></div></li>
+    <li><b class="t">Open Roles &amp; Permissions</b><div class="d"><p>Select an administrator and tick exactly the modules they may use. The School Owner always keeps full access.</p></div></li>
+  </ol>
+  <div class="callout tip"><i class="fas fa-clipboard-check"></i><div><b>You're ready!</b>Once these nine steps are done, your day-to-day work is just Sections 4–8 below: students, attendance, fees, exams and communication.</div></div>
+</section>
+<!-- ============ SECTION 4 ============ -->
+<section class="card" id="s4">
+  <div class="sec-head"><div class="sec-num">4</div><h2>Managing Students</h2></div>
+  <p class="sec-sub">Admit new students, import last term's register in bulk, keep records current, and export your data any time.</p>
+
+  <h3 class="sub"><i class="fas fa-user-plus"></i> 4.1 Admitting a New Student</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Students</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">+ Add Student</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Open the admission form</b><div class="d"><p>In the Student Directory, click <span class="ui-btn">+ Add Student</span>.</p></div></li>
+    <li><b class="t">Capture the student's details</b><div class="d"><p>Upload a passport photo, then enter full name, gender, grade/class and stream, academic year, and the guardian's name and phone contact.</p></div></li>
+    <li><b class="t">Check the admission number</b><div class="d"><p>If your school uses auto-generation it is filled for you; in manual mode the <b>Auto-fill</b> button suggests the next free number. Numbers are always unique.</p></div></li>
+    <li><b class="t">Save the record</b><div class="d"><p>The student now appears in the directory with their photo, status and guardian contact.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-file-import"></i> 4.2 Importing Students in Bulk</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Students</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline"><i class="fas fa-download"></i> Download Template</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Download the official template</b><div class="d"><p>Click <b>Download Template</b> to get the import spreadsheet with the correct column headings.</p></div></li>
+    <li><b class="t">Fill in your students</b><div class="d"><p>Add one row per student — names, gender, class, stream, guardian contacts. Do not change the column headings.</p></div></li>
+    <li><b class="t">Upload and confirm</b><div class="d"><p>Click <b>Import</b>, attach your file, review the preview, then click <span class="ui-btn">Confirm Import</span>. All students are added at once.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-magnifying-glass"></i> 4.3 Finding &amp; Filtering Students</h3>
+  <p>The Student Directory search bar accepts a <b>name or admission number</b>. Combine it with the dropdowns to filter by <b>Grade/Class</b>, <b>Stream</b>, <b>Status</b> (Active, Inactive, Transferred, Graduated, Left School, Archived) and <b>Academic Year</b>. Click <span class="ui-btn outline">Reset</span> to clear all filters.</p>
+
+  <h3 class="sub"><i class="fas fa-user-pen"></i> 4.4 Updating a Student Through Their Profile</h3>
+  <ol class="steps">
+    <li><b class="t">Open the student</b><div class="d"><p>Click the student's row in the directory to open their full profile.</p></div></li>
+    <li><b class="t">Use the profile actions</b><div class="d"><p><b>Edit</b> updates personal details · <b>Promote</b> moves them to the next class at year end · <b>Transfer</b> records a move between classes/streams · <b>Archive</b> safely retires a record without deleting history.</p></div></li>
+  </ol>
+  <div class="callout tip"><i class="fas fa-file-csv"></i><div><b>Your data is yours</b>Use <span class="ui-btn outline"><i class="fas fa-file-csv"></i> Export CSV</span> on the Students page to download the whole directory for backups or board reports. The same export buttons exist on Attendance, Fee Summary, Timetable and Activity Logs.</div></div>
+</section>
+<!-- ============ SECTION 5 ============ -->
+<section class="card" id="s5">
+  <div class="sec-head"><div class="sec-num">5</div><h2>Daily Attendance</h2></div>
+  <p class="sec-sub">Marking a class takes under a minute — and re-marking the same day simply updates the record instead of duplicating it.</p>
+
+  <h3 class="sub"><i class="fas fa-clipboard-check"></i> 5.1 Marking Today's Attendance</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Attendance</span></span>
+  <ol class="steps">
+    <li><b class="t">Select the class and date</b><div class="d"><p>Choose the <b>class</b>, confirm the <b>date</b> (defaults to today), then click <span class="ui-btn"><i class="fas fa-clipboard-check"></i> Mark Attendance</span>.</p></div></li>
+    <li><b class="t">Mark each student</b><div class="d"><p>Set every student to <b>Present</b>, <b>Late</b>, <b>Absent</b> or <b>Excused</b>.</p></div></li>
+    <li><b class="t">Use quick actions to go faster</b><div class="d"><p>Tap <span class="ui-btn outline">All Present</span> to mark everyone present in one click, then adjust only the exceptions. <span class="ui-btn outline">Clear</span> resets the form.</p></div></li>
+    <li><b class="t">Save</b><div class="d"><p>Click <span class="ui-btn"><i class="fas fa-save"></i> Save Attendance</span>. A live summary shows the Present / Late / Absent / Excused counts as you work.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-clock-rotate-left"></i> 5.2 Reviewing &amp; Correcting History</h3>
+  <p>The <b>Attendance Records &amp; History</b> table lists every marked day per class. Click any record to reopen and correct that day — saving overwrites the old marks cleanly, never creating duplicates.</p>
+  <div class="callout tip"><i class="fas fa-file-csv"></i><div><b>End-of-term registers</b>Click <span class="ui-btn outline"><i class="fas fa-file-csv"></i> Export CSV</span> on the history table for a complete register — no more manual mark books.</div></div>
+  <div class="callout warn"><i class="fas fa-triangle-exclamation"></i><div><b>Records in the wrong term?</b>Attendance is stored under the active term. If something looks off, check the active term in <b>Academic Years &amp; Terms</b> first.</div></div>
+</section>
+
+<!-- ============ SECTION 6 ============ -->
+<section class="card" id="s6">
+  <div class="sec-head"><div class="sec-num">6</div><h2>Fees &amp; Payments</h2></div>
+  <p class="sec-sub">Record every payment once and the balances, statements and collection reports build themselves.</p>
+
+  <h3 class="sub"><i class="fas fa-cash-register"></i> 6.1 Recording a Fee Payment</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Fees Management</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">Record Payment</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Open the payment form</b><div class="d"><p>In Fees Management, click <span class="ui-btn">Record Payment</span>.</p></div></li>
+    <li><b class="t">Select the student</b><div class="d"><p>Search by name or admission number and pick the student from the results.</p></div></li>
+    <li><b class="t">Enter the payment details</b><div class="d"><p>Choose the <b>term and year</b> the payment is for, type the <b>amount paid (KES)</b>, select the <b>method</b> (cash, bank, M-Pesa…), and add the date and any note/receipt number.</p></div></li>
+    <li><b class="t">Save</b><div class="d"><p>The payment appears instantly in the Fee Records table with its expected / paid / balance figures, and updates the dashboard totals.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-file-invoice-dollar"></i> 6.2 Checking a Balance &amp; Printing a Statement</h3>
+  <span class="path"><span class="seg">Fees Management</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline"><i class="fas fa-search"></i> Check Student Balance</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Look up the student</b><div class="d"><p>Click <b>Check Student Balance</b>, search and select the student, then pick the academic term and year.</p></div></li>
+    <li><b class="t">View the fee statement</b><div class="d"><p>Click <span class="ui-btn">View Fee Statement</span> to open a full statement: expected fees, every payment made, and the running balance.</p></div></li>
+    <li><b class="t">Print or share it</b><div class="d"><p>Click <span class="ui-btn"><i class="fas fa-print"></i> Print Statement</span> for a parent-ready copy on your school's letterhead details.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-chart-pie"></i> 6.3 Collection Reports for Management</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Fee Summary</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline">Load Summary</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Filter by class, term and year</b><div class="d"><p>Pick your filters and load the summary.</p></div></li>
+    <li><b class="t">Read the numbers</b><div class="d"><p>Each row shows <b>Expected</b> vs <b>Collected</b> vs <b>Outstanding</b> plus a <b>Collection %</b> per class.</p></div></li>
+    <li><b class="t">Export for meetings</b><div class="d"><p>Click <span class="ui-btn outline"><i class="fas fa-file-csv"></i> Export CSV</span> to take the report to the board or owner.</p></div></li>
+  </ol>
+  <div class="callout warn"><i class="fas fa-triangle-exclamation"></i><div><b>No structure, no balance</b>If a student's balance shows zero unexpectedly, check that the <b>Fee Structure</b> exists for that class, term and year (Section 3, Step 8).</div></div>
+</section>
+<!-- ============ SECTION 7 ============ -->
+<section class="card" id="s7">
+  <div class="sec-head"><div class="sec-num">7</div><h2>Exams &amp; Report Cards</h2></div>
+  <p class="sec-sub">Enter subject marks, review results per student, and send beautifully personalised term newsletters to every parent.</p>
+
+  <h3 class="sub"><i class="fas fa-pen-to-square"></i> 7.1 Entering Exam Marks</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Exams &amp; Results</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">+ Add Exam Record</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Create the exam entry</b><div class="d"><p>Name the exam (e.g. Opener, Mid-Term, End-Term), pick the class/stream, student and date.</p></div></li>
+    <li><b class="t">Type the marks per subject</b><div class="d"><p>A field is provided for each subject that student takes. Totals, averages and letter grades calculate automatically using your Settings ranges.</p></div></li>
+    <li><b class="t">Save the record</b><div class="d"><p>Results are grouped by <b>Exam + Student</b>, so each student shows as a single row with all their subject marks inline.</p></div></li>
+    <li><b class="t">Find results quickly later</b><div class="d"><p>Use the search box plus the <b>All Exams</b> / <b>All Classes</b> filters above the results table.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-layer-group"></i> 7.2 Generating Bulk Term Newsletters (Report Cards)</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Exams &amp; Results</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline"><i class="fas fa-layer-group"></i> Bulk Term Reports</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Open the generator</b><div class="d"><p>Click <b>Bulk Term Reports</b>.</p></div></li>
+    <li><b class="t">Fill in the term details</b><div class="d"><p>Select the term and year, then enter the term opening date, closing date, next-term opening date, a short <b>Term Highlights</b> summary, the Principal's message and the principal's name for the signature.</p></div></li>
+    <li><b class="t">Choose who receives it</b><div class="d"><p>Pick the <b>Class Filter</b> (all classes or one) and the <b>Performance Filter</b>: All Students, Top Performers, or Needs Improvement.</p></div></li>
+    <li><b class="t">Generate in your format</b><div class="d"><p><span class="ui-btn"><i class="fas fa-file-pdf"></i> Generate Term Newsletter (PDF)</span> for printable report cards · <span class="ui-btn outline"><i class="fab fa-whatsapp"></i> WhatsApp Messages</span> for copy-ready parent texts · or the email option.</p></div></li>
+  </ol>
+  <div class="callout tip"><i class="fas fa-wand-magic-sparkles"></i><div><b>What parents receive</b>Every newsletter is fully personalised: the student's progress, subject marks, attendance, fee status, term highlights and the principal's message — branded with your school's details from Settings.</div></div>
+  <div class="callout danger"><i class="fas fa-circle-exclamation"></i><div><b>Delete carefully</b>Deleting an exam group removes all its marks and cannot be undone — export a CSV backup first if unsure.</div></div>
+</section>
+<!-- ============ SECTION 8 ============ -->
+<section class="card" id="s8">
+  <div class="sec-head"><div class="sec-num">8</div><h2>Announcements &amp; Parent Communication</h2></div>
+  <p class="sec-sub">Post notices for staff, and push messages straight to parents on WhatsApp.</p>
+
+  <h3 class="sub"><i class="fas fa-bullhorn"></i> 8.1 Posting an Internal Notice</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Announcements</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn">Post Notice</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Write the notice</b><div class="d"><p>Give it a clear title and message, then save. Notices appear on every user's dashboard under Recent Announcements.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fab fa-whatsapp"></i> 8.2 Sending Messages to Parents</h3>
+  <span class="path"><span class="seg">Announcements</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline"><i class="fab fa-whatsapp"></i> Send to Parents</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Compose the broadcast</b><div class="d"><p>Click <b>Send to Parents</b> and write your message — fee reminders, meeting notices, closure dates, etc.</p></div></li>
+    <li><b class="t">Generate the parent links</b><div class="d"><p>The system builds a personalised WhatsApp link per guardian using the contacts saved on each student. Copy them out and send — no SMS gateway needed.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-users"></i> 8.3 Bulk Personalised Newsletters</h3>
+  <span class="path"><span class="seg">Announcements</span><i class="fas fa-chevron-right"></i><span class="seg"><span class="ui-btn outline"><i class="fas fa-users"></i> Bulk Personalized Newsletters</span></span></span>
+  <ol class="steps">
+    <li><b class="t">Pick the term and year, then generate</b><div class="d"><p>Closing-term newsletters for every student at once — the same rich format as Section 7.2.</p></div></li>
+  </ol>
+</section>
+
+<!-- ============ SECTION 9 ============ -->
+<section class="card" id="s9">
+  <div class="sec-head"><div class="sec-num">9</div><h2>Timetable</h2></div>
+  <p class="sec-sub">Build each class's weekly timetable once — everyone sees the same plan.</p>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Timetable</span></span>
+  <ol class="steps">
+    <li><b class="t">Select the class</b><div class="d"><p>Choose the class whose timetable you are building.</p></div></li>
+    <li><b class="t">Fill the slots</b><div class="d"><p>Place subjects into day/time slots. Because subjects were mapped to teachers in Classes &amp; Subjects, the timetable stays consistent with who actually teaches what.</p></div></li>
+    <li><b class="t">Save — or start over</b><div class="d"><p>Click <span class="ui-btn"><i class="fas fa-save"></i> Save Timetable</span>, use <span class="ui-btn outline">Clear Slots</span> to wipe the grid, or <span class="ui-btn outline"><i class="fas fa-file-csv"></i> Export CSV</span> to print wall copies.</p></div></li>
+  </ol>
+</section>
+<!-- ============ SECTION 10 ============ -->
+<section class="card" id="s10">
+  <div class="sec-head"><div class="sec-num">10</div><h2>Other Modules</h2></div>
+  <p class="sec-sub">Four more toolkits that come standard with your system.</p>
+  <div class="grid2">
+    <div class="mini">
+      <h4><i class="fas fa-book"></i> Library</h4>
+      <p><b>Add Book</b> builds your catalogue (title, author, category, copies, shelf). <b>Issue Book</b> lends a copy to a student with a due date; the Borrowing Ledger tracks what is out and overdue. Copies available decrease and restore automatically.</p>
+    </div>
+    <div class="mini">
+      <h4><i class="fas fa-bus"></i> Transport</h4>
+      <p><b>Add Vehicle</b> registers each bus with its route, driver and capacity. <b>Assign Student</b> places learners on routes; the table shows how full each vehicle is at a glance.</p>
+    </div>
+    <div class="mini">
+      <h4><i class="fas fa-bed"></i> Hostel</h4>
+      <p>Register dormitories/rooms and allocate boarding students to beds so occupancy is always known.</p>
+    </div>
+    <div class="mini">
+      <h4><i class="fas fa-boxes"></i> Inventory / Store</h4>
+      <p><b>+ Add Item</b> stocks the store (category, unit, minimum level). <b>Stock In / Out</b> records every movement with a note; items falling below their minimum are flagged so you reorder in time. A movements log keeps the full history.</p>
+    </div>
+  </div>
+  <div class="callout note"><i class="fas fa-circle-info"></i><div><b>Use only what you need</b>These modules are independent — a day school can ignore Hostel and Transport entirely without affecting anything else.</div></div>
+</section>
+
+<!-- ============ SECTION 11 ============ -->
+<section class="card" id="s11">
+  <div class="sec-head"><div class="sec-num">11</div><h2>Users &amp; Permissions</h2></div>
+  <p class="sec-sub">Give every staff member exactly the access they need — nothing more, nothing less.</p>
+
+  <h3 class="sub"><i class="fas fa-id-badge"></i> The Three Kinds of Users</h3>
+  <ul class="plain">
+    <li><span class="badge owner">School Owner</span> — full control of your school: settings, money, users and permissions. There is one owner account per school.</li>
+    <li><span class="badge admin">School Admin</span> — created by the owner for office staff. Access is limited to the modules you tick.</li>
+    <li><span class="badge teacher">Teacher</span> — sees only the classes, streams and subjects assigned via Teacher Assignments.</li>
+  </ul>
+
+  <h3 class="sub"><i class="fas fa-key"></i> Granting Module Permissions to an Admin</h3>
+  <span class="path"><span class="seg">Sidebar</span><i class="fas fa-chevron-right"></i><span class="seg">Roles &amp; Permissions</span></span>
+  <ol class="steps">
+    <li><b class="t">Select the administrator</b><div class="d"><p>Choose them from the dropdown at the top of the page.</p></div></li>
+    <li><b class="t">Tick their modules</b><div class="d"><p>The permission editor lists every module — e.g. give a bursar Fees Management + Fee Summary but not Exams.</p></div></li>
+    <li><b class="t">Save</b><div class="d"><p>Their sidebar updates the next time they open the system.</p></div></li>
+  </ol>
+
+  <h3 class="sub"><i class="fas fa-user-lock"></i> Managing &amp; Auditing Accounts</h3>
+  <p>In <b>School Admins</b> you can see each admin's role, account status, creation date and last login — and suspend or remove accounts the same day staff leave.</p>
+  <p>In <b>Activity Logs</b>, every critical operation is recorded (who did what, when, on which record). Click <span class="ui-btn outline"><i class="fas fa-file-csv"></i> Export CSV</span> when you need a formal audit trail.</p>
+  <div class="callout tip"><i class="fas fa-shield-halved"></i><div><b>Security habit</b>Audit accounts once a term. Fewer active accounts with narrow permissions = fewer accidents.</div></div>
+</section>
+
+<!-- ============ SECTION 12 ============ -->
+<section class="card" id="s12">
+  <div class="sec-head"><div class="sec-num">12</div><h2>Settings Reference</h2></div>
+  <p class="sec-sub">A quick map of everything configurable under Settings.</p>
+  <div class="table-wrap">
+    <table class="g">
+      <tr><th>Setting</th><th>What It Controls</th></tr>
+      <tr><td><b>School Profile</b></td><td>Logo, name, motto, address, contacts, principal's name — printed on statements, report cards and newsletters.</td></tr>
+      <tr><td><b>Current Term &amp; Year</b></td><td>Default term/year used across attendance, fees and exams.</td></tr>
+      <tr><td><b>Admission Numbers</b></td><td>Auto mode (<span class="kbd">PREFIX/YEAR/0001</span>) or manual entry; always unique within your school.</td></tr>
+      <tr><td><b>Marks &amp; Grades</b></td><td>Letter grades A–E on/off, plus the minimum mark per grade. Off = marks only everywhere.</td></tr>
+      <tr><td><b>Academic Years &amp; Terms</b></td><td>Your calendar — one active year and term at a time.</td></tr>
+      <tr><td><b>Streams / Subjects / Assignments</b></td><td>The academic structure that powers classes, exams and teacher visibility.</td></tr>
+    </table>
+  </div>
+  <div class="callout warn"><i class="fas fa-triangle-exclamation"></i><div><b>Changing grading mid-term</b>If you switch letter grades on/off or change ranges, previously saved marks keep their numbers but displays may mix formats within the same term. Best changed at term boundaries.</div></div>
+</section>
+<!-- ============ SECTION 13 ============ -->
+<section class="card" id="s13">
+  <div class="sec-head"><div class="sec-num">13</div><h2>Best Practices</h2></div>
+  <p class="sec-sub">Habits that keep your school's data clean all year.</p>
+  <ul class="checklist">
+    <li><i class="fas fa-circle-check"></i><span><b>Switch the active term on day one</b> of every new term before marking attendance or fees.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Set fee structures before opening day</b>, so expected balances are right from the first payment.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Mark attendance daily by 9 a.m.</b> — absentees can be followed up while it still matters.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Record payments the same day</b> they are received; statements are then always accurate.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Keep guardian phone numbers updated</b> — WhatsApp broadcasts only reach numbers saved on the student's record.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Export CSVs monthly</b> (Students, Fees, Attendance) as an offline backup for your records.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Promote students once, at year end</b>, using each student profile's Promote action.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>Archive rather than delete</b> student records, and remove leavers' staff accounts immediately.</span></li>
+    <li><i class="fas fa-circle-check"></i><span><b>One person per account</b> — never share the owner password; give staff their own admin accounts.</span></li>
+  </ul>
+</section>
+
+<!-- ============ SECTION 14 ============ -->
+<section class="card" id="s14">
+  <div class="sec-head"><div class="sec-num">14</div><h2>FAQ &amp; Troubleshooting</h2></div>
+  <p class="sec-sub">Fast answers to the questions we hear most.</p>
+  <div class="table-wrap">
+    <table class="g">
+      <tr><th style="width:42%">Situation</th><th>What To Do</th></tr>
+      <tr><td><b>I forgot my password</b></td><td>Use the reset link on the login screen and follow the email instructions. If it doesn't arrive, check spam, ask the School Owner, or call us.</td></tr>
+      <tr><td><b>A teacher can't see their class</b></td><td>Check <b>Teacher Assignments</b> — teachers see only assigned grades/streams/subjects. Add the missing assignment.</td></tr>
+      <tr><td><b>A menu is missing for an admin</b></td><td>An owner needs to tick that module in <b>Roles &amp; Permissions</b>.</td></tr>
+      <tr><td><b>Balances show zero / wrong expected fees</b></td><td>The <b>Fee Structure</b> for that class-term-year is missing or wrong. Fix it under Fee Structure.</td></tr>
+      <tr><td><b>Attendance saved into the wrong term</b></td><td>The active term had been switched late. Correct the active term, then re-mark the affected days.</td></tr>
+      <tr><td><b>Duplicate admission number error</b></td><td>The number already exists in your school. Search the directory first; auto mode prevents this entirely.</td></tr>
+      <tr><td><b>Bulk import failed</b></td><td>Column headings were changed or a required field is empty. Re-download a fresh template and compare.</td></tr>
+      <tr><td><b>Wrong payment recorded</b></td><td>Edit or reverse it from the Fee Records table so records stay honest — don't ignore it.</td></tr>
+      <tr><td><b>WhatsApp links not generated for some parents</b></td><td>Those guardians have no phone number saved. Edit the student profile and add the contact.</td></tr>
+      <tr><td><b>System feels slow / won't load</b></td><td>Refresh the page (F5), check your internet, or try another browser. Your data is safe in the cloud meanwhile.</td></tr>
+      <tr><td><b>We lost a device with access</b></td><td>Log that account out / change its password from School Admins, then re-secure the device.</td></tr>
+    </table>
+  </div>
+</section>
+<!-- ============ SECTION 15 ============ -->
+<section class="card" id="s15">
+  <div class="sec-head"><div class="sec-num">15</div><h2>Quick Routine Card</h2></div>
+  <p class="sec-sub">Pin this page next to the office computer.</p>
+  <div class="table-wrap">
+    <table class="g">
+      <tr><th style="width:22%">When</th><th>Routine</th></tr>
+      <tr><td><b>Every morning</b></td><td>Login → Attendance → select class → <span class="ui-btn outline">All Present</span> → fix exceptions → <span class="ui-btn"><i class="fas fa-save"></i> Save Attendance</span>.</td></tr>
+      <tr><td><b>As money comes in</b></td><td>Fees Management → <span class="ui-btn">Record Payment</span> → student → amount &amp; method → save → print statement if asked.</td></tr>
+      <tr><td><b>New admission</b></td><td>Students → <span class="ui-btn">+ Add Student</span> → details &amp; photo → save.</td></tr>
+      <tr><td><b>Exam season</b></td><td>Exams &amp; Results → <span class="ui-btn">+ Add Exam Record</span> per student → enter marks → save. Then <span class="ui-btn outline"><i class="fas fa-layer-group"></i> Bulk Term Reports</span> at close of term.</td></tr>
+      <tr><td><b>Need to tell parents?</b></td><td>Announcements → post a notice, or <span class="ui-btn outline"><i class="fab fa-whatsapp"></i> Send to Parents</span>.</td></tr>
+      <tr><td><b>New term begins</b></td><td>Academic Years &amp; Terms → activate the new term → Fee Structure → set the new term's fees → done.</td></tr>
+    </table>
+  </div>
+  <div class="callout tip"><i class="fas fa-headset"></i><div><b>You are never alone</b>Real human support, direct on phone or WhatsApp: <b>0717 384 875</b> · princealexdigital@gmail.com · www.princealex.digital</div></div>
+</section>
+
+</main>
+</div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="flinks">
+      <a href="tel:+254717384875"><i class="fas fa-phone"></i> 0717 384 875</a>
+      <a href="https://wa.me/254717384875"><i class="fab fa-whatsapp"></i> WhatsApp Support</a>
+      <a href="mailto:princealexdigital@gmail.com"><i class="fas fa-envelope"></i> princealexdigital@gmail.com</a>
+      <a href="https://www.princealex.digital"><i class="fas fa-globe"></i> www.princealex.digital</a>
+    </div>
+    <b>Prince Alex Digital — School Management System</b>
+    <small>&copy; 2026 Prince Alex Digital. All rights reserved. This guide may be printed and shared within your school.</small>
+  </div>
+</footer>
+
+</body>
+</html>
+

@@ -1,0 +1,2186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prince Alex | School Management System</title>
+    <meta name="description" content="Modern School Management SaaS Dashboard">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+    <div id="loader" class="loader-overlay"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ===== LANDING / SALES PAGE (first screen) ===== -->
+    <section id="landing-section">
+        <!-- Top Bar -->
+        <nav class="lp-topbar" id="lpTopbar">
+            <div class="lp-container lp-nav">
+                <button class="lp-brand" type="button" onclick="showLoginView()" title="Login to your school dashboard">
+                    <span class="lp-logo"><i class="fas fa-graduation-cap"></i></span>
+                    <span><b>Prince Alex Digital</b><small>School Management System</small></span>
+                </button>
+                <div class="lp-links" id="lpLinks">
+                    <a href="#lp-features">Features</a>
+                    <a href="#lp-how">How It Works</a>
+                    <a href="#lp-pricing">Pricing</a>
+                    <a href="#lp-faq">FAQ</a>
+                    <a href="#lp-contact">Contact</a>
+                </div>
+                <div class="lp-actions">
+                    <button class="lp-btn lp-btn-gold" type="button" onclick="showLoginView()"><i class="fas fa-sign-in-alt"></i> Login</button>
+                    <button class="lp-toggle" id="lpToggle" onclick="lpToggleNav()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <header class="lp-hero" id="lp-top">
+            <div class="lp-container lp-hero-grid">
+                <div class="lp-reveal">
+                    <span class="lp-badge"><i class="fas fa-bolt"></i> All-in-One School System</span>
+                    <h1>Run your entire school from <span class="acc">one beautiful</span> dashboard.</h1>
+                    <p class="lp-sub">Student records, attendance, fees, exams, results and announcements — all in one secure cloud platform. Less paperwork, more time for education.</p>
+                    <div class="lp-cta">
+                        <a class="lp-btn lp-btn-gold" href="#lp-contact"><i class="fas fa-phone-alt"></i> Book a Demo</a>
+                        <button class="lp-btn lp-btn-ghost" type="button" onclick="showLoginView()"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
+                    </div>
+                    <div class="lp-hero-contact">
+                        <a href="tel:+254717384875"><i class="fas fa-phone"></i> 0717 384 875</a>
+                        <a href="mailto:princealexdigital@gmail.com"><i class="fas fa-envelope"></i> princealexdigital@gmail.com</a>
+                        <a href="https://www.princealex.digital" target="_blank" rel="noopener"><i class="fas fa-globe"></i> www.princealex.digital</a>
+                    </div>
+                </div>
+                <div class="lp-mock">
+                    <div class="lp-mock-head"><i></i><i></i><i></i><span>SCHOOL ADMIN DASHBOARD</span><i></i></div>
+                    <div class="lp-mock-body">
+                        <div class="lp-mock-top">
+                            <h4>Today at a Glance <small>Prince Alex Academy · Term 2</small></h4>
+                            <span class="d">KES &amp; Balances</span>
+                        </div>
+                        <div class="lp-mock-grid">
+                            <div class="lp-mock-card"><div class="ic" style="background:#800000"><i class="fas fa-user-graduate"></i></div><b>1,240</b><small>Students</small></div>
+                            <div class="lp-mock-card"><div class="ic" style="background:#1e9d5f"><i class="fas fa-chalkboard-teacher"></i></div><b>86</b><small>Teachers</small></div>
+                            <div class="lp-mock-card"><div class="ic" style="background:#d99b2b"><i class="fas fa-wallet"></i></div><b>KES 4.8M</b><small>Fees Collected</small></div>
+                            <div class="lp-mock-card">
+                                <div class="ic" style="background:#3b82f6"><i class="fas fa-calendar-check"></i></div>
+                                <b>96%</b>
+                                <small>Attendance</small>
+                                <div class="lp-att-meta">
+                                    <span class="lp-mini-pill lp-preset">P 93%</span>
+                                    <span class="lp-mini-pill lp-late">L 4%</span>
+                                    <span class="lp-mini-pill lp-absent">A 2%</span>
+                                    <span class="lp-mini-pill lp-excused">E 1%</span>
+                                </div>
+                                <div class="lp-att-trend" aria-label="Attendance trend over last 7 days">
+                                    <span style="height:34%"></span><span style="height:62%"></span><span style="height:92%"></span><span style="height:76%"></span><span style="height:84%"></span><span style="height:64%"></span><span style="height:92%"></span>
+                                </div>
+                                <div class="lp-att-sub"><span>Last 7 days</span><span>Term avg. 94%</span></div>
+                            </div></div>
+                        <div class="lp-chart">
+                            <div class="lp-bar" style="height:42%"></div><div class="lp-bar g" style="height:64%"></div><div class="lp-bar" style="height:38%"></div><div class="lp-bar g" style="height:78%"></div><div class="lp-bar" style="height:55%"></div><div class="lp-bar g" style="height:92%"></div>
+                        </div>
+                        <div class="lp-chart-note"><span><i class="fas fa-circle" style="color:#800000;font-size:.55rem"></i> Expected</span><span><i class="fas fa-circle" style="color:#eab94b;font-size:.55rem"></i> Collected</span></div>
+                    </div>
+                    <div class="lp-float f1"><i class="fas fa-hand-holding-usd"></i> Outstanding: KES 320K</div>
+                    <div class="lp-float f2"><i class="fas fa-bullhorn"></i> 2 Announcements</div>
+                </div>
+            </div>
+        </header>
+        <!-- Stats -->
+        <section class="lp-stats">
+            <div class="lp-container lp-stats-grid">
+                <div class="lp-stat"><b>10+</b><span>Core Modules</span></div>
+                <div class="lp-stat"><b>100%</b><span>Cloud &amp; Secure</span></div>
+                <div class="lp-stat"><b>24/7</b><span>Digital Support</span></div>
+                <div class="lp-stat"><b>Any</b><span>Device Ready</span></div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="lp-sec" id="lp-features">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow">Platform Features</span>
+                <h2 class="lp-title">Everything your school runs on. In one system.</h2>
+                <p class="lp-sub">Stop juggling registers, receipt books and spreadsheets. Prince Alex Digital brings every office task into one clean, secure dashboard.</p>
+            </div>
+            <div class="lp-container lp-feats">
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-user-graduate"></i></div><h3>Student Records</h3><p>Full student profiles, admission numbers, classes, guardians and contacts — searchable in seconds and exportable to CSV.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-chalkboard-teacher"></i></div><h3>Teacher Accounts</h3><p>Every teacher gets their own login and role, with exactly the right access to students, classes and the data they need.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-school"></i></div><h3>Classes &amp; Subjects</h3><p>Set up classes, streams and subjects to match your school layout, then organise students and teachers under each class.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-calendar-check"></i></div><h3>Attendance Tracking</h3><p>Take daily attendance in a few clicks and keep a live attendance summary for every class — no more paper registers.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-file-invoice"></i></div><h3>Fee Structures</h3><p>Define fee structures per class and term exactly the way your fee ledger works: tuition, transport, lunch and more.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-file-invoice-dollar"></i></div><h3>Fees Management</h3><p>Record payments in KES and watch collected, expected and outstanding balances update automatically on your dashboard.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-poll-h"></i></div><h3>Exams &amp; Results</h3><p>Record exams and marks, keep a term-by-term results history and have every student's performance in one place.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-bullhorn"></i></div><h3>Announcements</h3><p>Publish school announcements that appear right on the dashboard so your whole team stays informed, every day.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-file-export"></i></div><h3>Reports &amp; Exports</h3><p>Export student lists, fee balances and reports to CSV in one click — perfect for Excel, archives and audits.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-lock"></i></div><h3>Secure Cloud Data</h3><p>Hosted on Google&rsquo;s Firebase with fast, secure authentication. Access from anywhere — always backed up for you.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-mobile-alt"></i></div><h3>Works Everywhere</h3><p>Responsive design that works on PC, tablet and smartphone. No installation and no technical team required.</p></div>
+                <div class="lp-fcard"><div class="lp-ic"><i class="fas fa-user-shield"></i></div><h3>Owner Control</h3><p>Running more than one school? Manage every school, admin and teacher role from a single master control panel.</p></div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="lp-sec lp-alt" id="lp-how">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow">How It Works</span>
+                <h2 class="lp-title">From first call to full launch in days.</h2>
+                <p class="lp-sub">We handle the technical setup so your office can focus on students from day one.</p>
+            </div>
+            <div class="lp-container lp-steps">
+                <div class="lp-step"><div class="lp-num">1</div><h3>Tell Us About Your School</h3><p>Call, WhatsApp or email us. Let us know the size of your school, your classes, streams and what you use today.</p></div>
+                <div class="lp-step"><div class="lp-num">2</div><h3>We Set Everything Up</h3><p>We create your school on the system and organise students, classes, subjects and fee structures for you.</p></div>
+                <div class="lp-step"><div class="lp-num">3</div><h3>Train, Launch &amp; Manage</h3><p>We train your office and teachers, then you run the whole school from your dashboard — with us behind you.</p></div>
+            </div>
+        </section>
+        <!-- Why Us -->
+        <section class="lp-sec" id="lp-why" style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow" style="color:#eab94b">Why Schools Choose Us</span>
+                <h2 class="lp-title" style="color:#fff">Built for Kenyan schools. Priced for everyone.</h2>
+                <p class="lp-sub" style="color:rgba(255,255,255,.85)">Whether you run a small academy or a growing group of schools, we make going digital simple and affordable.</p>
+            </div>
+            <div class="lp-container" style="margin-top:48px">
+                <div class="lp-why-grid">
+                    <div class="lp-why"><i class="fas fa-map-marker-alt"></i><b>Local &amp; Familiar</b><p>Built around how Kenyan schools work — KES, terms, classes and fee ledgers.</p></div>
+                    <div class="lp-why"><i class="fas fa-paper-plane"></i><b>No Paper Queues</b><p>Replace registers, receipt books and spreadsheets with one organised system.</p></div>
+                    <div class="lp-why"><i class="fas fa-headset"></i><b>Real Human Support</b><p>Call or WhatsApp us directly on 0717 384 875 — no endless ticket queues.</p></div>
+                    <div class="lp-why"><i class="fas fa-rocket"></i><b>Fast Onboarding</b><p>Your office can be live within days of your first call — not months.</p></div>
+                    <div class="lp-why"><i class="fas fa-wallet"></i><b>Affordable Pricing</b><p>Flexible per-term pricing that grows with your school. Ask for a quote.</p></div>
+                    <div class="lp-why"><i class="fas fa-shield-alt"></i><b>Secure Cloud</b><p>Google&rsquo;s infrastructure, secure login and automatic backups — your data is safe.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="lp-sec" id="lp-pricing">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow">Simple Pricing</span>
+                <h2 class="lp-title">Plans that fit every school&rsquo;s size.</h2>
+                <p class="lp-sub">Flexible per-term pricing. Tell us your school size and we&rsquo;ll send a quote within 24 hours.</p>
+            </div>
+            <div class="lp-container lp-prices">
+                <div class="lp-price">
+                    <h3>Starter School</h3>
+                    <p class="fit">For small schools getting organised</p>
+                    <div class="amt">Get a Quote <small>&middot; per term</small></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i>Up to 300 students</li>
+                        <li><i class="fas fa-check"></i>Student &amp; teacher records</li>
+                        <li><i class="fas fa-check"></i>Attendance tracking</li>
+                        <li><i class="fas fa-check"></i>Fee structure &amp; collections</li>
+                        <li><i class="fas fa-check"></i>Email support</li>
+                    </ul>
+                    <a class="btn lp-btn-maroon" href="mailto:princealexdigital@gmail.com?subject=Starter%20Plan%20Quote%20-%20School%20Management%20System">Request Quote</a>
+                </div>
+                <div class="lp-price pop">
+                    <span class="lp-tag">Most Popular</span>
+                    <h3>Standard School</h3>
+                    <p class="fit">For schools ready to go fully digital</p>
+                    <div class="amt">Most Chosen</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i>Up to 1,000 students</li>
+                        <li><i class="fas fa-check"></i>Everything in Starter</li>
+                        <li><i class="fas fa-check"></i>Exams &amp; results</li>
+                        <li><i class="fas fa-check"></i>Announcements &amp; dashboards</li>
+                        <li><i class="fas fa-check"></i>CSV reports &amp; exports</li>
+                        <li><i class="fas fa-check"></i>Priority WhatsApp support</li>
+                    </ul>
+                    <a class="btn lp-btn-gold" href="mailto:princealexdigital@gmail.com?subject=Standard%20Plan%20Quote%20-%20Prince%20Alex%20Digital">Get Started Today</a>
+                </div>
+                <div class="lp-price">
+                    <h3>Multi-Branch / Custom</h3>
+                    <p class="fit">For groups, franchises &amp; special needs</p>
+                    <div class="amt">Let&rsquo;s Talk</div>
+                    <ul>
+                        <li><i class="fas fa-check"></i>Multiple schools in one panel</li>
+                        <li><i class="fas fa-check"></i>Custom modules &amp; fields</li>
+                        <li><i class="fas fa-check"></i>On-site training for your team</li>
+                        <li><i class="fas fa-check"></i>Dedicated account manager</li>
+                    </ul>
+                    <a class="btn lp-btn-maroon" href="https://wa.me/254717384875?text=Hello%20Prince%20Alex%20Digital%2C%20I%20want%20to%20discuss%20a%20custom%20school%20management%20plan." target="_blank" rel="noopener">Talk to Us</a>
+                </div>
+            </div>
+        </section>
+        <!-- FAQ -->
+        <section class="lp-sec" id="lp-faq">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow">FAQ</span>
+                <h2 class="lp-title">Frequently asked questions.</h2>
+                <p class="lp-sub">Everything schools usually ask us before going live.</p>
+            </div>
+            <div class="lp-container lp-faqs">
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">How do we get started? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Just call or WhatsApp us on 0717 384 875, or email princealexdigital@gmail.com. We&rsquo;ll answer a few quick questions about your school and set up a free 20-minute online demo.</p></div>
+                </div>
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">Is the system cloud based? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Yes — everything runs on Google&rsquo;s cloud (Firebase), so you only need a browser and internet. No installation, no server, no IT team needed.</p></div>
+                </div>
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">We keep records in Excel. Can you bring them in? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Yes. During setup we help you gather and organise your existing student, teacher and fee lists so nothing is lost when you move onto the system.</p></div>
+                </div>
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">Can we really track school fees? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Absolutely. You define fee structures per class and term, then record payments in KES. Collected, expected and outstanding balances update live on the dashboard.</p></div>
+                </div>
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">Who can access the system? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Your school&rsquo;s admins and teachers get their own secure logins with role-based access. If you run several schools, a master owner panel puts everything under one roof.</p></div>
+                </div>
+                <div class="lp-faq">
+                    <button class="lp-faq-q" type="button">What support do we get? <i class="fas fa-plus"></i></button>
+                    <div class="lp-faq-a"><p>Direct phone and WhatsApp support from Prince Alex Digital for your admin team, plus email support — so someone real is always within reach after you go live.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section class="lp-sec lp-alt" id="lp-contact">
+            <div class="lp-container lp-center">
+                <span class="lp-eyebrow">Contact Us</span>
+                <h2 class="lp-title">Get your school online today.</h2>
+                <p class="lp-sub">Reach us any way you like — we reply fast and we speak your language.</p>
+            </div>
+            <div class="lp-container lp-contact">
+                <div class="lp-cards">
+                    <div class="lp-card"><i class="fas fa-phone-alt"></i><div><b>Call Us</b><a href="tel:+254717384875">0717 384 875</a></div></div>
+                    <div class="lp-card"><i class="fab fa-whatsapp" style="background:#1e9d5f"></i><div><b>WhatsApp</b><a href="https://wa.me/254717384875?text=Hello%20Prince%20Alex%20Digital.%20I%20want%20to%20know%20more%20about%20the%20School%20Management%20System." target="_blank" rel="noopener">Chat with us instantly</a></div></div>
+                    <div class="lp-card"><i class="fas fa-envelope"></i><div><b>Email</b><a href="mailto:princealexdigital@gmail.com">princealexdigital@gmail.com</a></div></div>
+                    <div class="lp-card"><i class="fas fa-globe"></i><div><b>Website</b><a href="https://www.princealex.digital" target="_blank" rel="noopener">www.princealex.digital</a></div></div>
+                </div>
+                <form class="lp-form" id="lpContactForm">
+                    <h3>Send us your enquiry</h3>
+                    <div class="lp-row">
+                        <div class="lp-group"><label>Your Name</label><input type="text" id="lp-name" placeholder="e.g. Amina Wafula" required></div>
+                        <div class="lp-group"><label>School Name</label><input type="text" id="lp-school" placeholder="e.g. Greenhill Academy"></div>
+                    </div>
+                    <div class="lp-row">
+                        <div class="lp-group"><label>Email</label><input type="email" id="lp-email" placeholder="you@school.ac.ke" required></div>
+                        <div class="lp-group"><label>Phone</label><input type="tel" id="lp-phone" placeholder="07XX XXX XXX"></div>
+                    </div>
+                    <div class="lp-group"><label>Message</label><textarea id="lp-message" rows="4" placeholder="Tell us about your school and what you need..." required></textarea></div>
+                    <button type="submit" class="btn lp-btn-gold" style="width:100%"><i class="fas fa-paper-plane"></i> Send Enquiry</button>
+                    <p style="margin-top:12px;font-size:.8rem;color:#6b6258">Opens your email app with the message ready to send to princealexdigital@gmail.com.</p>
+                </form>
+            </div>
+        </section>
+        <!-- Footer -->
+        <footer class="lp-foot">
+            <div class="lp-container lp-foot-inner">
+                <div>
+                    <button class="lp-brand" type="button" onclick="showLoginView()">
+                        <span class="lp-logo"><i class="fas fa-graduation-cap"></i></span>
+                        <span><b>Prince Alex Digital</b><small>School Management System</small></span>
+                    </button>
+                    <p class="lp-foot-about">A complete all-in-one platform for schools — students, teachers, attendance, fees, exams and announcements in one secure cloud dashboard.</p>
+                </div>
+                <div>
+                    <h4>Platform</h4>
+                    <nav>
+                        <a href="#lp-features">Features</a>
+                        <a href="#lp-how">How It Works</a>
+                        <a href="#lp-pricing">Pricing</a>
+                        <a href="#lp-faq">FAQ</a>
+                    </nav>
+                </div>
+                <div>
+                    <h4>Access</h4>
+                    <nav>
+                        <a href="javascript:void(0)" onclick="showLoginView()">Admin Login</a>
+                        <a href="admin.html">Owner Admin Panel</a>
+                        <a href="https://www.princealex.digital" target="_blank" rel="noopener">Our Website</a>
+                    </nav>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <div class="ci"><i class="fas fa-phone"></i><a href="tel:+254717384875">0717 384 875</a></div>
+                    <div class="ci"><i class="fab fa-whatsapp"></i><a href="https://wa.me/254717384875" target="_blank" rel="noopener">WhatsApp Us</a></div>
+                    <div class="ci"><i class="fas fa-envelope"></i><a href="mailto:princealexdigital@gmail.com">princealexdigital@gmail.com</a></div>
+                    <div class="ci"><i class="fas fa-globe"></i><a href="https://www.princealex.digital" target="_blank" rel="noopener">www.princealex.digital</a></div>
+                </div>
+            </div>
+            <div class="lp-container lp-foot-bottom">
+                <span>&copy; 2026 <b>Prince Alex Digital</b>. All rights reserved.</span>
+                <span>School Management System SaaS &middot; <a href="#lp-top" style="color:#eab94b">Back to top</a></span>
+            </div>
+        </footer>
+
+        <!-- WhatsApp Float -->
+        <a class="lp-wa" href="https://wa.me/254717384875?text=Hello%20Prince%20Alex%20Digital.%20I%20want%20a%20demo%20of%20the%20School%20Management%20System." target="_blank" rel="noopener" title="Chat with us on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    </section>
+
+    <!-- AUTHENTICATION SECTION -->
+    <section id="auth-section" class="hidden">
+        <div class="auth-card">
+            <div id="login-form">
+                <i class="fas fa-graduation-cap" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h2>Admin Login</h2>
+                <p class="auth-sub">Access your school management dashboard</p>
+                <form class="auth-form" onsubmit="handleAuth(event, 'login')">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Login to Dashboard</button>
+                </form>
+                <a href="javascript:void(0)" onclick="showResetView()" style="display:inline-block;margin-top:14px;color: var(--text-muted); text-decoration: none; font-size: 0.8rem; font-weight: 600;"><i class="fas fa-key"></i> Forgot Password?</a>
+            </div>
+
+            <div id="reset-form" class="hidden">
+                <i class="fas fa-lock-open" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h2>Reset Password</h2>
+                <p class="auth-sub">Enter your account email and we'll send you a reset link</p>
+                <form class="auth-form" onsubmit="handlePasswordReset(event)">
+                    <input type="email" id="reset-email" placeholder="Email Address" required>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-paper-plane"></i> Send Reset Link</button>
+                </form>
+                <a href="javascript:void(0)" onclick="showLoginForm()" style="display:inline-block;margin-top:14px;color: var(--text-muted); text-decoration: none; font-size: 0.78rem; font-weight: 600;"><i class="fas fa-arrow-left"></i> Back to Login</a>
+            </div>
+            <div class="auth-footer">
+                This system is powered by <a href="https://www.princealex.digital" target="_blank" style="color: var(--primary); text-decoration: none;"><strong>Prince Alex Digital</strong></a>
+                <br><a href="javascript:void(0)" onclick="showLandingView()" style="display:inline-block;margin-top:14px;color: var(--text-muted); text-decoration: none; font-size: 0.78rem; font-weight: 600;"><i class="fas fa-arrow-left"></i> Back to Homepage</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN APPLICATION SECTION -->
+    <section id="app-section" class="hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 id="school-name-sidebar">School Admin</h2>
+                <p style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;">Management System</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" data-view="dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </div>
+                <div class="menu-item" data-view="students">
+                    <i class="fas fa-user-graduate"></i> Students
+                </div>
+                <div class="menu-item" data-view="teachers">
+                    <i class="fas fa-chalkboard-teacher"></i> Teachers
+                </div>
+                <div class="menu-item" data-view="classes">
+                    <i class="fas fa-school"></i> Classes & Subjects
+                </div>
+                <div class="menu-item" data-view="timetable">
+                    <i class="fas fa-calendar-alt"></i> Timetable
+                </div>
+                <div class="menu-item" data-view="attendance">
+                    <i class="fas fa-calendar-check"></i> Attendance
+                </div>
+                <div class="menu-item" data-view="fee-structures">
+                    <i class="fas fa-file-invoice"></i> Fee Structure
+                </div>
+                <div class="menu-item" data-view="fees">
+                    <i class="fas fa-file-invoice-dollar"></i> Fees Management
+                </div>
+                <div class="menu-item" data-view="fee-summary">
+                    <i class="fas fa-chart-pie"></i> Fee Summary
+                </div>
+                <div class="menu-item" data-view="exams">
+                    <i class="fas fa-poll-h"></i> Exams & Results
+                </div>
+                <div class="menu-item" data-view="announcements">
+                    <i class="fas fa-bullhorn"></i> Announcements
+                </div>
+                <div class="menu-item" data-view="library">
+                    <i class="fas fa-book"></i> Library
+                </div>
+                <div class="menu-item" data-view="transport">
+                    <i class="fas fa-bus"></i> Transport
+                </div>
+                <div class="menu-item" data-view="hostel">
+                    <i class="fas fa-bed"></i> Hostel
+                </div>
+                <div class="menu-item" data-view="inventory">
+                    <i class="fas fa-boxes"></i> Inventory
+                </div>
+                <!-- ===== School Operations Extension (Academics) ===== -->
+                <div class="menu-item" data-view="academic-structure">
+                    <i class="fas fa-calendar-plus"></i> Academic Years & Terms
+                </div>
+                <div class="menu-item" data-view="streams">
+                    <i class="fas fa-code-branch"></i> Streams
+                </div>
+                <div class="menu-item" data-view="subjects">
+                    <i class="fas fa-book"></i> Subjects
+                </div>
+                <div class="menu-item" data-view="teacher-assignments">
+                    <i class="fas fa-user-check"></i> Teacher Assignments
+                </div>
+                <!-- ===== Administration ===== -->
+                <div class="menu-item" data-view="school-admins">
+                    <i class="fas fa-users-cog"></i> School Admins
+                </div>
+                <div class="menu-item" data-view="roles">
+                    <i class="fas fa-key"></i> Roles & Permissions
+                </div>
+                <div class="menu-item" data-view="audit">
+                    <i class="fas fa-history"></i> Activity Logs
+                </div>
+                <div class="menu-item" data-view="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="main-wrapper">
+            <header class="navbar">
+                <div class="flex align-center gap-12">
+                    <i class="fas fa-bars menu-toggle" id="toggle-btn"></i>
+                    <h3 id="current-view-title">Dashboard</h3>
+                </div>
+                <div class="navbar-branding" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                    <a href="https://www.princealex.digital" target="_blank" style="color: var(--text-muted); text-decoration: none; font-weight: 600; margin-right: 12px;"><i class="fas fa-home"></i> Website</a>
+                    This system is powered by <a href="https://www.princealex.digital" target="_blank" style="color: var(--primary); text-decoration: none;"><strong>Prince Alex Digital</strong></a>
+                </div>
+                <div class="flex align-center gap-20">
+                    <div id="master-access-indicator" class="hidden" style="background:rgba(128,0,0,0.1); border:1px solid var(--primary); padding:6px 12px; border-radius:8px; font-size:0.75rem; color:var(--primary); font-weight:700; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-user-shield"></i> MASTER ACCESS
+                        <button onclick="exitMasterAccess()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:800; font-size:1rem; padding:0 4px;">&times;</button>
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar" id="admin-initials">AD</div>
+                        <div class="admin-details">
+                            <p id="admin-name-nav" style="font-weight: 700; font-size: 0.9rem;"></p>
+                            <p id="admin-role-nav" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;"></p>
+                        </div>
+                        <i class="fas fa-sign-out-alt" style="margin-left: 10px; color: var(--danger);" onclick="logout()"></i>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content-body" id="view-container">
+                
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view">
+                    <div class="stats-grid">
+                        <div class="card stat-card">
+                            <div class="stat-icon-box bg-maroon-soft"><i class="fas fa-user-graduate"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">TOTAL STUDENTS</p>
+                                <h2 id="count-students">0</h2>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon-box bg-green-soft"><i class="fas fa-chalkboard-teacher"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">TOTAL TEACHERS</p>
+                                <h2 id="count-teachers">0</h2>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--success);">
+                            <div class="stat-icon-box bg-green-soft"><i class="fas fa-wallet"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">TOTAL COLLECTED</p>
+                                <h3 id="dash-fees-collected">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--warning);">
+                            <div class="stat-icon-box" style="background: rgba(241, 196, 15, 0.1); color: var(--warning);"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">TOTAL EXPECTED</p>
+                                <h3 id="dash-fees-expected">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card" style="border-bottom: 4px solid var(--danger);">
+                            <div class="stat-icon-box" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);"><i class="fas fa-exclamation-circle"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.7rem; font-weight: bold;">OUTSTANDING BALANCE</p>
+                                <h3 id="dash-fees-balance">KES 0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon-box" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fas fa-door-open"></i></div>
+                            <div>
+                                <p class="text-muted" style="font-size: 0.8rem; font-weight: bold;">CLASSES</p>
+                                <h2 id="count-classes">0</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-20" style="flex-wrap: wrap;">
+                        <div class="card" style="flex: 2; min-width: 300px;">
+                            <h3 style="margin-bottom: 1rem;">Recent Announcements</h3>
+                            <div id="dash-announcements-list"></div>
+                        </div>
+                        <div class="card" style="flex: 1; min-width: 250px;">
+                            <h3 style="margin-bottom: 1rem;">Attendance Summary</h3>
+                            <div id="dash-attendance-chart">
+                                <p class="text-muted">Today's attendance will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students View -->
+                <div id="view-students" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 15px;">
+                            <h3>Student Directory</h3>
+                            <div class="flex gap-10" style="flex-wrap: wrap;">
+                                <button class="btn btn-outline" onclick="exportStudentsCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                                <button class="btn btn-outline" onclick="openModal('modal-student-import')"><i class="fas fa-file-upload"></i> Import</button>
+                                <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-bottom: 1rem; background:var(--bg-light);">
+                            <div class="flex gap-10" style="flex-wrap: wrap; align-items:end;">
+                                <div class="form-group" style="margin-bottom:0; min-width:170px;">
+                                    <label>Search Name / Admission</label>
+                                    <input type="text" class="form-control" id="ops-student-search" placeholder="Search name or admission no..." onkeyup="renderStudentList()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:150px;">
+                                    <label>Grade / Class</label>
+                                    <select class="form-control" id="ops-student-class" onchange="renderStudentList()"><option value="">All Classes</option></select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:150px;">
+                                    <label>Stream</label>
+                                    <select class="form-control" id="ops-student-stream" onchange="renderStudentList()"><option value="">All Streams</option></select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:150px;">
+                                    <label>Status</label>
+                                    <select class="form-control" id="ops-student-status" onchange="renderStudentList()">
+                                        <option value="">All Statuses</option>
+                                        <option>Active</option><option>Inactive</option><option>Transferred</option><option>Graduated</option><option>Left School</option><option>Archived</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:130px;">
+                                    <label>Academic Year</label>
+                                    <select class="form-control" id="ops-student-year" onchange="renderStudentList()"><option value="">All Years</option></select>
+                                </div>
+                                <button class="btn btn-outline btn-sm" onclick="resetStudentListFilters()"><i class="fas fa-undo-alt"></i> Reset</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="min-width: 900px;">
+                            <table id="student-table">
+                                <thead>
+                                    <tr>
+                                        <th>Photo</th>
+                                        <th>Admission No</th>
+                                        <th>Name</th>
+                                        <th>Gender</th>
+                                        <th>Grade</th>
+                                        <th>Stream</th>
+                                        <th>Academic Year</th>
+                                        <th>Guardian Contact</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teachers View -->
+                <div id="view-teachers" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 15px;">
+                            <h3>Faculty Management</h3>
+                            <div class="flex gap-10">
+                                <div class="search-box">
+                                    <input type="text" class="form-control" placeholder="Search faculty..." onkeyup="filterTable('teacher-table-el', this.value)">
+                                </div>
+                                <button class="btn btn-primary" onclick="openModal('modal-teacher')">+ Add Teacher</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="teacher-table-el">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Subjects</th>
+                                        <th>Workload</th>
+                                        <th>Phone</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacher-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes View -->
+                <div id="view-classes" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>Classes & Subjects</h3>
+                            <button class="btn btn-primary" onclick="openModal('modal-class')">+ Create Class</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class Name</th>
+                                        <th>Class Teacher</th>
+                                        <th>Subject-Teacher Mapping</th>
+                                        <th>Students</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="class-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Structure View -->
+                <div id="view-fee-structures" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>Class Fee Structures</h3>
+                            <button class="btn btn-primary" onclick="document.getElementById('fs-edit-id').value=''; openModal('modal-fee-structure')">+ Set Structure</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Term</th>
+                                        <th>Year</th>
+                                        <th>Tuition (KES)</th>
+                                        <th>Other Fees (KES)</th>
+                                        <th>Total (KES)</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fee-structure-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timetable View -->
+                <div id="view-timetable" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 12px; margin-bottom: 1rem;">
+                            <h3>Class Timetable</h3>
+                            <div class="flex gap-10" style="flex-wrap: wrap;">
+                                <div class="form-group" style="margin-bottom:0; width:170px;">
+                                    <select class="form-control" id="tt-class-select" onchange="loadTimetable()">
+                                        <option value="">Select Class</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:130px;">
+                                    <select class="form-control" id="tt-term" onchange="loadTimetable()">
+                                        <option>Term 1</option>
+                                        <option>Term 2</option>
+                                        <option>Term 3</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:120px;">
+                                    <input type="number" class="form-control" id="tt-year" onchange="loadTimetable()">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Pick a class &amp; term, then select the subject and teacher for each period. Press <b>Save Timetable</b> when done.</p>
+                        <div id="timetable-container" style="margin-top: 1.2rem;">
+                            <p class="text-muted">Select a class to build the timetable.</p>
+                        </div>
+                        <div class="flex gap-10" id="timetable-actions" style="margin-top: 1.2rem; display: none;">
+                            <button class="btn btn-primary" onclick="saveTimetable()"><i class="fas fa-save"></i> Save Timetable</button>
+                            <button class="btn btn-outline" onclick="clearTimetableSlots()"><i class="fas fa-eraser"></i> Clear</button>
+                            <button class="btn btn-outline" onclick="exportTimetableCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance View -->
+                <div id="view-attendance" class="view hidden">
+                    <div class="card">
+                        <h3>Daily Attendance</h3>
+                        <p class="text-muted" style="font-size:0.82rem;">Select a class and date, then mark each student as <b>Present</b>, <b>Late</b>, <b>Absent</b> or <b>Excused</b>. Records are stored per class per day — re-marking the same day updates it (no duplicates).</p>
+                        <div class="flex gap-12 align-center" style="margin-top: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Select Class</label>
+                                <select class="form-control" id="attendance-class-select"></select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Date</label>
+                                <input type="date" class="form-control" id="attendance-date">
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 5px;" onclick="loadAttendanceForm()"><i class="fas fa-clipboard-check"></i> Mark Attendance</button>
+                        </div>
+                    </div>
+
+                    <div class="card hidden" id="attendance-form-card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 10px; margin-bottom: 0.75rem;">
+                            <h3 id="attendance-form-title">Students List</h3>
+                            <span id="attendance-edit-note" class="text-muted" style="font-size:0.78rem; font-weight:600;"></span>
+                        </div>
+                        <div class="attendance-toolbar flex gap-10 align-center" style="margin-bottom: 0.75rem; flex-wrap: wrap;">
+                            <span class="text-muted" style="font-size:0.8rem; font-weight:600;">Quick actions:</span>
+                            <button class="btn btn-outline btn-xs" onclick="markAllAttendance('Present')">All Present</button>
+                            <button class="btn btn-outline btn-xs" onclick="markAllAttendance('Late')">All Late</button>
+                            <button class="btn btn-outline btn-xs" onclick="markAllAttendance('Absent')">All Absent</button>
+                            <button class="btn btn-outline btn-xs" onclick="clearAttendance()">Clear</button>
+                        </div>
+                        <div id="attendance-form-summary" class="flex gap-10" style="margin-bottom: 0.75rem; flex-wrap: wrap;"></div>
+                        <div id="attendance-students-list" style="margin: 1.5rem 0;"></div>
+                        <div class="flex gap-10">
+                            <button class="btn btn-primary" onclick="saveAttendance()"><i class="fas fa-save"></i> Save Attendance</button>
+                            <button class="btn btn-outline" onclick="cancelAttendanceForm()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                            <h3>Attendance Records &amp; History</h3>
+                            <button class="btn btn-outline" onclick="exportAttendanceHistoryCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="attendance-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Class</th>
+                                        <th>Present</th>
+                                        <th>Late</th>
+                                        <th>Absent</th>
+                                        <th>Excused</th>
+                                        <th>Attendance %</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-history-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                            <h3>Student Attendance Report</h3>
+                            <div class="flex gap-10 align-center" style="flex-wrap: wrap;">
+                                <div class="form-group" style="margin-bottom:0; width:200px;">
+                                    <select class="form-control" id="attendance-report-class" onchange="renderAttendanceHistory()">
+                                        <option value="">All Classes</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-outline" onclick="exportAttendanceReportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="attendance-report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Present</th>
+                                        <th>Late</th>
+                                        <th>Absent</th>
+                                        <th>Excused</th>
+                                        <th>Attendance %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-report-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fees View -->
+                <div id="view-fees" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                            <h3>Fee Records</h3>
+                            <div class="flex gap-10">
+                                <div class="form-group" style="margin-bottom:0; width:220px;">
+                                    <input type="text" class="form-control" id="fee-search-input" placeholder="Search student name..." onkeyup="refreshFeesTable()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width:180px;">
+                                    <select class="form-control" id="filter-fee-class" onchange="refreshFeesTable()">
+                                        <option value="">All Classes</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-outline" onclick="window.openStudentLookup()"><i class="fas fa-search"></i> Check Student Balance</button>
+                                <button class="btn btn-primary" onclick="document.getElementById('fee-edit-id').value=''; openModal('modal-fee')">Record Payment</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student</th>
+                                        <th>Period</th>
+                                        <th>Expected</th>
+                                        <th>Paid</th>
+                                        <th>Balance</th>
+                                        <th>Method</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fee-history-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fee Summary View -->
+                <div id="view-fee-summary" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 12px; margin-bottom: 1rem;">
+                            <h4>Fee Collection Summary</h4>
+                            <div class="flex gap-10" style="flex-wrap: wrap;">
+                                <div class="form-group" style="margin-bottom:0; width: 160px;">
+                                    <select class="form-control" id="fee-summary-class">
+                                        <option value="">All Classes</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width: 130px;">
+                                    <select class="form-control" id="fee-summary-term">
+                                        <option>Term 1</option>
+                                        <option>Term 2</option>
+                                        <option>Term 3</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0; width: 120px;">
+                                    <input type="number" class="form-control" id="fee-summary-year" placeholder="Year">
+                                </div>
+                                <button class="btn btn-primary" onclick="renderFeeSummary()"><i class="fas fa-signal"></i> Load Summary</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-10" style="margin-bottom: 1rem;">
+                            <button class="btn btn-outline" onclick="exportFeeSummaryCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                            <button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="fee-summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Class</th>
+                                        <th>Students</th>
+                                        <th>Expected</th>
+                                        <th>Collected</th>
+                                        <th>Outstanding</th>
+                                        <th>Collection %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fee-summary-body">
+                                    <tr><td colspan="6" class="text-muted" style="text-align:center;">Select term filters and press Load Summary.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exams View -->
+                <div id="view-exams" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap: wrap; gap: 10px;">
+                            <h3>Examination Results</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openModal('modal-bulk-term-reports')"><i class="fas fa-layer-group"></i> Bulk Term Reports</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-exam')">+ Add Exam Record</button>
+                            </div>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem; margin-top:4px;">Results are grouped by <b>Exam + Student</b> so each student shows as a single row with all their subject marks inline.</p>
+                        <div class="flex gap-10 align-center" style="margin: 1rem 0; flex-wrap: wrap;">
+                            <div class="search-box" style="flex:1; min-width:200px;">
+                                <input type="text" class="form-control" id="exam-search" placeholder="Search student or exam..." onkeyup="filterExamTable()">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0; width:180px;">
+                                <select class="form-control" id="exam-filter-name" onchange="filterExamTable()">
+                                    <option value="">All Exams</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0; width:180px;">
+                                <select class="form-control" id="exam-filter-class" onchange="filterExamTable()">
+                                    <option value="">All Classes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="exam-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Exam</th>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Total / Avg</th>
+                                        <th id="exam-th-grade">Grade</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exam-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcements View -->
+                <div id="view-announcements" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center">
+                            <h3>School Notices & Newsletters</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openParentBroadcast()"><i class="fab fa-whatsapp"></i> Send to Parents</button>
+                                <button class="btn btn-outline" onclick="openModal('modal-bulk-newsletter')"><i class="fas fa-users"></i> Bulk Personalized Newsletters</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-announcement')">Post Notice</button>
+                            </div>
+                        </div>
+                        <div id="announcement-list" style="margin-top: 1.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- Library View -->
+                <div id="view-library" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                            <h3>Library Catalogue</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openModal('modal-borrow')"><i class="fas fa-hand-holding"></i> Issue Book</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-book')">+ Add Book</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="book-table">
+                                <thead>
+                                    <tr><th>Title</th><th>Author</th><th>Category</th><th>Copies</th><th>Available</th><th>Shelf</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="book-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Borrowing Ledger</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr><th>Book</th><th>Borrower</th><th>Issue Date</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="borrow-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transport View -->
+                <div id="view-transport" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                            <h3>Vehicles &amp; Routes</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openModal('modal-route')"><i class="fas fa-user-plus"></i> Assign Student</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-vehicle')">+ Add Vehicle</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="vehicle-table">
+                                <thead>
+                                    <tr><th>Plate No.</th><th>Route</th><th>Driver</th><th>Capacity</th><th>Assigned</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="vehicle-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Route Assignments</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr><th>Student</th><th>Class</th><th>Vehicle / Route</th><th>Period</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="route-assign-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hostel View -->
+                <div id="view-hostel" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                            <h3>Dormitories</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openModal('modal-bed')"><i class="fas fa-user-cog"></i> Assign Bed</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-dorm')">+ Add Dormitory</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="dorm-table">
+                                <thead>
+                                    <tr><th>Dormitory</th><th>Type</th><th>Capacity</th><th>Occupied</th><th>Patron / Matron</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="dorm-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Boarders</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr><th>Student</th><th>Class</th><th>Dormitory</th><th>Room</th><th>Bed</th><th>Action</th></tr>
+                                </thead>
+                                <tbody id="bed-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory View -->
+                <div id="view-inventory" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                            <h3>Inventory / Store</h3>
+                            <div class="flex gap-10">
+                                <button class="btn btn-outline" onclick="openStockMove()"><i class="fas fa-exchange-alt"></i> Stock In / Out</button>
+                                <button class="btn btn-primary" onclick="openModal('modal-inventory-item')">+ Add Item</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="inventory-table">
+                                <thead>
+                                    <tr><th>Item</th><th>Category</th><th>Unit</th><th>In Stock</th><th>Min Stock</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="inventory-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Stock Movements</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr><th>Date</th><th>Item</th><th>Type</th><th>Qty</th><th>Note</th></tr>
+                                </thead>
+                                <tbody id="stock-move-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Academic Years & Terms View ===== -->
+                <div id="view-academic-structure" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Academic Years</h3>
+                            <button class="btn btn-primary" onclick="openAcademicYearModal()">+ Add Academic Year</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">One academic year should be active per time. Older teaching stays linked to its academic year.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Year</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Active</th><th>Actions</th></tr></thead>
+                                <tbody id="academic-year-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Terms</h3>
+                            <button class="btn btn-primary" onclick="openTermModal()">+ Add Term</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Each school configures its own terms (e.g. Term 1 / Term 2 / Term 3) with dates. Only one active term per academic year.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Term</th><th>Academic Year</th><th>Start Date</th><th>End Date</th><th>Status</th><th>Active</th><th>Actions</th></tr></thead>
+                                <tbody id="term-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Streams View -->
+                <div id="view-streams" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Streams</h3>
+                            <button class="btn btn-primary" onclick="openStreamModal()">+ Add Stream</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Streams split a grade into groups (e.g. Grade 7 &rarr; East / West / North). Each stream belongs to a grade/class and the school.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Stream</th><th>Grade / Class</th><th>Class Teacher</th><th>Capacity</th><th>Students</th><th>Archived</th><th>Actions</th></tr></thead>
+                                <tbody id="stream-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects View -->
+                <div id="view-subjects" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Subjects / Learning Areas</h3>
+                            <button class="btn btn-primary" onclick="openSubjectModal()">+ Add Subject</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Configure subjects per school so curriculum templates (e.g. Kenya CBC/CBE learning areas) can be added later without code changes.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Name</th><th>Code</th><th>Applicable Grades</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody id="subject-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Assignments View -->
+                <div id="view-teacher-assignments" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Teacher Assignments</h3>
+                            <button class="btn btn-primary" onclick="openTeacherAssignmentModal()">+ Assign Teacher</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Assign a teacher to a grade/class, stream, and subject. Teachers only see the classes and records they are assigned to (unless granted more).</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Teacher</th><th>Grade / Class</th><th>Stream</th><th>Subject</th><th>Actions</th></tr></thead>
+                                <tbody id="teacher-assignment-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- School Admins View (Owner self-service) -->
+                <div id="view-school-admins" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>School Administrators</h3>
+                            <button class="btn btn-primary" onclick="openAdminUserModal()">+ Add School Admin</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Manage administrators belonging to your school only. Admins are limited to the data and actions you grant them.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Admin Email</th><th>Role</th><th>Account Status</th><th>Created</th><th>Last Login</th><th>Actions</th></tr></thead>
+                                <tbody id="school-admin-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles & Permissions View -->
+                <div id="view-roles" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Roles &amp; Permissions</h3>
+                            <div class="form-group" style="margin-bottom:0; width:280px;">
+                                <select class="form-control" id="role-admin-select" onchange="loadRolePermissions()"><option value="">Select an administrator...</option></select>
+                            </div>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">Grant module-level permissions to a school administrator. The School Owner keeps full access to their school.</p>
+                        <div id="permission-editor"><p class="text-muted" style="text-align:center;">Select an administrator to edit their permissions.</p></div>
+                    </div>
+                </div>
+
+                <!-- Audit Logs View -->
+                <div id="view-audit" class="view hidden">
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="flex-wrap:wrap; gap:10px;">
+                            <h3>Activity Logs</h3>
+                            <button class="btn btn-outline" onclick="exportAuditCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        </div>
+                        <p class="text-muted" style="font-size:0.82rem;">School-scoped audit trail of critical operations. Only administrators can see these logs.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Timestamp</th><th>User</th><th>Module</th><th>Action</th><th>Record</th><th>Details</th></tr></thead>
+                                <tbody id="audit-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="view-settings" class="view hidden">
+                    <div class="card" style="max-width: 700px;">
+                        <h3>School Profile</h3>
+                        <div style="margin-top: 1.5rem;">
+                            <div class="flex" style="gap:20px; align-items:center; margin-bottom: 1.2rem;">
+                                <div class="photo-preview" id="school-logo-preview" style="width:100px; height:100px;"><i class="fas fa-school" style="font-size:1.6rem;"></i></div>
+                                <div style="flex:1;">
+                                    <label style="font-weight:600; font-size:0.9rem;">School Logo</label>
+                                    <input type="file" id="set-school-logo" accept="image/*" onchange="previewSchoolLogo(this)" style="display:block; margin-top:6px;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>School Name</label>
+                                <input type="text" class="form-control" id="set-school-name">
+                            </div>
+                            <div class="form-group">
+                                <label>School Location</label>
+                                <input type="text" class="form-control" id="set-school-location" placeholder="e.g. City, Country">
+                            </div>
+                            <div class="form-group">
+                                <label>School Motto</label>
+                                <input type="text" class="form-control" id="set-school-motto" placeholder="e.g. Excellence in Education">
+                            </div>
+                            <div class="form-group">
+                                <label>School Contact (Email/Phone/Address)</label>
+                                <input type="text" class="form-control" id="set-school-contact" placeholder="info@school.com | +254...">
+                            </div>
+                            <div class="form-group">
+                                <label>Admin Display Name</label>
+                                <input type="text" class="form-control" id="set-admin-name">
+                            </div>
+                            <div class="flex gap-10">
+                                <div class="form-group" style="flex:1;">
+                                    <label>Academic Year</label>
+                                    <input type="number" class="form-control" id="set-academic-year">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>Current Term</label>
+                                    <select class="form-control" id="set-current-term">
+                                        <option value="Term 1">Term 1</option>
+                                        <option value="Term 2">Term 2</option>
+                                        <option value="Term 3">Term 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Principal / Head Teacher Name</label>
+                                <input type="text" class="form-control" id="set-principal-name" placeholder="e.g. Mrs. Jane Doe">
+                            </div>
+                            <h4 style="margin:1rem 0 0.4rem; font-size:0.95rem; color:var(--primary);">Admission Number Configuration</h4>
+                            <div class="flex gap-10">
+                                <div class="form-group" style="flex:1;">
+                                    <label>Mode</label>
+                                    <select class="form-control" id="set-admission-mode">
+                                        <option value="auto">Automatically generated</option>
+                                        <option value="manual">Entered manually</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>Prefix</label>
+                                    <input type="text" class="form-control" id="set-admission-prefix" placeholder="e.g. ABC" title="Text shown before the year in generated numbers">
+                                </div>
+                            </div>
+                            <p class="text-muted" style="font-size:0.75rem;">Auto format example: <b>ABC/2026/0001</b> — prefix/year/sequence. Manual mode leaves the admission number blank for the user to type. Numbers stay unique within this school.</p>
+                            <h4 style="margin:1rem 0 0.4rem; font-size:0.95rem; color:var(--primary);">Marks &amp; Grades</h4>
+                            <div class="form-group">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+                                    <input type="checkbox" id="set-use-grades" style="width:17px; height:17px;" onchange="syncGradeRangesUI()">
+                                    Use letter grades (A–E)
+                                </label>
+                                <p class="text-muted" style="font-size:0.75rem; margin-top:4px;">Turn ON to show letter grades (and enable the ranges below). Turn OFF if your school works with <b>marks only</b> — grades will be hidden from results and report cards.</p>
+                            </div>
+                            <div id="grade-ranges-box">
+                                <h4 style="margin:0.4rem 0 0.4rem; font-size:0.95rem; color:var(--primary);">Grade Ranges</h4>
+                                <p class="text-muted" style="font-size:0.75rem; margin-bottom:0.8rem;">Set the minimum mark required to earn each grade. Below the D threshold is an automatic <b>E</b>.</p>
+                            <div class="flex gap-10">
+                                <div class="form-group" style="flex:1;">
+                                    <label>Grade A from</label>
+                                    <input type="number" class="form-control" id="set-grade-a" min="0" max="100" placeholder="80">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>Grade B from</label>
+                                    <input type="number" class="form-control" id="set-grade-b" min="0" max="100" placeholder="70">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>Grade C from</label>
+                                    <input type="number" class="form-control" id="set-grade-c" min="0" max="100" placeholder="60">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>Grade D from</label>
+                                    <input type="number" class="form-control" id="set-grade-d" min="0" max="100" placeholder="50">
+                                </div>
+                            </div>
+                            <p class="text-muted" style="font-size:0.75rem;">Example: A from 80, B from 70, C from 60, D from 50 → 70–79 is a B, below 50 is an E.</p>
+                            </div>
+                            <div class="flex gap-10 align-center">
+                                <div class="form-group" style="flex:1;">
+                                    <label>Theme Colour (branding)</label>
+                                    <input type="color" class="form-control" id="set-theme-color" style="width:90px; height:42px; padding:4px;">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label>M-Pesa / Bank Payment Details</label>
+                                    <input type="text" class="form-control" id="set-payment-info" placeholder="e.g. M-Pesa Paybill 123456 · KCB Acc 1234567890">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveSettings()">Update Profile</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </section>
+
+    <!-- --- MODALS --- -->
+
+    <!-- Student Modal -->
+    <div class="modal-overlay" id="modal-student">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Register Student</h3>
+                <span class="close-modal" onclick="closeModal('modal-student')">&times;</span>
+            </div>
+            <form onsubmit="saveStudent(event)">
+                <input type="hidden" id="student-edit-id">
+                <div class="form-group">
+                    <label>Student Photo</label>
+                    <div class="photo-preview" id="student-photo-preview"><i class="fas fa-camera"></i></div>
+                    <input type="file" id="student-photo" accept="image/*" onchange="previewImage(this, 'student-photo-preview')">
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="student-name" required placeholder="e.g. Jane Auma Otieno">
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>First Name</label><input type="text" class="form-control" id="student-first"></div>
+                    <div class="form-group" style="flex:1;"><label>Middle Name</label><input type="text" class="form-control" id="student-middle"></div>
+                    <div class="form-group" style="flex:1;"><label>Last Name</label><input type="text" class="form-control" id="student-last"></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Gender</label><select class="form-control" id="student-gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Date of Birth</label><input type="date" class="form-control" id="student-dob" required></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:2;"><label>Admission Number</label><div class="flex gap-8 align-center" style="width:100%;"><input type="text" class="form-control" id="student-admission" placeholder="ABC/2026/0001"><button type="button" class="btn btn-outline btn-sm" onclick="autoFillAdmissionNo()" title="Auto-generate next admission number"><i class="fas fa-magic"></i></button></div></div>
+                    <div class="form-group" style="flex:1;"><label>Status</label><select class="form-control" id="student-status"><option>Active</option><option>Inactive</option><option>Transferred</option><option>Graduated</option><option>Left School</option><option>Archived</option></select></div>
+                </div>
+                <div class="form-group">
+                    <label>Class / Grade</label>
+                    <select class="form-control" id="student-class" required></select>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Stream</label><select class="form-control" id="student-stream"><option value="">No stream</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Academic Year</label><select class="form-control" id="student-academic-year"></select></div>
+                    <div class="form-group" style="flex:1;"><label>Admission Date</label><input type="date" class="form-control" id="student-admission-date"></div>
+                </div>
+                <div class="form-group">
+                    <label>Guardian / Parent Contact (Phone)</label>
+                    <input type="tel" class="form-control" id="student-parent" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Student Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Teacher Modal -->
+    <div class="modal-overlay" id="modal-teacher">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Teacher Details</h3>
+                <span class="close-modal" onclick="closeModal('modal-teacher')">&times;</span>
+            </div>
+            <form onsubmit="saveTeacher(event)">
+                <input type="hidden" id="teacher-edit-id">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="teacher-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-control" id="teacher-email" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Employee ID</label>
+                        <input type="text" class="form-control" id="teacher-emp-id">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Phone Number</label>
+                        <input type="tel" class="form-control" id="teacher-phone" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subjects Qualified (Comma separated)</label>
+                    <input type="text" class="form-control" id="teacher-subjects-csv" placeholder="Math, Physics...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Teacher</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Class Modal -->
+    <div class="modal-overlay" id="modal-class">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Manage Class</h3>
+                <span class="close-modal" onclick="closeModal('modal-class')">&times;</span>
+            </div>
+            <form onsubmit="saveClass(event)">
+                <input type="hidden" id="class-edit-id">
+                <div class="form-group">
+                    <label>Class Name (e.g. Grade 10-A)</label>
+                    <input type="text" class="form-control" id="class-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Class Teacher</label>
+                    <select class="form-control" id="class-teacher-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Subject-Teacher Mapping (JSON Format)</label>
+                    <textarea class="form-control" id="class-subject-mapping" rows="5" placeholder='[{"name": "Math", "teacherId": "TEA-ID"}]'></textarea>
+                    <small class="text-muted">Example: [{"name": "Math", "teacherId": "TEA-123"}]</small>
+                    <label>Subject-Teacher Mapping</label>
+                    <div id="class-subject-teacher-rows">
+                        <!-- Dynamic rows will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addSubjectTeacherRow()" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create / Update Class</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Payment Modal -->
+    <div class="modal-overlay" id="modal-fee">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Record Fee Payment</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee')">&times;</span>
+            </div>
+            <form onsubmit="saveFee(event)">
+                <input type="hidden" id="fee-edit-id">
+                <div class="form-group">
+                    <label>Select Student</label>
+                    <select class="form-control" id="fee-student-select" required></select>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="fee-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="fee-year" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Payment Amount (KES)</label>
+                    <input type="number" class="form-control" id="fee-amount" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Payment Method</label>
+                        <select class="form-control" id="fee-method">
+                            <option>Cash</option>
+                            <option>Bank Transfer</option>
+                            <option>M-Pesa</option>
+                            <option>Cheque</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Reference No.</label>
+                        <input type="text" class="form-control" id="fee-ref" placeholder="e.g. M-Pesa ID">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" class="form-control" id="fee-note">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Payment & Generate Receipt</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Structure Modal -->
+    <div class="modal-overlay" id="modal-fee-structure">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Define Fee Structure</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee-structure')">&times;</span>
+            </div>
+            <form onsubmit="saveFeeStructure(event)">
+                <input type="hidden" id="fs-edit-id">
+                <div class="form-group">
+                    <label>Target Class</label>
+                    <select class="form-control" id="fs-class" required></select>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="fs-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="fs-year" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tuition Fee (KES)</label>
+                    <input type="number" class="form-control" id="fs-tuition" required>
+                </div>
+                <div class="form-group">
+                    <label>Other Requirements / Extra Fees</label>
+                    <div id="fs-extra-fees-container"></div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addExtraFeeRow()" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Add Extra Fee
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Fee Structure</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Modal -->
+    <div class="modal-overlay" id="modal-exam">
+        <div class="modal" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="exam-modal-title">Input Examination Marks</h3>
+                <span class="close-modal" onclick="closeModal('modal-exam')">&times;</span>
+            </div>
+            <form onsubmit="saveExam(event)">
+                <input type="hidden" id="exam-edit-id">
+                <div class="form-group">
+                    <label>Examination Name</label>
+                    <input type="text" class="form-control" id="exam-name" placeholder="Mid Term 2025" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term</label>
+                        <select class="form-control" id="exam-term" required>
+                            <option>Term 1</option>
+                            <option>Term 2</option>
+                            <option>Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="exam-year" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Student</label>
+                    <select class="form-control" id="exam-student-select" required onchange="window.populateExamSubjects()"></select>
+                </div>
+                <div id="exam-bulk-area" style="margin-top: 15px;">
+                    <div class="flex justify-between align-center" style="margin-bottom: 10px;">
+                        <label style="font-weight: 600; font-size: 0.9rem;">Subject Marks Entries</label>
+                        <button type="button" class="btn btn-outline btn-sm" id="exam-add-row-btn" onclick="window.addExamSubjectRow()">
+                            <i class="fas fa-plus"></i> Add Subject Entry
+                        </button>
+                    </div>
+                    <div id="exam-subjects-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Save Examination Marks</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Results View Modal (grouped overlay, editable) -->
+    <div class="modal-overlay" id="modal-exam-view">
+        <div class="modal" style="max-width: 720px;">
+            <div class="modal-header">
+                <h3 id="exam-view-title">Examination Results</h3>
+                <span class="close-modal" onclick="closeModal('modal-exam-view')">&times;</span>
+            </div>
+            <div id="exam-view-summary" style="margin-bottom:15px; font-size:0.9rem; color:var(--text-muted);"></div>
+            <div style="margin-bottom:10px;">
+                <div class="flex justify-between align-center" style="margin-bottom:8px;">
+                    <label style="font-weight:600; font-size:0.9rem;">Subject Marks</label>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="addExamViewSubjectRow()">
+                        <i class="fas fa-plus"></i> Add Subject
+                    </button>
+                </div>
+                <div id="exam-view-subjects-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+            <div class="flex justify-between" style="margin-top:20px;">
+                <button type="button" class="btn btn-danger" onclick="deleteExamGroup(window.currentExamViewEnc)">Delete All Records</button>
+                <div class="flex gap-10">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-exam-view')">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveExamView()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal -->
+    <div class="modal-overlay" id="modal-announcement">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Post New Notice</h3>
+                <span class="close-modal" onclick="closeModal('modal-announcement')">&times;</span>
+            </div>
+            <form onsubmit="saveAnnouncement(event)">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" class="form-control" id="ann-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Announcement Type</label>
+                    <select class="form-control" id="ann-type">
+                        <option>General</option>
+                        <option>Urgent</option>
+                        <option>Exam</option>
+                        <option>Holiday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea class="form-control" id="ann-content" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Publish Announcement</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Personalized Term Reports Modal -->
+    <div class="modal-overlay" id="modal-bulk-term-reports">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Bulk Term Newsletter</h3>
+                <span class="close-modal" onclick="closeModal('modal-bulk-term-reports')">&times;</span>
+            </div>
+            <form id="bulk-reports-form">
+                <p class="text-muted" style="font-size:0.82rem; margin-bottom:12px;">Generate a beautifully designed, personalised <b>Term Newsletter</b> for every parent — with student progress, subject marks, attendance, fee status, term highlights &amp; the principal's message.</p>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Term</label>
+                        <select class="form-control" id="bulk-report-term" required>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Year</label>
+                        <input type="number" class="form-control" id="bulk-report-year" required>
+                    </div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term Opening Date</label>
+                        <input type="date" class="form-control" id="bulk-report-opening-date" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Term Closing Date</label>
+                        <input type="date" class="form-control" id="bulk-report-closing-date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Next Term Opening Date</label>
+                    <input type="date" class="form-control" id="bulk-report-next-term-opening-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Term Highlights / Summary</label>
+                    <textarea class="form-control" id="bulk-report-term-summary" rows="3" placeholder="Key achievements, events and highlights of the term..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Mr/Madam Principal's Message to Parents</label>
+                    <textarea class="form-control" id="bulk-report-teacher-comment" rows="2" placeholder="A note from the head of school for all families..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Principal Name (for signature)</label>
+                    <input type="text" class="form-control" id="bulk-report-principal-name" placeholder="e.g. Mrs. Jane Doe" required>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Class Filter</label>
+                        <select class="form-control" id="bulk-report-class-filter">
+                            <option value="all">All Classes</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Performance Filter</label>
+                        <select class="form-control" id="bulk-report-performance-filter">
+                            <option value="all">All Students</option>
+                            <option value="top">Top Performers</option>
+                            <option value="needs-improvement">Needs Improvement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-10" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-primary" style="flex: 1;" onclick="generateBulkReports('pdf')">
+                        <i class="fas fa-file-pdf"></i> Generate Term Newsletter (PDF)
+                    </button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="generateBulkReports('whatsapp')">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Messages
+                    </button>
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="generateBulkReports('email')">
+                        <i class="fas fa-envelope"></i> Email Content
+                    </button>
+                </div>
+                <div id="bulk-report-output" style="margin-top: 1.5rem; max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; display: none;">
+                    <h4 style="color:var(--primary); margin-bottom: 0.5rem;">Generated Content:</h4>
+                    <pre id="bulk-report-output-content" style="white-space: pre-wrap; font-family: 'Space Mono', monospace; font-size: 0.8rem;"></pre>
+                    <div class="flex gap-10" style="margin-top: 1rem;">
+                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="copyOutput()">
+                            <i class="fas fa-copy"></i> Copy All
+                        </button>
+                        <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('bulk-report-output').style.display='none'">
+                            <i class="fas fa-times"></i> Close Output
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Lookup Modal -->
+    <div class="modal-overlay" id="modal-lookup-params">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Check Student Balance</h3>
+                <span class="close-modal" onclick="closeModal('modal-lookup-params')">&times;</span>
+            </div>
+            <form onsubmit="handleLookupSubmit(event)">
+                <div class="form-group" id="lookup-student-search-group">
+                    <label>Search Student</label>
+                    <input type="text" class="form-control" id="lookup-student-search" placeholder="Enter name or Admission ID..." onkeyup="searchStudentForLookup(this.value)">
+                    <div id="lookup-search-results" style="border: 1.5px solid var(--border); border-radius: 8px; margin-top: 5px; max-height: 150px; overflow-y: auto; display: none; background: var(--bg-light); z-index: 10;"></div>
+                </div>
+                <input type="hidden" id="lookup-student-id">
+                <div id="lookup-selected-display" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(128, 0, 0, 0.1); border-radius: 8px; font-weight: 700; color: var(--primary); text-align: center;"></div>
+                
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Term</label>
+                        <select class="form-control" id="lookup-term" required>
+                            <option value="Term 1">Term 1</option>
+                            <option value="Term 2">Term 2</option>
+                            <option value="Term 3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Academic Year</label>
+                        <input type="number" class="form-control" id="lookup-year" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">View Fee Statement</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fee Statement Modal -->
+    <div class="modal-overlay" id="modal-fee-statement">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice-dollar"></i> Student Fee Statement</h3>
+                <span class="close-modal" onclick="closeModal('modal-fee-statement')">&times;</span>
+            </div>
+            <div class="modal-body" id="fee-statement-body">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading fee statement...</p>
+                </div>
+            </div>
+            <div class="flex gap-10 mfoot" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+                <button class="btn btn-outline" onclick="closeModal('modal-fee-statement')">Close</button>
+                <button class="btn btn-primary" id="print-fee-statement-btn"><i class="fas fa-print"></i> Print Statement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Newsletter Modal -->
+    <div class="modal-overlay" id="modal-bulk-newsletter">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Bulk Personalized Newsletters</h3>
+                <span class="close-modal" onclick="closeModal('modal-bulk-newsletter')">&times;</span>
+            </div>
+            <form onsubmit="generateBulkClosingNewsletters(event)">
+                <div class="form-group">
+                    <label>Academic Term</label>
+                    <select class="form-control" id="bulk-news-term" required>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <input type="number" class="form-control" id="bulk-news-year" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Generate Bulk PDFs</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Parameters Modal -->
+    <div class="modal-overlay" id="modal-report-params">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Report Form Configuration</h3>
+                <span class="close-modal" onclick="closeModal('modal-report-params')">&times;</span>
+            </div>
+            <form onsubmit="event.preventDefault(); generateReportFormPDF()">
+                <input type="hidden" id="report-student-id">
+                <div class="form-group">
+                    <label>Select Term</label>
+                    <select class="form-control" id="report-term" required>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Academic Year</label>
+                    <input type="number" class="form-control" id="report-year" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Generate PDF Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Parent WhatsApp Broadcast Modal -->
+    <div class="modal-overlay" id="modal-parent-broadcast">
+        <div class="modal" style="max-width: 640px;">
+            <div class="modal-header">
+                <h3><i class="fab fa-whatsapp" style="color:var(--success);"></i> Send Message to Parents</h3>
+                <span class="close-modal" onclick="closeModal('modal-parent-broadcast')">&times;</span>
+            </div>
+            <div class="form-group">
+                <label>Class (All Classes = entire school)</label>
+                <select class="form-control" id="pb-class">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea class="form-control" id="pb-message" rows="3" placeholder="Type the notice parents should receive..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Parent WhatsApp Numbers &amp; Links</label>
+                <div id="pb-list" style="max-height:150px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:0.85rem; background:var(--bg-light);">
+                    Press Generate to build the parent list.
+                </div>
+            </div>
+            <div class="flex gap-10" style="margin-top:1rem;">
+                <button class="btn btn-primary" style="flex:1;" onclick="generateParentBroadcast()"><i class="fas fa-sync"></i> Generate</button>
+                <button class="btn btn-outline" style="flex:1;" onclick="copyParentBroadcast()"><i class="fas fa-copy"></i> Copy All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Book -->
+    <div class="modal-overlay" id="modal-book">
+        <div class="modal">
+            <div class="modal-header"><h3 id="book-modal-title">Add Book</h3><span class="close-modal" onclick="closeModal('modal-book')">&times;</span></div>
+            <form onsubmit="saveBook(event)">
+                <input type="hidden" id="book-edit-id">
+                <div class="form-group"><label>Title</label><input type="text" class="form-control" id="book-title" required></div>
+                <div class="form-group"><label>Author</label><input type="text" class="form-control" id="book-author" required></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Category</label><input type="text" class="form-control" id="book-category" placeholder="e.g. Mathematics"></div>
+                    <div class="form-group" style="flex:1;"><label>Total Copies</label><input type="number" class="form-control" id="book-copies" value="1" min="1" required></div>
+                </div>
+                <div class="form-group"><label>Shelf / Location</label><input type="text" class="form-control" id="book-shelf" placeholder="e.g. Shelf B2"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Issue Book -->
+    <div class="modal-overlay" id="modal-borrow">
+        <div class="modal">
+            <div class="modal-header"><h3>Issue Book</h3><span class="close-modal" onclick="closeModal('modal-borrow')">&times;</span></div>
+            <form onsubmit="saveBorrowing(event)">
+                <div class="form-group"><label>Book (available copies)</label><select class="form-control" id="borrow-book" required></select></div>
+                <div class="form-group"><label>Student</label><select class="form-control" id="borrow-student" required></select></div>
+                <div class="form-group"><label>Due Date</label><input type="date" class="form-control" id="borrow-due" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Issue Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Vehicle -->
+    <div class="modal-overlay" id="modal-vehicle">
+        <div class="modal">
+            <div class="modal-header"><h3 id="vehicle-modal-title">Add Vehicle / Route</h3><span class="close-modal" onclick="closeModal('modal-vehicle')">&times;</span></div>
+            <form onsubmit="saveVehicle(event)">
+                <input type="hidden" id="veh-edit-id">
+                <div class="form-group"><label>Plate Number</label><input type="text" class="form-control" id="veh-plate" placeholder="e.g. KDA 123A" required></div>
+                <div class="form-group"><label>Route</label><input type="text" class="form-control" id="veh-route" placeholder="e.g. CBD – School" required></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Driver Name</label><input type="text" class="form-control" id="veh-driver"></div>
+                    <div class="form-group" style="flex:1;"><label>Driver Phone</label><input type="tel" class="form-control" id="veh-phone"></div>
+                </div>
+                <div class="form-group"><label>Capacity</label><input type="number" class="form-control" id="veh-capacity" value="40" min="1" required></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Vehicle</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Route -->
+    <div class="modal-overlay" id="modal-route">
+        <div class="modal">
+            <div class="modal-header"><h3>Assign Student to Transport</h3><span class="close-modal" onclick="closeModal('modal-route')">&times;</span></div>
+            <form onsubmit="assignRoute(event)">
+                <div class="form-group"><label>Student</label><select class="form-control" id="route-student" required></select></div>
+                <div class="form-group"><label>Vehicle / Route</label><select class="form-control" id="route-vehicle" required></select></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Term</label><select class="form-control" id="route-term"><option>Term 1</option><option>Term 2</option><option>Term 3</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Year</label><input type="number" class="form-control" id="route-year"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Assign</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Dormitory -->
+    <div class="modal-overlay" id="modal-dorm">
+        <div class="modal">
+            <div class="modal-header"><h3 id="dorm-modal-title">Add Dormitory</h3><span class="close-modal" onclick="closeModal('modal-dorm')">&times;</span></div>
+            <form onsubmit="saveDorm(event)">
+                <input type="hidden" id="dorm-edit-id">
+                <div class="form-group"><label>Dormitory Name</label><input type="text" class="form-control" id="dorm-name" placeholder="e.g. Nyerere House" required></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Type</label><select class="form-control" id="dorm-type"><option>Boys</option><option>Girls</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Capacity (beds)</label><input type="number" class="form-control" id="dorm-capacity" value="40" min="1" required></div>
+                </div>
+                <div class="form-group"><label>Patron / Matron</label><input type="text" class="form-control" id="dorm-patron"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Dormitory</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Bed -->
+    <div class="modal-overlay" id="modal-bed">
+        <div class="modal">
+            <div class="modal-header"><h3>Assign Boarding Bed</h3><span class="close-modal" onclick="closeModal('modal-bed')">&times;</span></div>
+            <form onsubmit="assignBed(event)">
+                <div class="form-group"><label>Student</label><select class="form-control" id="bed-student" required></select></div>
+                <div class="form-group"><label>Dormitory</label><select class="form-control" id="bed-dorm" required></select></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Room / Unit</label><input type="text" class="form-control" id="bed-room" placeholder="e.g. Room 12"></div>
+                    <div class="form-group" style="flex:1;"><label>Bed Number</label><input type="text" class="form-control" id="bed-number" placeholder="e.g. B4"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Assign Bed</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Inventory Item -->
+    <div class="modal-overlay" id="modal-inventory-item">
+        <div class="modal">
+            <div class="modal-header"><h3 id="item-modal-title">Add Inventory Item</h3><span class="close-modal" onclick="closeModal('modal-inventory-item')">&times;</span></div>
+            <form onsubmit="saveInventoryItem(event)">
+                <input type="hidden" id="item-edit-id">
+                <div class="form-group"><label>Item Name</label><input type="text" class="form-control" id="item-name" required></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Category</label><input type="text" class="form-control" id="item-category" placeholder="e.g. Stationery"></div>
+                    <div class="form-group" style="flex:1;"><label>Unit</label><input type="text" class="form-control" id="item-unit" placeholder="pcs / reams / kg"></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Opening Stock</label><input type="number" class="form-control" id="item-stock" value="0" min="0" required></div>
+                    <div class="form-group" style="flex:1;"><label>Min Stock (alert)</label><input type="number" class="form-control" id="item-min" value="5" min="0" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Stock Move -->
+    <div class="modal-overlay" id="modal-stock-move">
+        <div class="modal">
+            <div class="modal-header"><h3>Record Stock Movement</h3><span class="close-modal" onclick="closeModal('modal-stock-move')">&times;</span></div>
+            <form onsubmit="saveStockMove(event)">
+                <div class="form-group"><label>Item</label><select class="form-control" id="sm-item" required></select></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Type</label><select class="form-control" id="sm-type"><option>In</option><option>Out</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Quantity</label><input type="number" class="form-control" id="sm-qty" value="1" min="1" required></div>
+                </div>
+                <div class="form-group"><label>Note / Reference</label><input type="text" class="form-control" id="sm-note" placeholder="e.g. Monthly supply / Issued to Grade 4"></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Record Movement</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Import Modal -->
+    <div class="modal-overlay" id="modal-student-import">
+        <div class="modal" style="max-width:620px;">
+            <div class="modal-header"><h3>Import Students (CSV)</h3><span class="close-modal" onclick="closeModal('modal-student-import')">&times;</span></div>
+            <p class="text-muted" style="font-size:0.8rem;">CSV columns: <b>FirstName, MiddleName, LastName, Gender, DateOfBirth, AdmissionNo, Class, Stream, AcademicYear, Status, GuardianPhone</b>.<br>Class / Stream may be a name or an ID. Rows are validated before creating anything &mdash; no partial imports.</p>
+            <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="downloadStudentTemplate()"><i class="fas fa-download"></i> Download Template</button>
+            <div class="form-group"><label>CSV File</label><input type="file" id="ops-import-file" accept=".csv,.txt" onchange="parseStudentImport(this)"></div>
+            <div id="ops-import-result" class="hidden"></div>
+            <div class="flex gap-10" style="margin-top:1.2rem;">
+                <button type="button" class="btn btn-primary" id="ops-import-confirm" style="flex:1; display:none;" onclick="confirmStudentImport()">Confirm Import</button>
+                <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('modal-student-import')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Profile Modal -->
+    <div class="modal-overlay" id="modal-student-profile">
+        <div class="modal" style="max-width:740px;">
+            <div class="modal-header"><h3>Student Profile</h3><span class="close-modal" onclick="closeModal('modal-student-profile')">&times;</span></div>
+            <div id="student-profile-content"><p class="text-muted">Loading...</p></div>
+            <div class="flex gap-10" style="margin-top:1.2rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="editStudentFromProfile()"><i class="fas fa-user-edit"></i> Edit</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openTransferModal()"><i class="fas fa-people-arrows"></i> Transfer</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="openPromoteModal()"><i class="fas fa-arrow-circle-up"></i> Promote</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="archiveStudentFromProfile()"><i class="fas fa-archive"></i> Archive</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal-overlay" id="modal-transfer">
+        <div class="modal" style="max-width:560px;">
+            <div class="modal-header"><h3>Transfer / Change Class</h3><span class="close-modal" onclick="closeModal('modal-transfer')">&times;</span></div>
+            <form onsubmit="saveStudentTransfer(event)">
+                <input type="hidden" id="transfer-student-id">
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Destination Grade / Class</label><select class="form-control" id="transfer-class" required></select></div>
+                    <div class="form-group" style="flex:1;"><label>Destination Stream</label><select class="form-control" id="transfer-stream"><option value="">No stream</option></select></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Transfer Date</label><input type="date" class="form-control" id="transfer-date" required></div>
+                    <div class="form-group" style="flex:1;"><label>Type</label><select class="form-control" id="transfer-type"><option>Internal</option><option>Transferred Out</option></select></div>
+                </div>
+                <div class="form-group" style="flex:1;"><label>Destination School (if out)</label><input type="text" class="form-control" id="transfer-dest-school"></div>
+                <div class="form-group"><label>Reason / Notes</label><textarea class="form-control" id="transfer-reason" rows="2"></textarea></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Transfer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Promote Modal -->
+    <div class="modal-overlay" id="modal-promote">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3>Promote Student</h3><span class="close-modal" onclick="closeModal('modal-promote')">&times;</span></div>
+            <form onsubmit="confirmPromote(event)">
+                <input type="hidden" id="promote-student-id">
+                <p class="text-muted" style="font-size:0.82rem;">Moves the student to the next academic stage. A promotion history record is kept and the previous placement is preserved.</p>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Destination Grade / Class</label><select class="form-control" id="promote-class" required></select></div>
+                    <div class="form-group" style="flex:1;"><label>Destination Stream</label><select class="form-control" id="promote-stream"><option value="">No stream</option></select></div>
+                </div>
+                <div class="form-group"><label>Academic Year</label><select class="form-control" id="promote-year" required></select></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Confirm Promotion</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Academic Year Modal -->
+    <div class="modal-overlay" id="modal-academic-year">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3 id="academic-year-modal-title">Add Academic Year</h3><span class="close-modal" onclick="closeModal('modal-academic-year')">&times;</span></div>
+            <form onsubmit="saveAcademicYear(event)">
+                <input type="hidden" id="ay-edit-id">
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Year</label><input type="number" class="form-control" id="ay-name" placeholder="2026" required></div>
+                    <div class="form-group" style="flex:1;"><label>Status</label><select class="form-control" id="ay-status"><option>Active</option><option>Archived</option></select></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Start Date</label><input type="date" class="form-control" id="ay-start"></div>
+                    <div class="form-group" style="flex:1;"><label>End Date</label><input type="date" class="form-control" id="ay-end"></div>
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="ay-active" style="width:18px;height:18px;"> <label for="ay-active">Set as Active for this school</label></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Academic Year</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Term Modal -->
+    <div class="modal-overlay" id="modal-term">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3>Manage Term</h3><span class="close-modal" onclick="closeModal('modal-term')">&times;</span></div>
+            <form onsubmit="saveTerm(event)">
+                <input type="hidden" id="term-edit-id">
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Term Name</label><input type="text" class="form-control" id="term-name" placeholder="Term 1" required></div>
+                    <div class="form-group" style="flex:1;"><label>Academic Year</label><select class="form-control" id="term-year" required></select></div>
+                </div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Start Date</label><input type="date" class="form-control" id="term-start"></div>
+                    <div class="form-group" style="flex:1;"><label>End Date</label><input type="date" class="form-control" id="term-end"></div>
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="term-active" style="width:16px;height:18px;"> <label for="term-active">Active term</label></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Term</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stream Modal -->
+    <div class="modal-overlay" id="modal-stream">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-header"><h3>Add / Edit Stream</h3><span class="close-modal" onclick="closeModal('modal-stream')">&times;</span></div>
+            <form onsubmit="saveStream(event)">
+                <input type="hidden" id="stream-edit-id">
+                <div class="form-group"><label>Stream Name</label><input type="text" class="form-control" id="stream-name" placeholder="East" required></div>
+                <div class="form-group"><label>Grade / Class</label><select class="form-control" id="stream-class" required></select></div>
+                <div class="form-group"><label>Class Teacher</label><select class="form-control" id="stream-teacher"><option value="">None</option></select></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Capacity</label><input type="number" class="form-control" id="stream-capacity" value="40" min="0"></div>
+                    <div class="form-group" style="flex:1;"><label>Archived</label><select class="form-control" id="stream-archived"><option value="false">No</option><option value="true">Yes</option></select></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Stream</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subject Modal -->
+    <div class="modal-overlay" id="modal-subject">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3>Add / Edit Subject</h3><span class="close-modal" onclick="closeModal('modal-subject')">&times;</span></div>
+            <form onsubmit="saveSubject(event)">
+                <input type="hidden" id="subject-edit-id">
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Subject / Learning Area</label><input type="text" class="form-control" id="subject-name" placeholder="Mathematics" required></div>
+                    <div class="form-group" style="flex:1;width:150px;"><label>Code</label><input type="text" class="form-control" id="subject-code" placeholder="MAT"></div>
+                </div>
+                <div class="form-group"><label>Applicable Grade / Classes</label><select multiple class="form-control" id="subject-classes" size="4"></select></div>
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="subject-active" checked style="width:16px;height:18px;"> <label for="subject-active">Active</label></div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Subject</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Teacher Assignment Modal -->
+    <div class="modal-overlay" id="modal-teacher-assign">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3>Assign Teacher</h3><span class="close-modal" onclick="closeModal('modal-teacher-assign')">&times;</span></div>
+            <form onsubmit="saveTeacherAssignment(event)">
+                <input type="hidden" id="tassign-edit-id">
+                <div class="form-group"><label>Teacher</label><select class="form-control" id="tassign-teacher" required></select></div>
+                <div class="form-group"><label>Grade / Class</label><select class="form-control" id="tassign-class" required></select></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Stream</label><select class="form-control" id="tassign-stream"><option value="">Any / None</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Subject</label><select class="form-control" id="tassign-subject" required></select></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Assignment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- School Admin User Modal -->
+    <div class="modal-overlay" id="modal-admin-user">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3 id="admin-user-modal-title">Add School Administrator</h3><span class="close-modal" onclick="closeModal('modal-admin-user')">&times;</span></div>
+            <form onsubmit="saveAdminUser(event)">
+                <input type="hidden" id="admuser-original-email">
+                <div class="form-group"><label>Email Address</label><input type="email" class="form-control" id="admuser-email" placeholder="staff@school.ac.ke" required></div>
+                <div class="flex gap-10">
+                    <div class="form-group" style="flex:1;"><label>Role</label><select class="form-control" id="admuser-role"><option value="admin">Admin</option><option value="teacher">Teacher</option></select></div>
+                    <div class="form-group" style="flex:1;"><label>Status</label><select class="form-control" id="admuser-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                </div>
+                <p class="text-muted" style="font-size:0.75rem;">The user needs a login provisioned by the system owner. Adding them here assigns this school, role and any permissions you set.</p>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Save Administrator</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
+

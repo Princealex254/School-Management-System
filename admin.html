@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Control | Prince Alex Digital</title>
+    <meta name="description" content="SaaS Owner / Super Admin Master Control Panel">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="toast-container"></div>
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ===== AUTH SECTION ===== -->
+    <section id="auth-section">
+        <div class="auth-card">
+            <i class="fas fa-user-shield" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h2>Master Control</h2>
+            <p class="auth-sub">Prince Alex Digital Super Admin Panel</p>
+            <form onsubmit="handleLogin(event)">
+                <div class="auth-form-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="login-email" placeholder="Master Email Address" required>
+                </div>
+                <div class="auth-form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="Secret Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.05rem; margin-top: 0.5rem;">
+                    Access Master Panel <i class="fas fa-sign-in-alt" style="margin-left: 10px;"></i>
+                </button>
+            </form>
+            <p style="margin-top: 1.2rem; font-size: 0.7rem; color: var(--text-muted); opacity: 0.6;">&copy; 2026 Prince Alex Digital. All rights reserved.</p>
+            <p style="margin-top: 0.4rem; font-size: 0.75rem;">
+                <a href="https://www.princealex.digital" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 700;">www.princealex.digital</a>
+                &nbsp;•&nbsp;
+                <a href="index.html" style="color: var(--text-muted); text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to School Dashboard</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== APP SECTION ===== -->
+    <section id="app-section" class="hidden">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Master Control</h2>
+                <p style="font-size: 0.6rem; opacity: 0.7; text-transform: uppercase; margin-top: 5px;">Prince Alex Digital</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" data-view="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+                <div class="menu-divider"><small>SCHOOL MANAGEMENT</small></div>
+                <div class="menu-item" data-view="schools"><i class="fas fa-university"></i> Schools</div>
+                <div class="menu-item" data-view="owners"><i class="fas fa-user-tie"></i> School Owners</div>
+                <div class="menu-divider"><small>PLATFORM</small></div>
+                <div class="menu-item" data-view="modules"><i class="fas fa-cubes"></i> Module Management</div>
+                <div class="menu-item" data-view="users"><i class="fas fa-users"></i> Platform Users</div>
+                                <div class="menu-item" data-view="roles"><i class="fas fa-key"></i> Platform Roles</div>
+                <div class="menu-item" data-view="superowners"><i class="fas fa-user-shield"></i> Super Owners</div>
+                <div class="menu-item" data-view="support"><i class="fas fa-lifering"></i> Support Access</div>
+                <div class="menu-item" data-view="audit"><i class="fas fa-history"></i> Audit Logs</div>
+                <div class="menu-item" data-view="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
+                <div class="menu-item" data-view="announcements"><i class="fas fa-bullhorn"></i> Global Announcements</div>
+                <div class="menu-item" data-view="settings"><i class="fas fa-cog"></i> Global Settings</div>
+                <div class="menu-item" data-view="health"><i class="fas fa-heartbeat"></i> System Health</div>
+            </nav>
+        </aside>
+        <div class="main-wrapper">
+            <header class="navbar">
+                <div class="flex align-center gap-10">
+                    <i class="fas fa-bars menu-toggle" id="toggle-btn" onclick="toggleSidebar()"></i>
+                    <h3 id="view-title">Dashboard</h3>
+                </div>
+                <button class="btn btn-outline" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </header>
+                        <main class="content-body" id="view-container">
+                <!-- ===== DASHBOARD VIEW ===== -->
+                <div id="view-dashboard" class="view">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Platform Dashboard</h4>
+                        <button class="btn btn-outline btn-sm" onclick="refreshDashboard()" style="font-size:0.75rem;padding:0.4rem 0.8rem;"><i class="fas fa-redo"></i> Refresh</button>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="stat-total-schools">0</div><div class="stat-label">Total Schools</div><div class="stat-icon"><i class="fas fa-school"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-active-schools">0</div><div class="stat-label">Active Schools</div><div class="stat-icon"><i class="fas fa-check-circle"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-inactive-schools">0</div><div class="stat-label">Inactive/Suspended</div><div class="stat-icon"><i class="fas fa-pause-circle"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-total-students">0</div><div class="stat-label">Total Students</div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-total-teachers">0</div><div class="stat-label">Total Teachers</div><div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-total-admins">0</div><div class="stat-label">Total School Admins</div><div class="stat-icon"><i class="fas fa-users-cog"></i></div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-total-users">0</div><div class="stat-label">Total Active Users</div><div class="stat-icon"><i class="fas fa-user"></i></div></div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3 style="margin-bottom:1rem;">Recently Added Schools</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead><tr><th>School</th><th>Location</th><th>Status</th><th>Created</th></tr></thead>
+                                    <tbody id="recent-schools-body"><tr><td colspan="4" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 style="margin-bottom:1rem;">Recent Platform Activity</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead><tr><th>Activity</th><th>User</th><th>School</th><th>When</th></tr></thead>
+                                    <tbody id="recent-activity-body"><tr><td colspan="4" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">System Alerts</h3>
+                        <div id="system-alerts"><p style="color:var(--text-muted);">No active alerts.</p></div>
+                    </div>
+                </div>
+
+                <!-- ===== SCHOOLS VIEW ===== -->
+                <div id="view-schools" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>School Management</h4>
+                        <div class="flex gap-10">
+                            <div class="search-box"><input type="text" class="form-control" placeholder="Search schools..." onkeyup="filterTable('school-table-el', this.value)"></div>
+                            <button class="btn btn-primary" onclick="openModal('modal-school')"><i class="fas fa-plus"></i> New School</button>
+                        </div>
+                    </div>
+                    <div class="card table-responsive">
+                        <table id="school-table-el">
+                            <thead>
+                                <tr><th>School</th><th>Location</th><th>Status</th><th>Owner</th><th>Students</th><th>Teachers</th><th>Modules</th><th>Created</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="school-list-body"><tr><td colspan="9" style="text-align:center;padding:2rem;">Loading schools...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ===== SCHOOL OWNERS VIEW ===== -->
+                <div id="view-owners" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>School Owners</h4>
+                        <div class="flex gap-10">
+                            <div class="search-box"><input type="text" class="form-control" placeholder="Search owners..." onkeyup="filterTable('owner-table-el', this.value)"></div>
+                            <button class="btn btn-primary" onclick="openModal('modal-owner')"><i class="fas fa-plus"></i> New Owner</button>
+                        </div>
+                    </div>
+                    <div class="card table-responsive">
+                        <table id="owner-table-el">
+                            <thead><tr><th>Owner</th><th>Email</th><th>School</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                            <tbody id="owner-list-body"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading owners...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== MODULES VIEW ===== -->
+                <div id="view-modules" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Module Management</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-module')"><i class="fas fa-plus"></i> New Module</button>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">Platform Modules</h3>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Control which modules exist on the platform and their global status. Then enable/disable them per school from the Schools view.</p>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>Module</th><th>Icon</th><th>Status</th><th>Schools Enabled</th><th>Created</th><th>Actions</th></tr></thead>
+                                <tbody id="module-list-body"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading modules...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- ===== PLATFORM USERS VIEW ===== -->
+                <div id="view-users" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Platform Users</h4>
+                        <div class="flex gap-10">
+                            <div class="search-box"><input type="text" class="form-control" placeholder="Search users..." onkeyup="filterTable('user-table-el', this.value)"></div>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Search and view users across all schools. Use account recovery to reset passwords.</p>
+                    <div class="card table-responsive">
+                        <table id="user-table-el">
+                            <thead><tr><th>User</th><th>Email</th><th>School</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr></thead>
+                            <tbody id="user-list-body"><tr><td colspan="7" style="text-align:center;padding:2rem;">Loading users...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== PLATFORM ROLES VIEW ===== -->
+                <div id="view-roles" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Platform Roles</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-role')"><i class="fas fa-plus"></i> New Role</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Platform roles are separate from school roles. They control access to this master panel.</p>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead><tr><th>Role</th><th>Level</th><th>Permissions</th><th>Created</th><th>Actions</th></tr></thead>
+                            <tbody id="role-list-body"><tr><td colspan="5" style="text-align:center;padding:2rem;">Loading roles...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                                <!-- ===== SUPER OWNERS VIEW ===== -->
+                <div id="view-superowners" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Super Owners</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-super-owner')"><i class="fas fa-plus"></i> Grant Super Owner</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Super Owners live in the <code>users</code> Firestore collection (name, email, role &amp; more). Every Master Control login checks this <b>role: owner</b> — grant or revoke below and it applies on the very next sign-in.</p>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Added</th><th>Action</th></tr></thead>
+                            <tbody id="super-owner-list-body"><tr><td colspan="5" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== SUPPORT ACCESS VIEW ===== -->
+                <div id="view-support" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Support Access</h4>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">Enter Support Mode</h3>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Access a school's environment for troubleshooting. Each session is logged.</p>
+                        <form onsubmit="enterSupportMode(event)" style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <div class="form-group" style="flex:1;min-width:180px;">
+                                <label>School</label>
+                                <select class="form-control" id="support-school" required></select>
+                            </div>
+                            <div class="form-group" style="flex:1;min-width:180px;">
+                                <label>Reason</label>
+                                <input type="text" class="form-control" id="support-reason" placeholder="e.g. Attendance issue" required>
+                            </div>
+                            <div class="form-group" style="align-self:flex-end;">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-lifering"></i> Enter Support Mode</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <div class="flex justify-between align-center" style="margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
+                            <h3 style="margin:0;">Recent Support Sessions</h3>
+                            <button class="btn btn-outline btn-sm" style="font-size:0.75rem;padding:0.4rem 0.8rem;" onclick="loadSupportSessions()"><i class="fas fa-redo"></i></button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>School</th><th>By</th><th>Reason</th><th>Started</th><th>Ended</th><th>Status</th></tr></thead>
+                                <tbody id="support-sessions-body"><tr><td colspan="6" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ===== AUDIT LOGS VIEW ===== -->
+                <div id="view-audit" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Audit Logs</h4>
+                        <div class="flex gap-10">
+                            <select class="form-control" id="audit-filter-module" onchange="loadAuditLogs()" style="max-width:180px;">
+                                <option value="">All Modules</option>
+                                <option value="schools">Schools</option>
+                                <option value="owners">Owners</option>
+                                <option value="modules">Modules</option>
+                                <option value="users">Users</option>
+                                <option value="settings">Settings</option>
+                                <option value="support">Support</option>
+                            </select>
+                            <select class="form-control" id="audit-filter-action" onchange="loadAuditLogs()" style="max-width:180px;">
+                                <option value="">All Actions</option>
+                                <option value="created">Created</option>
+                                <option value="updated">Updated</option>
+                                <option value="deleted">Deleted</option>
+                                <option value="status_changed">Status Changed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead><tr><th>Date &amp; Time</th><th>User</th><th>Action</th><th>Module</th><th>School</th><th>Record</th><th>Details</th></tr></thead>
+                            <tbody id="audit-list-body"><tr><td colspan="7" style="text-align:center;padding:2rem;">Loading logs...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== ANALYTICS VIEW ===== -->
+                <div id="view-analytics" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Platform Analytics</h4>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="analytics-total-students">0</div><div class="stat-label">Total Students</div></div>
+                        <div class="stat-card"><div class="stat-value" id="analytics-week-students">+0</div><div class="stat-label">Students This Week</div></div>
+                        <div class="stat-card"><div class="stat-value" id="analytics-month-students">+0</div><div class="stat-label">Students This Month</div></div>
+                        <div class="stat-card"><div class="stat-value" id="analytics-active-modules">0</div><div class="stat-label">Active Modules</div></div>
+                        <div class="stat-card"><div class="stat-value" id="analytics-inactive-schools">0</div><div class="stat-label">Inactive Schools</div></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">Students Per School</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead><tr><th>School</th><th>Students</th><th>Teachers</th></tr></thead>
+                                <tbody id="analytics-school-body"><tr><td colspan="3" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== ANNOUNCEMENTS VIEW ===== -->
+                <div id="view-announcements" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Global Announcements</h4>
+                        <button class="btn btn-primary" onclick="openModal('modal-announcement')"><i class="fas fa-bullhorn"></i> New Announcement</button>
+                    </div>
+                    <div class="card table-responsive">
+                        <table>
+                            <thead><tr><th>Title</th><th>Recipients</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                            <tbody id="announcement-list-body"><tr><td colspan="5" style="text-align:center;padding:2rem;">Loading...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <!-- ===== GLOBAL SETTINGS VIEW ===== -->
+                <div id="view-settings" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>Global Settings</h4>
+                        <button class="btn btn-primary" onclick="savePlatformSettings()"><i class="fas fa-save"></i> Save Settings</button>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">General Settings</h3>
+                        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Platform Name</label><input type="text" class="form-control" id="set-platform-name" placeholder="e.g. Prince Alex Digital"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Platform Logo URL</label><input type="text" class="form-control" id="set-platform-logo" placeholder="https://..."></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Support Email</label><input type="email" class="form-control" id="set-support-email" placeholder="support@example.com"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Support Phone</label><input type="text" class="form-control" id="set-support-phone" placeholder="e.g. 0717 384 875"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Default Country</label><input type="text" class="form-control" id="set-country" value="Kenya"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Default Currency</label><input type="text" class="form-control" id="set-currency" value="KES"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Default Timezone</label><input type="text" class="form-control" id="set-timezone" value="Africa/Nairobi"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">System Settings</h3>
+                        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Default School Status</label><select class="form-control" id="set-default-school-status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="suspended">Suspended</option></select></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Password Min Length</label><input type="number" class="form-control" id="set-password-min" value="8"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Session Timeout (hours)</label><input type="number" class="form-control" id="set-session-timeout" value="8"></div>
+                            <div class="form-group" style="flex:1;min-width:200px;"><label>Default Modules (comma separated)</label><input type="text" class="form-control" id="set-default-modules" placeholder="e.g. students,academics,attendance,exams,finance"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== SYSTEM HEALTH VIEW ===== -->
+                <div id="view-health" class="view hidden">
+                    <div class="flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                        <h4>System Health</h4>
+                        <button class="btn btn-outline btn-sm" style="font-size:0.75rem;padding:0.4rem 0.8rem;" onclick="refreshSystemHealth()"><i class="fas fa-redo"></i> Refresh</button>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="health-auth">✓</div><div class="stat-label">Authentication</div></div>
+                        <div class="stat-card"><div class="stat-value" id="health-db">✓</div><div class="stat-label">Database</div></div>
+                        <div class="stat-card"><div class="stat-value" id="health-storage">✓</div><div class="stat-label">Storage</div></div>
+                        <div class="stat-card"><div class="stat-value" id="health-email">✓</div><div class="stat-label">Email</div></div>
+                        <div class="stat-card"><div class="stat-value" id="health-sms">✓</div><div class="stat-label">SMS</div></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:1rem;">System Status</h3>
+                        <ul id="health-list" style="list-style:none;padding:0;">
+                            <li class="health-item">Authentication: <span class="operational">Operational</span></li>
+                            <li class="health-item">Database: <span class="operational">Operational</span></li>
+                            <li class="health-item">Storage: <span class="operational">Operational</span></li>
+                            <li class="health-item">Email: <span class="operational">Operational</span></li>
+                            <li class="health-item">SMS: <span class="operational">Operational</span></li>
+                        </ul>
+                        <p style="color:var(--text-muted);font-size:0.85rem;margin-top:1rem;">Subscription and payment management systems have been removed. Pricing is handled directly between schools and Prince Alex Digital.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Modal: New/Edit School -->
+    <div class="modal-overlay" id="modal-school">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-school-title">Create New School</h3>
+                <span class="close-modal" onclick="closeModal('modal-school')">&times;</span>
+            </div>
+            <form onsubmit="saveSchool(event)">
+                <input type="hidden" id="edit-sch-id">
+                <div class="form-group"><label>School Name</label><input type="text" class="form-control" id="sch-name" required></div>
+                <div class="form-group"><label>Location</label><input type="text" class="form-control" id="sch-loc" required></div>
+                <div class="form-group"><label>Theme Color</label><input type="color" class="form-control" id="sch-color" value="#800000" style="height:45px;padding:5px;"></div>
+                <div class="form-group"><label>School Owner Email</label><input type="email" class="form-control" id="sch-owner" placeholder="owner@email.com"></div>
+                <div class="form-group" id="sch-owner-password-wrap">
+                    <label>Owner Password <span style="font-weight:400;font-size:.8rem;color:var(--text-muted);">(creates owner login)</span></label>
+                    <input type="password" class="form-control" id="sch-owner-password" placeholder="Set an owner login password" autocomplete="new-password">
+                    <small style="color:var(--text-muted);">Enter a password above to create the owner's Firebase login account. Leave blank to only assign the email (no login created).</small>
+                </div>
+                <div class="form-group">
+                    <label>School Status</label>
+                    <select class="form-control" id="sch-status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Enabled Modules</label><div id="sch-modules-selector" style="max-height:160px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;"></div></div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-school-btn">Create School</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-school')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New/Edit School Owner -->
+    <div class="modal-overlay" id="modal-owner">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-owner-title">Create New School Owner</h3>
+                <span class="close-modal" onclick="closeModal('modal-owner')">&times;</span>
+            </div>
+            <form onsubmit="saveOwner(event)">
+                <input type="hidden" id="edit-owner-id">
+                <div class="form-group"><label>Owner Email</label><input type="email" class="form-control" id="own-email" required></div>
+                <div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="own-name"></div>
+                <div class="form-group"><label>Phone</label><input type="text" class="form-control" id="own-phone"></div>
+                <div class="form-group"><label>Assign to School</label><select class="form-control" id="own-school"></select></div>
+                <div class="form-group"><label>Owner Status</label><select class="form-control" id="own-status"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-owner-btn">Create Owner</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-owner')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: New/Edit Module -->
+    <div class="modal-overlay" id="modal-module">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-module-title">Create New Module</h3>
+                <span class="close-modal" onclick="closeModal('modal-module')">&times;</span>
+            </div>
+            <form onsubmit="saveModule(event)">
+                <input type="hidden" id="edit-mod-id">
+                <div class="form-group"><label>Module Name</label><input type="text" class="form-control" id="mod-name" required></div>
+                <div class="form-group"><label>Icon (Font Awesome class)</label><input type="text" class="form-control" id="mod-icon" placeholder="e.g. fas fa-book"></div>
+                <div class="form-group"><label>Description</label><textarea class="form-control" id="mod-desc" rows="2" placeholder="Short description of this module."></textarea></div>
+                <div class="form-group">
+                    <label>Platform Status</label>
+                    <select class="form-control" id="mod-status">
+                        <option value="active">Active</option>
+                        <option value="coming_soon">Coming Soon</option>
+                        <option value="maintenance">Under Maintenance</option>
+                        <option value="disabled">Disabled</option>
+                    </select>
+                </div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-module-btn">Create Module</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-module')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New/Edit Platform Role -->
+    <div class="modal-overlay" id="modal-role">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-role-title">Create New Role</h3>
+                <span class="close-modal" onclick="closeModal('modal-role')">&times;</span>
+            </div>
+            <form onsubmit="saveRole(event)">
+                <input type="hidden" id="edit-role-id">
+                <div class="form-group"><label>Role Name</label><input type="text" class="form-control" id="role-name" required></div>
+                <div class="form-group"><label>Level</label><select class="form-control" id="role-level">
+                    <option value="super_owner">Super Owner</option>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="platform_support">Platform Support Admin</option>
+                    <option value="platform_admin">Platform Admin</option>
+                </select></div>
+                <div class="form-group"><label>Permissions (comma separated)</label><input type="text" class="form-control" id="role-perms" placeholder="e.g. manage_schools,view_users"></div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-role-btn">Create Role</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-role')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+        <!-- Modal: Grant Super Owner -->
+    <div class="modal-overlay" id="modal-super-owner">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>Grant Super Owner Access</h3>
+                <span class="close-modal" onclick="closeModal('modal-super-owner')">&times;</span>
+            </div>
+            <form onsubmit="addSuperOwner(event)">
+                <div class="form-group"><label>Full Name</label><input type="text" class="form-control" id="super-owner-name" placeholder="e.g. Alex Senerwa"></div>
+                <div class="form-group"><label>User Email</label><input type="email" class="form-control" id="super-owner-email" placeholder="user@example.com" required></div>
+                <p style="color:var(--text-muted);font-size:0.8rem;margin-top:-0.5rem;margin-bottom:1rem;">Saved to the <code>users</code> Firestore collection (name, email, role: owner). The user must already have a Firebase Authentication account to sign in to Master Control.</p>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">Grant Access</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-super-owner')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New Announcement -->
+    <div class="modal-overlay" id="modal-announcement">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-announcement-title">New Announcement</h3>
+                <span class="close-modal" onclick="closeModal('modal-announcement')">&times;</span>
+            </div>
+            <form onsubmit="saveAnnouncement(event)">
+                <input type="hidden" id="edit-ann-id">
+                <div class="form-group"><label>Title</label><input type="text" class="form-control" id="ann-title" required></div>
+                <div class="form-group"><label>Message</label><textarea class="form-control" id="ann-message" rows="3" required></textarea></div>
+                <div class="form-group">
+                    <label>Recipients</label>
+                    <select class="form-control" id="ann-recipients">
+                        <option value="all">All Schools</option>
+                        <option value="selected_schools">Selected Schools</option>
+                        <option value="owners">All School Owners</option>
+                        <option value="admins">Selected School Admins</option>
+                    </select>
+                </div>
+                <div class="flex gap-10" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;" id="modal-ann-btn">Publish</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-announcement')" style="flex: 1; justify-content: center;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal: School Detail / Manage -->
+    <div class="modal-overlay" id="modal-school-detail">
+        <div class="modal" style="max-width:700px;">
+            <div class="modal-header">
+                <h3 id="modal-school-detail-title">School Details</h3>
+                <span class="close-modal" onclick="closeModal('modal-school-detail')">&times;</span>
+            </div>
+            <div id="school-detail-content" style="max-height:60vh;overflow-y:auto;"><p>Loading school details...</p></div>
+            <div class="flex gap-10" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-school-detail')" style="flex: 1; justify-content: center;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: User Detail -->
+    <div class="modal-overlay" id="modal-user-detail">
+        <div class="modal" style="max-width:600px;">
+            <div class="modal-header">
+                <h3>User Details</h3>
+                <span class="close-modal" onclick="closeModal('modal-user-detail')">&times;</span>
+            </div>
+            <div id="user-detail-content"><p>Loading...</p></div>
+            <div class="flex gap-10" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-user-detail')" style="flex: 1; justify-content: center;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Support Mode Confirm -->
+    <div class="modal-overlay" id="modal-support-confirm">
+        <div class="modal">
+            <div class="modal-header"><h3>Confirm Support Mode</h3><span class="close-modal" onclick="closeModal('modal-support-confirm')">&times;</span></div>
+            <div id="support-confirm-content"><p>Loading...</p></div>
+            <div class="flex gap-10" style="margin-top: 2rem;">
+                <button type="button" class="btn btn-danger" onclick="confirmEnterSupport()" style="flex: 1; justify-content: center;">Enter Support Mode</button>
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-support-confirm')" style="flex: 1; justify-content: center;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
+
+
