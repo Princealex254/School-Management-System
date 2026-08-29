@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard | ShuleSmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+<aside class="sa-sidebar" id="sidebar"></aside>
+<div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main">
+<header class="sa-topbar" id="topbar"></header>
+<main class="sa-content">
+  <div class="sa-page-head">
+    <div>
+      <h1>Finance Dashboard</h1>
+      <p>Charges, collections and balances across your school — derived live from the student ledger.</p>
+    </div>
+  </div>
+
+  <div class="sa-card" style="margin-bottom:20px;">
+    <div class="sa-card-body" style="padding:16px 22px;">
+      <div class="sa-filters">
+        <select class="sa-select" id="yearSel"><option value="">All Academic Years</option></select>
+        <select class="sa-select" id="termSel"><option value="">All Terms</option></select>
+        <input type="date" class="sa-input" id="fromDate" title="From date">
+        <input type="date" class="sa-input" id="toDate" title="To date">
+        <button class="sa-btn sa-btn-primary sa-btn-sm" id="applyBtn"><i class="fa-solid fa-filter"></i> Apply</button>
+        <button class="sa-btn sa-btn-ghost sa-btn-sm" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="contentArea">
+    <div class="sa-stats-grid" id="statCards"></div>
+
+    <div class="sa-grid-2">
+      <div class="sa-card">
+        <div class="sa-card-header" style="padding:18px 22px 0;"><h3 style="font-size:15px;">Recent Payments</h3><p>Newest receipts recorded by your team.</p></div>
+        <div class="sa-card-body" id="recentPayments"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="sa-card">
+          <div class="sa-card-header" style="padding:18px 22px 0;"><h3 style="font-size:15px;">Collections by Method</h3></div>
+          <div class="sa-card-body" id="byMethod"></div>
+        </div>
+        <div class="sa-card">
+          <div class="sa-card-header" style="padding:18px 22px 0;"><h3 style="font-size:15px;">Recent Reversals</h3></div>
+          <div class="sa-card-body" id="recentReversals"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet } from "../js/api.js";
+import { initShell, setTopbarTitle, escapeHtml, formatDate, formatCurrency, loadingState, errorState } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "finance-dashboard" });
+setTopbarTitle("Finance Dashboard");
+
+/* Element references — missing before, so the module threw ReferenceError
+   on first use (yearSel is used in loadRefs before load() ever runs),
+   which is why the dashboard never loaded any data. */
+const contentArea = document.getElementById("contentArea");
+const statCards = document.getElementById("statCards");
+const recentPayments = document.getElementById("recentPayments");
+const byMethod = document.getElementById("byMethod");
+const recentReversals = document.getElementById("recentReversals");
+const yearSel = document.getElementById("yearSel");
+const termSel = document.getElementById("termSel");
+const fromDate = document.getElementById("fromDate");
+const toDate = document.getElementById("toDate");
+const applyBtn = document.getElementById("applyBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const REF = { years: [], terms: [] };
+async function loadRefs() {
+  try { const y = await apiGet("/api/academic-years"); REF.years = (y.academicYears || []).map((r) => ({ id: r.id, label: r.name })); } catch (e) { REF.years = []; }
+  try { const t = await apiGet("/api/terms"); REF.terms = (t.terms || []).map((r) => ({ id: r.id, label: r.name })); } catch (e) { REF.terms = []; }
+  yearSel.innerHTML = '<option value="">All Academic Years</option>' + REF.years.map((o) => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join("");
+  termSel.innerHTML = '<option value="">All Terms</option>' + REF.terms.map((o) => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join("");
+}
+
+function statCard(icon, color, value, label) {
+  return `<div class="sa-stat-card">
+    <div class="sa-stat-icon" style="background:${color}1A;color:${color};"><i class="${icon}"></i></div>
+    <div><div class="sa-stat-value">${value}</div><div class="sa-stat-label">${escapeHtml(label)}</div></div>
+  </div>`;
+}
+
+async function load() {
+  /* Load into the leaf containers (like dashboard.html) — loadingState on the
+     parent contentArea would destroy these child nodes, so their updates
+     would never render. */
+  loadingState(statCards, "Loading finance overview…");
+  loadingState(recentPayments, "Loading…");
+  loadingState(byMethod, "Loading…");
+  loadingState(recentReversals, "Loading…");
+  try {
+    const p = new URLSearchParams();
+    if (yearSel.value) p.set("academic_year_id", yearSel.value);
+    if (termSel.value) p.set("term_id", termSel.value);
+    if (fromDate.value) p.set("from", fromDate.value);
+    if (toDate.value) p.set("to", toDate.value);
+    const d = await apiGet("/api/finance/dashboard" + (p.toString() ? "?" + p.toString() : ""));
+    const s = d.summary || {};
+    const b = d.balances || {};
+
+    statCards.innerHTML =
+      statCard("fa-solid fa-file-invoice-dollar", "#2563EB", formatCurrency(s.total_charges || 0), "Total Charges") +
+      statCard("fa-solid fa-hand-holding-dollar", "#059669", formatCurrency(s.total_payments_received || 0), "Payments Received") +
+      statCard("fa-solid fa-triangle-exclamation", "#DC2626", formatCurrency(b.outstanding || 0), "Outstanding Balances") +
+      statCard("fa-solid fa-piggy-bank", "#7C3AED", formatCurrency(b.credit || 0), "Student Credits") +
+      statCard("fa-solid fa-calendar-day", "#D97706", formatCurrency(s.todays_collections || 0), "Today's Collections");
+
+    const methods = d.by_method || [];
+    byMethod.innerHTML = methods.length
+      ? methods.map((m) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+            <span style="font-weight:600;font-size:13px;">${escapeHtml(m.method || "Other")}</span>
+            <span style="text-align:right;"><strong>${formatCurrency(m.total)}</strong> <span class="sa-cell-sub">(${m.count})</span></span>
+          </div>`).join("")
+      : `<div class="sa-state"><i class="fa-solid fa-credit-card"></i><h4>No payments yet</h4><p>Collections appear once payments are recorded.</p></div>`;
+
+    const pays = d.recent_payments || [];
+    recentPayments.innerHTML = pays.length
+      ? `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Receipt</th><th>Student</th><th>Method</th><th style="text-align:right;">Amount</th><th>Date</th></tr></thead><tbody>` +
+        pays.map((r) => `<tr>
+          <td><span class="sa-badge sa-badge-info">${escapeHtml(r.receipt_no || "—")}</span>${String(r.status || "").toUpperCase() === "REVERSED" ? ' <span class="sa-badge sa-badge-danger">Reversed</span>' : ""}</td>
+          <td>${escapeHtml(r.student_name || "")}<div class="sa-cell-sub">${escapeHtml(r.admission_number || "")}</div></td>
+          <td>${escapeHtml(r.method || "—")}</td>
+          <td style="text-align:right;font-weight:700;">${formatCurrency(r.amount)}</td>
+          <td>${formatDate(r.payment_date)}</td>
+        </tr>`).join("") + `</tbody></table></div>`
+      : `<div class="sa-state"><i class="fa-solid fa-receipt"></i><h4>No payments yet</h4><p>Record a payment to see it here.</p></div>`;
+
+    const revs = d.recent_reversals || [];
+    recentReversals.innerHTML = revs.length
+      ? revs.map((r) => `
+          <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+            <div style="font-weight:600;font-size:13px;">${escapeHtml(r.description || "Reversal")}</div>
+            <div class="sa-cell-sub">${escapeHtml(r.student_name || "")} • ${formatDate(r.transaction_date)} • ${formatCurrency(r.debit)}</div>
+          </div>`).join("")
+      : `<div class="sa-state"><i class="fa-solid fa-shield-halved"></i><h4>No reversals</h4><p>Reversed payments will appear here.</p></div>`;
+  } catch (err) {
+    errorState(contentArea, err.message || "Could not load the finance dashboard.");
+  }
+}
+
+applyBtn.addEventListener("click", load);
+resetBtn.addEventListener("click", () => { yearSel.value = ""; termSel.value = ""; fromDate.value = ""; toDate.value = ""; load(); });
+
+await loadRefs();
+load();
+</script>
+</body>
+</html>

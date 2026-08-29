@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Details | ShuleSmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Teacher Details</h1>
+          <p>View and manage a single teacher record.</p>
+        </div>
+      </div>
+      <div class="sa-card" id="pickerCard" style="margin-bottom:20px;">
+        <div class="sa-card-body" style="padding:16px 22px;">
+          <input class="sa-input" id="pickInput" placeholder="Search by name, staff number or email…">
+          <div id="listWrap" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <div class="sa-card" id="detailCard" style="display:none;">
+        <div class="sa-card-header" style="padding:18px 20px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <h3 style="font-size:16px;" id="dName">—</h3>
+          <span id="dStatus"></span>
+        </div>
+        <div class="sa-card-body" style="padding:16px 20px 20px;">
+          <div id="detailBody"></div>
+          <button class="sa-btn sa-btn-secondary sa-btn-sm" id="backBtn" style="margin-top:14px;"><i class="fa-solid fa-arrow-left"></i> Back to list</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, formatDate, loadingState } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "teachers" });
+setTopbarTitle("Teacher Details");
+
+const pickInput = document.getElementById("pickInput");
+const listWrap = document.getElementById("listWrap");
+const pickerCard = document.getElementById("pickerCard");
+const detailCard = document.getElementById("detailCard");
+const detailBody = document.getElementById("detailBody");
+const dName = document.getElementById("dName");
+const dStatus = document.getElementById("dStatus");
+const backBtn = document.getElementById("backBtn");
+
+let teachers = [];
+
+function statusBadge(s) {
+  const map = { active: "sa-badge sa-badge-success", inactive: "sa-badge sa-badge-neutral" };
+  return `<span class="${map[String(s).toLowerCase()] || "sa-badge sa-badge-neutral"}">${escapeHtml(String(s || "").toLowerCase())}</span>`;
+}
+
+function row(label, value) {
+  return `<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px;">
+    <span style="color:var(--text-secondary);font-weight:600;">${label}</span>
+    <span style="font-weight:700;text-align:right;">${value}</span></div>`;
+}
+
+function renderList(q) {
+  const needle = (q || "").trim().toLowerCase();
+  const rows = teachers.filter((t) => {
+    if (!needle) return true;
+    return [t.first_name, t.last_name, t.staff_number, t.email]
+      .some((v) => v && String(v).toLowerCase().includes(needle));
+  });
+
+  if (!rows.length) {
+    listWrap.innerHTML = `<div class="sa-state"><i class="fa-solid fa-chalkboard-user"></i><h4>No teachers found</h4><p>${teachers.length ? "Try a different search." : "Add teachers from the Teachers page first."}</p></div>`;
+    return;
+  }
+
+  listWrap.innerHTML =
+    `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Name</th><th>Staff No.</th><th>Email</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody>` +
+    rows.map((t) =>
+      `<tr><td>${escapeHtml(`${t.first_name || ""} ${t.last_name || ""}`.trim())}</td>` +
+      `<td>${escapeHtml(t.staff_number || "—")}</td>` +
+      `<td>${escapeHtml(t.email || "—")}</td>` +
+      `<td>${escapeHtml(t.employment_type || "—")}</td>` +
+      `<td>${statusBadge(t.status)}</td>` +
+      `<td><button class="sa-btn sa-btn-secondary sa-btn-sm" data-tid="${t.id}">View</button></td></tr>`
+    ).join("") + `</tbody></table></div>`;
+
+  listWrap.querySelectorAll("[data-tid]").forEach((b) =>
+    b.addEventListener("click", () => openTeacher(b.dataset.tid)));
+}
+
+async function openTeacher(id) {
+  if (!id) return;
+  loadingState(detailBody, "Loading teacher…");
+  pickerCard.style.display = "none";
+  detailCard.style.display = "";
+  try {
+    const d = await apiGet(`/api/teachers/${id}`);
+    const t = d.teacher || {};
+    dName.textContent = `${t.first_name || ""} ${t.last_name || ""}`.trim() || "Teacher";
+    dStatus.innerHTML = statusBadge(t.status);
+    detailBody.innerHTML =
+      row("Staff Number", escapeHtml(t.staff_number || "—")) +
+      row("Gender", escapeHtml(t.gender || "—")) +
+      row("Email", escapeHtml(t.email || "—")) +
+      row("Phone", escapeHtml(t.phone || "—")) +
+      row("Employment Type", escapeHtml(t.employment_type || "—")) +
+      row("Employment Date", t.employment_date ? escapeHtml(formatDate(t.employment_date)) : "—") +
+      row("Registered", t.created_at ? escapeHtml(formatDate(String(t.created_at).slice(0, 10))) : "—");
+  } catch (err) {
+    detailBody.innerHTML = `<div class="sa-state"><i class="fa-solid fa-triangle-exclamation"></i><h4>Could not load teacher</h4><p>${escapeHtml(err.message || "")}</p></div>`;
+    dName.textContent = "Teacher";
+    dStatus.innerHTML = "";
+  }
+}
+
+backBtn.addEventListener("click", () => {
+  detailCard.style.display = "none";
+  pickerCard.style.display = "";
+});
+
+let searchTimer = null;
+pickInput.addEventListener("input", (e) => {
+  clearTimeout(searchTimer);
+  const v = e.target.value;
+  searchTimer = setTimeout(() => renderList(v), 200);
+});
+
+loadingState(listWrap, "Loading teachers…");
+try {
+  const d = await apiGet("/api/teachers?limit=100");
+  teachers = d.teachers || [];
+} catch (e) {
+  showToast(e.message || "Could not load teachers.", "error");
+}
+renderList("");
+</script>
+</body>
+</html>

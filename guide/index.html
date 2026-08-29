@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Guide — How ShuleSmart Works | ShuleSmart</title>
+<meta name="description" content="A complete walkthrough of the ShuleSmart school management platform: first-time setup, every module, portal roles, daily workflows and answers to common questions.">
+<meta name="theme-color" content="#1E3A8A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ============================================================
+   ShuleSmart — School Guide (standalone page)
+   Design tokens match the ShuleSmart brand exactly.
+   ============================================================ */
+:root{
+  --primary:#1E3A8A;
+  --primary-light:#2563EB;
+  --accent:#14B8A6;
+  --dark:#0F172A;
+  --background:#F8FAFC;
+  --white:#FFFFFF;
+  --text-secondary:#64748B;
+  --border:#E2E8F0;
+  --success:#10B981;
+  --warning:#F59E0B;
+  --info:#2563EB;
+  --font-display:'Plus Jakarta Sans','Inter',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --radius-sm:10px;--radius-md:16px;--radius-lg:24px;
+  --shadow-sm:0 1px 2px rgba(15,23,42,0.06);
+  --shadow-md:0 8px 24px rgba(15,23,42,0.08);
+  --shadow-lg:0 20px 50px rgba(15,23,42,0.12);
+  --container:1180px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;scroll-padding-top:96px;}
+body{font-family:var(--font-body);color:var(--dark);background:var(--background);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img,svg{display:block;max-width:100%;}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--dark);line-height:1.18;letter-spacing:-0.02em;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px;}
+.container{width:100%;max-width:var(--container);margin:0 auto;padding:0 24px;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+
+/* ---------- shared ---------- */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--primary-light);background:rgba(37,99,235,.08);padding:8px 16px;border-radius:100px;margin-bottom:16px;}
+.eyebrow i{color:var(--accent);}
+.section{padding:88px 0;}
+.section.alt{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.section-head{max-width:680px;margin:0 auto 52px;text-align:center;}
+.section-head h2{font-size:clamp(27px,3.6vw,40px);margin-bottom:14px;}
+.section-head p{color:var(--text-secondary);font-size:16.5px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 26px;border-radius:12px;font-weight:700;font-size:15px;font-family:var(--font-display);transition:transform .25s ease,box-shadow .25s ease,background .25s ease;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;box-shadow:0 10px 24px rgba(37,99,235,.28);}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(37,99,235,.36);}
+.btn-secondary{background:#fff;color:var(--primary);border:1.5px solid var(--border);}
+.btn-secondary:hover{border-color:var(--primary-light);transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.btn-ghost-light{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.35);}
+.btn-ghost-light:hover{background:rgba(255,255,255,.2);transform:translateY(-3px);}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+.rd1{transition-delay:.08s;}.rd2{transition-delay:.16s;}.rd3{transition-delay:.24s;}.rd4{transition-delay:.32s;}
+
+/* ---------- scroll progress ---------- */
+#scrollProgress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--primary-light),var(--accent));z-index:1200;transition:width .1s linear;}
+
+/* ---------- navbar ---------- */
+.gnav{position:sticky;top:0;z-index:1000;background:rgba(248,250,252,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:background .3s ease,border-color .3s ease,box-shadow .3s ease;}
+.gnav.scrolled{background:rgba(255,255,255,.94);border-bottom-color:var(--border);box-shadow:0 4px 20px rgba(15,23,42,.06);}
+.gnav-inner{display:flex;align-items:center;justify-content:space-between;height:72px;}
+.brand{display:flex;flex-direction:column;line-height:1;}
+.brand-mark{font-family:var(--font-display);font-weight:800;font-size:22px;letter-spacing:-0.02em;}
+.brand-mark .shule{color:var(--primary);}
+.brand-mark .smart{color:var(--accent);}
+.brand-sub{font-size:10.5px;color:var(--text-secondary);letter-spacing:.04em;margin-top:3px;font-weight:500;font-family:var(--font-body);}
+.gnav-links{display:flex;align-items:center;gap:4px;}
+.gnav-links a{padding:9px 14px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text-secondary);transition:color .2s,background .2s;}
+.gnav-links a:hover{color:var(--primary);background:rgba(37,99,235,.07);}
+.gnav-links a.active{color:var(--primary);background:rgba(37,99,235,.1);}
+.gnav-cta{display:flex;align-items:center;gap:12px;}
+.gnav-cta .btn{padding:11px 20px;font-size:14px;}
+.burger{display:none;width:44px;height:44px;border-radius:10px;font-size:19px;color:var(--dark);background:#fff;border:1.5px solid var(--border);}
+
+/* ---------- hero ---------- */
+.hero{position:relative;color:#fff;padding:104px 0 96px;overflow:hidden;background:linear-gradient(135deg,#0F172A 0%,#1E3A8A 55%,#2563EB 100%);}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 380px at 82% 18%,rgba(20,184,166,.28),transparent 60%),radial-gradient(600px 320px at 12% 85%,rgba(37,99,235,.5),transparent 65%);}
+.hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);}
+.hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;}
+.hero .eyebrow{background:rgba(255,255,255,.12);color:#c7d7ff;}
+.hero .eyebrow i{color:#5EEAD4;}
+.hero h1{color:#fff;font-size:clamp(32px,4.6vw,52px);margin-bottom:18px;}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#5EEAD4,#93C5FD);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p.lead{font-size:17.5px;color:#CBD5E1;max-width:540px;margin-bottom:30px;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:34px;}
+.hero-stats{display:flex;gap:14px;flex-wrap:wrap;}
+.hstat{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 18px;backdrop-filter:blur(6px);}
+.hstat b{display:block;font-family:var(--font-display);font-size:20px;color:#fff;}
+.hstat span{font-size:12.5px;color:#B6C4E2;}
+.hero-card{position:relative;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-lg);padding:26px;backdrop-filter:blur(10px);box-shadow:0 30px 60px rgba(2,6,23,.45);}
+.hero-card .hc-title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9FB3D9;font-weight:700;margin-bottom:16px;}
+.hc-row{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px 16px;margin-bottom:11px;}
+.hc-row:last-child{margin-bottom:0;}
+.hc-ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.hc-row b{display:block;font-size:14px;color:#fff;}
+.hc-row span{font-size:12.5px;color:#A9BADF;}
+.hc-badge{margin-left:auto;font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;}
+
+/* ---------- big picture flow ---------- */
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;position:relative;}
+.flow-item{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:26px 22px;box-shadow:var(--shadow-sm);transition:transform .25s ease,box-shadow .25s ease;position:relative;}
+.flow-item:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);}
+.flow-num{position:absolute;top:-16px;left:22px;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary-light),var(--primary));color:#fff;font-family:var(--font-display);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(37,99,235,.3);}
+.flow-item i.big{font-size:22px;color:var(--accent);margin-bottom:12px;display:block;}
+.flow-item h3{font-size:16.5px;margin-bottom:7px;}
+.flow-item p{font-size:13.8px;color:var(--text-secondary);}
+.flow-item p a{color:var(--primary-light);font-weight:600;}
+.flow-item p a:hover{text-decoration:underline;}
+
+/* ---------- setup steps ---------- */
+.steps{position:relative;max-width:860px;margin:0 auto;}
+.steps::before{content:"";position:absolute;left:27px;top:14px;bottom:14px;width:2px;background:linear-gradient(var(--primary-light),var(--accent));opacity:.25;}
+.step{position:relative;display:flex;gap:22px;padding:0 0 34px 0;}
+.step:last-child{padding-bottom:0;}
+.step-n{width:56px;height:56px;border-radius:16px;background:#fff;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--primary);flex-shrink:0;box-shadow:var(--shadow-sm);position:relative;z-index:2;transition:border-color .25s,background .25s,color .25s;}
+.step:hover .step-n{border-color:var(--primary-light);background:var(--primary-light);color:#fff;}
+.step-body{flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:22px 24px;box-shadow:var(--shadow-sm);}
+.step-body h3{font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.step-body p{font-size:14.3px;color:var(--text-secondary);}
+.step-body .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--primary-light);background:rgba(37,99,235,.08);padding:4px 11px;border-radius:100px;}
+.step-body .tag i{color:var(--accent);}
+.step-tip{margin-top:10px;display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#92400E;background:rgba(245,158,11,.08);border:1px solid #FDE68A;border-radius:10px;padding:9px 13px;}
+.step-tip i{margin-top:2px;color:var(--warning);}
+
+/* ---------- modules ---------- */
+.mod-group{margin-bottom:44px;}
+.mod-group:last-child{margin-bottom:0;}
+.mod-group-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.mod-group-head .gi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;}
+.mod-group-head h3{font-size:19px;}
+.mod-group-head span{color:var(--text-secondary);font-size:13.5px;}
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:16px;}
+.mod-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;display:flex;gap:14px;align-items:flex-start;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+.mod-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:rgba(37,99,235,.35);}
+.mod-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;flex-shrink:0;}
+.mod-card h4{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.mod-card h4 i.arrow{font-size:11px;color:var(--primary-light);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s;}
+.mod-card:hover h4 i.arrow{opacity:1;transform:translateX(0);}
+.mod-card p{font-size:13px;color:var(--text-secondary);}
+
+/* ---------- roles ---------- */
+.roles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;}
+.role-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:22px;box-shadow:var(--shadow-sm);transition:transform .25s ease,box-shadow .25s ease;}
+.role-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);}
+.role-top{display:flex;align-items:center;gap:13px;margin-bottom:12px;}
+.role-avatar{width:48px;height:48px;border-radius:14px;color:#fff;font-family:var(--font-display);font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.role-top h3{font-size:16.5px;}
+.role-top span{display:block;font-size:12.5px;color:var(--text-secondary);font-weight:500;}
+.role-card p{font-size:13.5px;color:var(--text-secondary);margin-bottom:10px;}
+.role-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.role-chips span{font-size:11.5px;font-weight:600;color:var(--primary);background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.15);padding:4px 10px;border-radius:100px;}
+.role-chips span.all{color:#047857;background:rgba(16,185,129,.09);border-color:rgba(16,185,129,.25);}
+
+/* ---------- workflows ---------- */
+.wf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;}
+.wf-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-md);padding:24px;box-shadow:var(--shadow-sm);border-top:4px solid var(--primary-light);}
+.wf-card.t2{border-top-color:var(--accent);}
+.wf-card.t3{border-top-color:var(--warning);}
+.wf-card.t4{border-top-color:#8B5CF6;}
+.wf-card h3{font-size:16.5px;margin-bottom:4px;}
+.wf-card > span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);}
+.wf-card ul{margin-top:14px;display:grid;gap:9px;}
+.wf-card li{display:flex;gap:10px;font-size:13.6px;color:var(--text-secondary);align-items:flex-start;}
+.wf-card li i{color:var(--success);margin-top:3px;font-size:12px;}
+.wf-card li b{color:var(--dark);font-weight:600;}
+
+/* ---------- money note ---------- */
+.money-note{background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:var(--radius-lg);padding:44px;color:#fff;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;position:relative;overflow:hidden;}
+.money-note::before{content:"";position:absolute;inset:0;background:radial-gradient(500px 260px at 90% 10%,rgba(20,184,166,.25),transparent 60%);}
+.money-note > *{position:relative;z-index:2;}
+.money-note h2{color:#fff;font-size:clamp(24px,3vw,32px);margin-bottom:14px;}
+.money-note p{color:#C7D2E8;font-size:15px;margin-bottom:18px;}
+.money-note ul{display:grid;gap:11px;}
+.money-note li{display:flex;gap:11px;font-size:14px;color:#DCE5F5;align-items:flex-start;}
+.money-note li i{color:#5EEAD4;margin-top:4px;}
+.money-panel{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:24px;backdrop-filter:blur(8px);}
+.money-panel .mp-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px dashed rgba(255,255,255,.18);font-size:14px;color:#DCE5F5;}
+.money-panel .mp-row:last-child{border-bottom:none;padding-top:14px;font-weight:700;color:#fff;font-size:15px;}
+.money-panel .mp-row b{font-family:var(--font-display);}
+.mp-pos{color:#5EEAD4;font-weight:700;}
+.mp-neg{color:#FCA5A5;font-weight:700;}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:820px;margin:0 auto;display:grid;gap:12px;}
+.faq details{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .25s ease,border-color .25s ease;}
+.faq details[open]{border-color:rgba(37,99,235,.4);box-shadow:var(--shadow-md);}
+.faq summary{list-style:none;display:flex;align-items:center;gap:14px;padding:18px 22px;font-family:var(--font-display);font-weight:700;font-size:15.5px;cursor:pointer;user-select:none;}
+.faq summary::-webkit-details-marker{display:none;}
+.faq summary .qic{width:34px;height:34px;border-radius:10px;background:rgba(37,99,235,.08);color:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.faq summary .chev{margin-left:auto;color:var(--text-secondary);transition:transform .3s ease;}
+.faq details[open] .chev{transform:rotate(180deg);color:var(--primary-light);}
+.faq .a{padding:0 22px 20px 70px;color:var(--text-secondary);font-size:14.2px;}
+.faq .a a{color:var(--primary-light);font-weight:600;}
+.faq .a a:hover{text-decoration:underline;}
+
+/* ---------- CTA + footer ---------- */
+.cta-band{background:linear-gradient(135deg,var(--primary-light),var(--primary));border-radius:var(--radius-lg);padding:52px 44px;text-align:center;color:#fff;position:relative;overflow:hidden;}
+.cta-band::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 300px at 20% 0%,rgba(20,184,166,.3),transparent 60%);}
+.cta-band > *{position:relative;z-index:2;}
+.cta-band h2{color:#fff;font-size:clamp(24px,3.2vw,34px);margin-bottom:12px;}
+.cta-band p{color:#CBD9F5;font-size:15.5px;max-width:560px;margin:0 auto 26px;}
+.cta-band .btn-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.gfooter{background:var(--dark);color:#94A3B8;padding:56px 0 0;}
+.gf-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px;padding-bottom:40px;}
+.gfooter h4{color:#fff;font-size:14px;margin-bottom:14px;letter-spacing:.04em;}
+.gfooter li{margin-bottom:9px;}
+.gfooter a{font-size:13.5px;color:#94A3B8;transition:color .2s;}
+.gfooter a:hover{color:#5EEAD4;}
+.gfooter .brand{color:#fff;margin-bottom:14px;}
+.gfooter .brand-sub{color:#64748B;}
+.gfooter p{font-size:13.5px;max-width:300px;}
+.gf-bottom{border-top:1px solid rgba(255,255,255,.08);padding:20px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12.5px;color:#64748B;}
+#toTop{position:fixed;right:24px;bottom:24px;width:48px;height:48px;border-radius:14px;background:var(--primary-light);color:#fff;font-size:16px;box-shadow:0 12px 28px rgba(37,99,235,.35);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s,transform .3s;z-index:900;}
+#toTop.show{opacity:1;pointer-events:auto;transform:translateY(0);}
+
+/* ---------- responsive ---------- */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:44px;}
+  .hero-card{max-width:520px;}
+  .gf-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:860px){
+  .gnav-links{position:fixed;inset:72px 0 auto 0;background:#fff;flex-direction:column;align-items:stretch;padding:16px 24px 24px;gap:4px;border-bottom:1px solid var(--border);box-shadow:var(--shadow-lg);display:none;}
+  .gnav-links.open{display:flex;}
+  .gnav-links a{padding:13px 14px;font-size:15px;}
+  .burger{display:flex;align-items:center;justify-content:center;}
+  .gnav-cta .btn span.hide-m{display:none;}
+  .flow{grid-template-columns:1fr;}
+  .money-note{grid-template-columns:1fr;padding:34px 26px;}
+  .section{padding:64px 0;}
+}
+@media(max-width:560px){
+  .hero{padding:76px 0 64px;}
+  .hero-actions .btn{width:100%;}
+  .steps::before{display:none;}
+  .step{gap:14px;}
+  .step-n{width:44px;height:44px;font-size:15px;border-radius:12px;}
+  .step-body{padding:18px;}
+  .faq .a{padding-left:22px;}
+  .gf-grid{grid-template-columns:1fr;}
+  .cta-band{padding:38px 22px;}
+}
+</style>
+</head>
+<body>
+<div id="scrollProgress"></div>
+
+<!-- ================= NAVBAR ================= -->
+<header class="gnav" id="gnav">
+  <div class="container gnav-inner">
+    <a class="brand" href="/" aria-label="ShuleSmart School Guide" title="ShuleSmart School Guide">
+      <span class="brand-mark"><span class="shule">Shule</span><span class="smart">Smart</span></span>
+      <span class="brand-sub">by Prince Alex Digital</span>
+    </a>
+    <nav class="gnav-links" id="gnavLinks">
+      <a href="#overview">Overview</a>
+      <a href="#setup">First Setup</a>
+      <a href="#modules">Modules</a>
+      <a href="#roles">Roles</a>
+      <a href="#workflows">Workflows</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="gnav-cta">
+      <a class="btn btn-primary" href="/login/"><i class="fa-solid fa-right-to-bracket"></i> <span class="hide-m">Open Portal</span></a>
+      <button class="burger" id="burger" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="reveal">
+      <span class="eyebrow"><i class="fa-solid fa-book-open-reader"></i> Official School Guide</span>
+      <h1>Everything your school needs to run on <em>ShuleSmart</em>.</h1>
+      <p class="lead">A complete, plain-language walkthrough of the platform — from your very first login to year-end rollover. Follow it top to bottom on day one, then keep it bookmarked as your reference manual.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#setup" style="background:#fff;color:var(--primary);box-shadow:0 10px 24px rgba(2,6,23,.35);"><i class="fa-solid fa-rocket"></i> Start with Setup</a>
+        <a class="btn btn-ghost-light" href="#modules"><i class="fa-solid fa-compass"></i> Explore Modules</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b>24</b><span>Guided modules</span></div>
+        <div class="hstat"><b>5</b><span>Portal roles</span></div>
+        <div class="hstat"><b>15 min</b><span>Setup walkthrough</span></div>
+      </div>
+    </div>
+    <div class="hero-card reveal rd2">
+      <div class="hc-title">Inside this guide</div>
+      <div class="hc-row"><span class="hc-ic" style="background:rgba(20,184,166,.2);color:#5EEAD4;"><i class="fa-solid fa-magnifying-glass-chart"></i></span><div><b>The big picture</b><span>How your school portal fits together</span></div></div>
+      <div class="hc-row"><span class="hc-ic" style="background:rgba(147,197,253,.2);color:#93C5FD;"><i class="fa-solid fa-list-ol"></i></span><div><b>First-time setup</b><span>7 steps, in the right order</span></div></div>
+      <div class="hc-row"><span class="hc-ic" style="background:rgba(37,99,235,.25);color:#BFDBFE;"><i class="fa-solid fa-table-cells-large"></i></span><div><b>All 24 modules</b><span>What each one does, and when</span></div></div>
+      <div class="hc-row"><span class="hc-ic" style="background:rgba(245,158,11,.2);color:#FDE68A;"><i class="fa-solid fa-user-shield"></i></span><div><b>Roles &amp; permissions</b><span>Who sees what in your school</span></div></div>
+      <div class="hc-row" style="margin-bottom:0;"><span class="hc-ic" style="background:rgba(16,185,129,.2);color:#6EE7B7;"><i class="fa-solid fa-circle-question"></i></span><div><b>FAQ</b><span>Quick answers to common questions</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OVERVIEW ================= -->
+<section class="section" id="overview">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-magnifying-glass-chart"></i> The Big Picture</span>
+      <h2>How ShuleSmart fits together</h2>
+      <p>One portal, one shared database. Everything you enter in one place instantly appears everywhere else it's needed.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-item reveal">
+        <span class="flow-num">1</span>
+        <i class="fa-solid fa-school big"></i>
+        <h3>Your School's Portal</h3>
+        <p>This is where your school's daily work happens — the 24-module portal covered by this guide: students, fees, exams, attendance, reports and more. Your staff sign in and everything they need is one menu away, on any device. Your school's data is fully isolated — only your people can ever see it.</p>
+      </div>
+      <div class="flow-item reveal rd1">
+        <span class="flow-num">2</span>
+        <i class="fa-solid fa-database big"></i>
+        <h3>One Shared Database</h3>
+        <p>Everything in ShuleSmart is connected. Add a student and their fee ledger is ready instantly. Record a payment and the balance updates everywhere. Enter exam marks and report cards build themselves. Nothing is ever entered twice — and nothing falls through the cracks.</p>
+      </div>
+      <div class="flow-item reveal rd2">
+        <span class="flow-num">3</span>
+        <i class="fa-solid fa-chart-line big"></i>
+        <h3>Reports &amp; Insights</h3>
+        <p>Every action in the portal feeds the numbers school leaders actually need: who owes fees, who's absent, how each class performed. Reports pull live data — nothing is entered twice. Print fee statements for parents, download class attendance summaries, or review exam performance from the same place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SETUP ================= -->
+<section class="section alt" id="setup">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-list-ol"></i> First-Time Setup</span>
+      <h2>Get your school ready in 7 steps</h2>
+      <p>Do these once, in order. It takes about 15 minutes, and everything after it becomes easy.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-n">1</div>
+        <div class="step-body">
+          <h3>Sign in <span class="tag"><i class="fa-solid fa-lock"></i> /login/</span></h3>
+          <p>Open the portal and sign in with the email your school registered with. Forgot your password? Use the <b>Forgot Password?</b> link on the sign-in page and a reset link is emailed to you instantly.</p>
+          <div class="step-tip"><i class="fa-solid fa-lightbulb"></i><span>Tip: bookmark the portal after your first sign-in — there's no app to install; ShuleSmart works in any modern browser, on phone or desktop.</span></div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">2</div>
+        <div class="step-body">
+          <h3>Create the Academic Year</h3>
+          <p>Go to <b>Academic Years</b> (Administration menu) and add the current year, e.g. <b>2026</b>. Mark it as the <b>Current Year</b>. Almost everything in ShuleSmart hangs off the academic year, so this must exist before anything else.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">3</div>
+        <div class="step-body">
+          <h3>Add the Terms</h3>
+          <p>Open <b>Terms</b> and create Term 1, 2 and 3 inside your year, with their start and end dates. Set the term the school is currently in. Fees are invoiced per term, so these dates drive your billing.</p>
+          <div class="step-tip"><i class="fa-solid fa-triangle-exclamation"></i><span>Important: the Promotions &amp; Rollover wizard requires the <b>next year's</b> terms to already exist — creating them now saves you a headache in November.</span></div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">4</div>
+        <div class="step-body">
+          <h3>Set Up Classes &amp; Subjects</h3>
+          <p>In <b>Classes</b>, add each grade/stream you run (e.g. Grade 1 — Blue). In <b>Subjects</b>, add what you teach (Mathematics, Kiswahili…). Teachers are assigned to classes and subjects later, when you add them.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">5</div>
+        <div class="step-body">
+          <h3>Build the Fee Structure</h3>
+          <p>In <b>Fee Structure</b>, define what each class pays per term — tuition, lunch, transport, whatever your school charges. This is what generates invoices, so take a minute to get the amounts right.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">6</div>
+        <div class="step-body">
+          <h3>Enrol Your Students</h3>
+          <p>In <b>Students</b>, add each learner: name, admission number, class and guardian contacts. Each student instantly gets a fee ledger connected to your fee structure. Admitting mid-term? No problem — invoices are generated from the date you set.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">7</div>
+        <div class="step-body">
+          <h3>Invite Your Team</h3>
+          <p>In <b>Portal Users</b> (System menu), create logins for your staff and pick a role for each — Head, Deputy, Accountant, Teacher or Secretary. Each person only sees the menus their role allows (see <a href="#roles" style="color:var(--primary-light);font-weight:600;">Roles</a> below).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODULES ================= -->
+<section class="section" id="modules">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-table-cells-large"></i> Module Reference</span>
+      <h2>Every module, explained simply</h2>
+      <p>The same 24 modules your staff see in the sidebar — grouped exactly the way the portal groups them. Click any card to open that module.</p>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:var(--primary-light);"><i class="fa-solid fa-gauge-high"></i></span>
+        <div><h3>Overview</h3><span>Your day at a glance</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/dashboard/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#2563EB,#1E3A8A);"><i class="fa-solid fa-gauge-high"></i></span>
+          <div><h4>Dashboard <i class="fa-solid fa-arrow-right arrow"></i></h4><p>The home screen. Live counts of students, teachers, classes, today's collection, and quick actions for the tasks you do most.</p></div>
+        </a>
+        <a class="mod-card" href="/activity/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#2563EB,#1E3A8A);"><i class="fa-solid fa-clock-rotate-left"></i></span>
+          <div><h4>Activity Log <i class="fa-solid fa-arrow-right arrow"></i></h4><p>A timestamped trail of everything done in your portal — who added, changed or removed what. Great for accountability.</p></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:var(--accent);"><i class="fa-solid fa-graduation-cap"></i></span>
+        <div><h3>Academics</h3><span>People and classes</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/students/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#14B8A6,#0D9488);"><i class="fa-solid fa-user-graduate"></i></span>
+          <div><h4>Students <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Enrol learners, keep guardian contacts and status up to date, and open any student for their full profile, ledger and documents.</p></div>
+        </a>
+        <a class="mod-card" href="/teachers/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#14B8A6,#0D9488);"><i class="fa-solid fa-chalkboard-user"></i></span>
+          <div><h4>Teachers <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Your teaching staff, with subjects and classes assigned so marks entry and timetables know who does what.</p></div>
+        </a>
+        <a class="mod-card" href="/staff/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#14B8A6,#0D9488);"><i class="fa-solid fa-user-tie"></i></span>
+          <div><h4>Staff <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Non-teaching staff — bursar, cook, driver, caretaker — with contacts and employment details.</p></div>
+        </a>
+        <a class="mod-card" href="/classes/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#14B8A6,#0D9488);"><i class="fa-solid fa-layer-group"></i></span>
+          <div><h4>Classes <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Grades and streams. Each class holds its students, class teacher, and subjects — the backbone of academics.</p></div>
+        </a>
+        <a class="mod-card" href="/subjects/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#14B8A6,#0D9488);"><i class="fa-solid fa-book"></i></span>
+          <div><h4>Subjects <i class="fa-solid fa-arrow-right arrow"></i></h4><p>What your school teaches. Subjects feed exams, marks and report cards automatically.</p></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:#8B5CF6;"><i class="fa-solid fa-file-pen"></i></span>
+        <div><h3>Examinations</h3><span>From exam setup to report cards</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/exams/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);"><i class="fa-solid fa-file-pen"></i></span>
+          <div><h4>Exams <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Create exams per term — CATs, mid-term, end-term — and set their grading out of e.g. 100 marks.</p></div>
+        </a>
+        <a class="mod-card" href="/marks/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);"><i class="fa-solid fa-pen-to-square"></i></span>
+          <div><h4>Marks <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Fast entry grid: pick exam, class and subject, then type marks. Grades compute instantly from your grading scale.</p></div>
+        </a>
+        <a class="mod-card" href="/results/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);"><i class="fa-solid fa-chart-simple"></i></span>
+          <div><h4>Results <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Class rankings, subject breakdowns and printable report cards once marks are in.</p></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:var(--success);"><i class="fa-solid fa-money-bill-wave"></i></span>
+        <div><h3>Finance</h3><span>Fees, invoices and payments</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/finance-dashboard/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-chart-pie"></i></span>
+          <div><h4>Finance Dashboard <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Money picture at a glance: expected vs collected per term, class-by-class balances, and today's payments.</p></div>
+        </a>
+        <a class="mod-card" href="/fees/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-money-bill-wave"></i></span>
+          <div><h4>Fees &amp; Balances <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Every student's balance in one list. Send statements, follow up on arrears, and see who has credit.</p></div>
+        </a>
+        <a class="mod-card" href="/fee-structure/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-list-check"></i></span>
+          <div><h4>Fee Structure <i class="fa-solid fa-arrow-right arrow"></i></h4><p>What each class pays per term. Changing it here drives all future invoices — past ones stay untouched.</p></div>
+        </a>
+        <a class="mod-card" href="/invoices/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+          <div><h4>Invoices <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Auto-generated per student per term from your fee structure. Generate in bulk, print, or mark discounts.</p></div>
+        </a>
+        <a class="mod-card" href="/payments/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+          <div><h4>Payments <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Record cash, bank or mobile-money payments against a student. Balances update instantly everywhere.</p></div>
+        </a>
+        <a class="mod-card" href="/receipts/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="fa-solid fa-receipt"></i></span>
+          <div><h4>Receipts <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Every payment gets a numbered, printable receipt. Reprint any time — the record never changes.</p></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:var(--warning);"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>
+        <div><h3>Administration</h3><span>The school year engine room</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/promotions/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>
+          <div><h4>Promotions &amp; Rollover <i class="fa-solid fa-arrow-right arrow"></i></h4><p>The end-of-year wizard: review every class, promote / repeat / graduate each student, and carry all balances into the new year in one guided flow.</p></div>
+        </a>
+        <a class="mod-card" href="/attendance/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-clipboard-user"></i></span>
+          <div><h4>Attendance <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Take the daily register per class in seconds — present, absent, late. Teachers love how fast it is.</p></div>
+        </a>
+        <a class="mod-card" href="/attendance-reports/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-chart-column"></i></span>
+          <div><h4>Attendance Reports <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Attendance patterns per student, class or date range — spot chronic absenteeism early.</p></div>
+        </a>
+        <a class="mod-card" href="/academic-years/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-calendar-check"></i></span>
+          <div><h4>Academic Years <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Create the years everything else hangs off. Mark exactly one as current.</p></div>
+        </a>
+        <a class="mod-card" href="/terms/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-calendar-days"></i></span>
+          <div><h4>Terms <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Term 1/2/3 with dates inside each year. Terms drive invoicing and exams.</p></div>
+        </a>
+        <a class="mod-card" href="/reports/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#F59E0B,#D97706);"><i class="fa-solid fa-file-lines"></i></span>
+          <div><h4>Reports <i class="fa-solid fa-arrow-right arrow"></i></h4><p>One-stop printing: class lists, fee statements, balance reports and more — filter, then print or save as PDF.</p></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="mod-group reveal">
+      <div class="mod-group-head">
+        <span class="gi" style="background:#EF4444;"><i class="fa-solid fa-users-gear"></i></span>
+        <div><h3>System</h3><span>Access &amp; configuration</span></div>
+      </div>
+      <div class="mod-grid">
+        <a class="mod-card" href="/users/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#EF4444,#B91C1C);"><i class="fa-solid fa-users-gear"></i></span>
+          <div><h4>Portal Users <i class="fa-solid fa-arrow-right arrow"></i></h4><p>Create staff logins and assign roles. Deactivate leavers the same day they walk out — access cuts off instantly.</p></div>
+        </a>
+        <a class="mod-card" href="/settings/">
+          <span class="mod-ic" style="background:linear-gradient(135deg,#EF4444,#B91C1C);"><i class="fa-solid fa-gear"></i></span>
+          <div><h4>Settings <i class="fa-solid fa-arrow-right arrow"></i></h4><p>School profile, contact details, currency, grading scale and defaults live here.</p></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ROLES ================= -->
+<section class="section alt" id="roles">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-user-shield"></i> Roles &amp; Permissions</span>
+      <h2>The right people see the right things</h2>
+      <p>When you create a portal login, you choose one of five roles. Each role unlocks only the menus that person needs — sensitive finance screens stay hidden from teachers, and so on.</p>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card reveal">
+        <div class="role-top">
+          <span class="role-avatar" style="background:linear-gradient(135deg,#2563EB,#1E3A8A);">H</span>
+          <div><h3>School Head / Principal</h3><span>Default role — full access</span></div>
+        </div>
+        <p>The complete portal. Any administrator created before roles were introduced has this role automatically, so nothing changes for them. Heads see finance, academics, staff management and system settings.</p>
+        <div class="role-chips"><span class="all">All 24 modules</span></div>
+      </div>
+      <div class="role-card reveal rd1">
+        <div class="role-top">
+          <span class="role-avatar" style="background:linear-gradient(135deg,#14B8A6,#0D9488);">D</span>
+          <div><h3>Deputy Head</h3><span>Everything except system settings</span></div>
+        </div>
+        <p>Nearly everything the Head has — academics, finance, attendance, promotions and reports — but without Portal Users or Settings, so only your most senior people can change access and configuration.</p>
+        <div class="role-chips"><span>Academics</span><span>Finance</span><span>Examinations</span><span>Promotions</span><span>Reports</span></div>
+      </div>
+      <div class="role-card reveal rd2">
+        <div class="role-top">
+          <span class="role-avatar" style="background:linear-gradient(135deg,#10B981,#059669);">A</span>
+          <div><h3>Accountant / Bursar</h3><span>The money role</span></div>
+        </div>
+        <p>Focused purely on finance: the finance dashboard, fees and balances, fee structure, invoices, payments and receipts — plus the student list, because every invoice starts with a learner.</p>
+        <div class="role-chips"><span>Finance Dashboard</span><span>Fees</span><span>Invoices</span><span>Payments</span><span>Receipts</span><span>Students</span></div>
+      </div>
+      <div class="role-card reveal rd3">
+        <div class="role-top">
+          <span class="role-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706);">T</span>
+          <div><h3>Teacher</h3><span>Classroom tools only</span></div>
+        </div>
+        <p>Everything a teacher needs in class — students, classes, subjects, exams, marks entry, results and the daily attendance register — with every finance screen hidden away.</p>
+        <div class="role-chips"><span>Students</span><span>Classes</span><span>Exams</span><span>Marks</span><span>Results</span><span>Attendance</span></div>
+      </div>
+      <div class="role-card reveal rd4">
+        <div class="role-top">
+          <span class="role-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);">S</span>
+          <div><h3>Secretary</h3><span>Records &amp; registers</span></div>
+        </div>
+        <p>Front-office duties: keeping student, teacher and staff records current, classes and subjects, the academic calendar, and attendance reporting — with no access to money screens.</p>
+        <div class="role-chips"><span>Students</span><span>Teachers</span><span>Staff</span><span>Classes</span><span>Calendar</span><span>Reports</span></div>
+      </div>
+    </div>
+    <p class="reveal" style="text-align:center;color:var(--text-secondary);font-size:13.5px;margin-top:22px;"><i class="fa-solid fa-circle-info" style="color:var(--primary-light);"></i> Roles are assigned per person in <b>Portal Users</b>. Need a custom mix? Contact ShuleSmart support — new role presets can be added for your school.</p>
+  </div>
+</section>
+
+<!-- ================= WORKFLOWS ================= -->
+<section class="section" id="workflows">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-route"></i> Daily Workflows</span>
+      <h2>How the busy days actually run</h2>
+      <p>Four rhythms your school will fall into — morning, enrolment, exam season and month-end.</p>
+    </div>
+    <div class="wf-grid">
+      <div class="wf-card reveal">
+        <span>Every morning</span>
+        <h3>Registration &amp; roll call</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i><span>Class teacher opens <b>Attendance</b>, picks their class and today's date.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Taps through the roster — present / absent / late — and saves.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Head checks <b>Attendance Reports</b> to spot absentees early.</span></li>
+        </ul>
+      </div>
+      <div class="wf-card t2 reveal rd1">
+        <span>New learner</span>
+        <h3>Admitting a student</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i><span>Add the student in <b>Students</b> with class and guardian contacts.</span></li>
+          <li><i class="fa-solid fa-check"></i><span><b>Invoices</b> are raised from the fee structure for the current term.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Any payment on day one goes into <b>Payments</b> → receipt prints.</span></li>
+        </ul>
+      </div>
+      <div class="wf-card t3 reveal rd2">
+        <span>Exam season</span>
+        <h3>Marks to report cards</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i><span>Create the exam in <b>Exams</b> (e.g. End-Term 1, graded out of 100).</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Teachers type marks in <b>Marks</b> — grades appear as they type.</span></li>
+          <li><i class="fa-solid fa-check"></i><span><b>Results</b> ranks the class and prints report cards in one click.</span></li>
+        </ul>
+      </div>
+      <div class="wf-card t4 reveal rd3">
+        <span>Month-end / term-end</span>
+        <h3>Money follow-up</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i><span><b>Finance Dashboard</b> shows expected vs collected per class.</span></li>
+          <li><i class="fa-solid fa-check"></i><span><b>Fees &amp; Balances</b> lists every arrears student — send statements home.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Record follow-up payments; receipts are numbered automatically.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="money-note reveal" style="margin-top:34px;">
+      <div>
+        <h2>Balances are carried, never forgotten</h2>
+        <p>The most-loved feature in ShuleSmart is also the quietest one: when the school year rolls over, every shilling a student owes — or is owed — moves with them. No more December spreadsheets or January confusion.</p>
+        <ul>
+          <li><i class="fa-solid fa-check"></i><span>Outstanding balances travel into the new year automatically during Promotions.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Overpayments become credit and offset next term's invoices.</span></li>
+          <li><i class="fa-solid fa-check"></i><span>Every shilling traces back through receipts, invoices and the ledger.</span></li>
+        </ul>
+      </div>
+      <div class="money-panel">
+        <div class="mp-row"><span>Term 1 fees expected</span><b>KES 240,000</b></div>
+        <div class="mp-row"><span>Collected so far</span><b class="mp-pos">KES 198,500</b></div>
+        <div class="mp-row"><span>Outstanding (12 students)</span><b class="mp-neg">KES 41,500</b></div>
+        <div class="mp-row"><span>Credits held (3 students)</span><b class="mp-pos">KES 7,250</b></div>
+        <div class="mp-row"><span>Collection rate</span><b>82.7%</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="section alt" id="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><i class="fa-solid fa-circle-question"></i> FAQ</span>
+      <h2>Questions schools ask us</h2>
+      <p>Short, straight answers. If yours isn't here, reach out via the WhatsApp button on the main site.</p>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-mobile-screen"></i></span> Do we need to install anything? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">No. ShuleSmart runs entirely in the browser — phone, tablet, laptop or desktop. Just bookmark your portal link. Data lives securely in the cloud, so nothing is lost if a device is lost.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-database"></i></span> Is our school's data private and safe? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">Yes. Each school's records are isolated — staff at one school can never see another school's data, enforced at the database level. Only the roles you assign can reach sensitive modules like finance, and every change is written to the Activity Log.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-key"></i></span> A teacher forgot their password. What do we do? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">They can use the <b>Forgot Password?</b> link on the sign-in page to receive a reset email instantly. If the email never arrives, the Head can restore access from <b>Portal Users</b>.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-money-bill-transfer"></i></span> Can a student pay part of the fees? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">Absolutely — record any amount in <b>Payments</b> and the balance updates automatically. Part payments, overpayments (which become credit) and multiple payments per term are all handled.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-print"></i></span> Can we print fee statements and report cards for parents? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">Yes — student statements, receipts, invoices and report cards are all print-ready. Use your browser's print option and choose "Save as PDF" if you want a digital copy to send on WhatsApp.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-graduation-cap"></i></span> How does the end-of-year rollover work? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">Open <b>Promotions &amp; Rollover</b> near year-end. The wizard checks the new year and its terms exist, maps each class to its destination (Grade 1 → Grade 2 is guessed for you), then shows every student for review. Nothing is final until you type <b>PROMOTE</b> to confirm — after that, students are promoted and all balances carry forward automatically.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-user-plus"></i></span> What happens when a student leaves mid-year? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">Set them to <b>Inactive</b> in Students (don't delete — their fee history matters). Their records, receipts and any credit remain searchable, and their balance still appears in your reports.</div>
+      </details>
+      <details>
+        <summary><span class="qic"><i class="fa-solid fa-wifi"></i></span> What if the internet goes down at school? <i class="fa-solid fa-chevron-down chev"></i></summary>
+        <div class="a">You can't reach the portal offline, but nothing breaks — your data is safe on the server. Once the connection returns, everything you do next syncs normally. Most schools keep a simple offline register for such days and catch up in a minute later.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA + FOOTER ================= -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-band reveal">
+      <h2>Ready to put your school on ShuleSmart?</h2>
+      <p>Sign in and follow the 7 setup steps above — or contact us and we'll walk your team through it personally.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/login/" style="background:#fff;color:var(--primary);box-shadow:0 10px 24px rgba(2,6,23,.3);"><i class="fa-solid fa-right-to-bracket"></i> Open Your Portal</a>
+        <a class="btn btn-ghost-light" href="/"><i class="fa-solid fa-house"></i> Back to Website</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="gfooter">
+  <div class="container">
+    <div class="gf-grid">
+      <div>
+        <a class="brand" href="/"><span class="brand-mark">Shule<span class="smart">Smart</span></span><span class="brand-sub">School Guide — Smart School Management, Simplified.</span></a>
+        <p>The smart school management platform by Prince Alex Digital — built for schools in Kenya and beyond.</p>
+      </div>
+      <div>
+        <h4>This Guide</h4>
+        <ul>
+          <li><a href="#overview">The Big Picture</a></li>
+          <li><a href="#setup">First-Time Setup</a></li>
+          <li><a href="#modules">Module Reference</a></li>
+          <li><a href="#roles">Roles &amp; Permissions</a></li>
+          <li><a href="#workflows">Daily Workflows</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Portal</h4>
+        <ul>
+          <li><a href="/login/">Sign In</a></li>
+          <li><a href="/dashboard/">School Dashboard</a></li>
+          <li><a href="/students/">Students</a></li>
+          <li><a href="/fees/">Fees &amp; Balances</a></li>
+          <li><a href="/promotions/">Promotions &amp; Rollover</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/">Prince Alex Digital</a></li>
+          <li><a href="/#contact">Contact</a></li>
+          <li><a href="/#features">Features</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gf-bottom">
+      <span>© <span id="year"></span> ShuleSmart · Prince Alex Digital. All rights reserved.</span>
+      <span>ShuleSmart v1.0 · Guide updated August 2026</span>
+    </div>
+  </div>
+</footer>
+
+<button id="toTop" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script>
+/* Scroll progress, navbar state, back-to-top, active section link */
+const prog = document.getElementById("scrollProgress");
+const gnav = document.getElementById("gnav");
+const toTop = document.getElementById("toTop");
+const sections = [...document.querySelectorAll("section[id]")];
+const navAnchors = [...document.querySelectorAll("#gnavLinks a")];
+function onScroll() {
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  prog.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+  gnav.classList.toggle("scrolled", h.scrollTop > 10);
+  toTop.classList.toggle("show", h.scrollTop > 600);
+  let current = "";
+  for (const s of sections) { if (h.scrollTop >= s.offsetTop - 130) current = s.id; }
+  navAnchors.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + current));
+}
+document.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+/* Mobile menu */
+const burger = document.getElementById("burger");
+const links = document.getElementById("gnavLinks");
+burger.addEventListener("click", () => links.classList.toggle("open"));
+links.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => links.classList.remove("open")));
+
+/* Reveal on scroll */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in-view"); io.unobserve(en.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+/* Footer year */
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

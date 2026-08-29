@@ -1,0 +1,28 @@
+{
+  "_readme": [
+    "ShuleSmart — Firestore bootstrap data (OPTIONAL).",
+    "",
+    "The engine now AUTO-BOOTSTRAPS the founding owner on first login:",
+    "sign in with an email listed in FOUNDING_OWNER_EMAILS",
+    "(js/firestore-data.js) and the users document is created",
+    "for you, keyed by your Firebase Auth UID.",
+    "",
+    "Manual seeding still works if you prefer: create collection",
+    "'users' with the DOCUMENT ID below (it must equal the Firebase",
+    "Auth UID so the security rules can resolve the caller profile)."
+  ],
+  "document_id": "YGfPVm3o8GPl9o5KH5XzEoOuEyc2",
+  "fields": {
+    "id": "YGfPVm3o8GPl9o5KH5XzEoOuEyc2",
+    "firebase_uid": "YGfPVm3o8GPl9o5KH5XzEoOuEyc2",
+    "email": "senerwaalex@gmail.com",
+    "display_name": "Alex Senerwa",
+    "phone": null,
+    "photo_url": null,
+    "platform_role": "super_owner",
+    "school_id": null,
+    "status": "active",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  }
+}

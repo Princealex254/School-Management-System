@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fees & Balances | ShuleSmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+<aside class="sa-sidebar" id="sidebar"></aside>
+<div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main">
+<header class="sa-topbar" id="topbar"></header>
+<main class="sa-content">
+<div class="sa-page-head"><div><h1>Fees & Balances</h1><p>Billed vs paid per student — balances update as payments are recorded.</p></div><button class="sa-btn sa-btn-primary" id="addBtn"><i class="fa-solid fa-plus"></i> Balances</button></div>
+<div class="sa-card"><div class="sa-card-body">
+<div class="sa-filters"><input type="text" class="sa-input" id="searchInput" placeholder="Search..."><select class="sa-select" id="statusSel"></select></div>
+<div id="listContainer"></div>
+<div id="pagerBar" style="display:none;margin-top:16px;"></div>
+</div></div>
+</main>
+</div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost, apiPut, apiPatch } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, initials, formatDate, formatCurrency, badgeHtml, loadingState, emptyState, errorState, openModal, closeModal, confirmDialog } from "../js/common.js";
+import { printStudentStatement } from "../js/print.js";
+const H = { E: escapeHtml, D: formatDate, B: badgeHtml, C: formatCurrency };
+const CFG = {"nav":"fees","title":"Fees \u0026 Balances","heading":"Fees \u0026 Balances","desc":"Billed vs paid per student — balances update as payments are recorded.","icon":"fa-solid fa-money-bill-wave","addLabel":"Balances","endpoint":"/api/fees/balances","key":"balances","search":true,"statuses":null,"addable":0,"toggle":false,"fields":[],"cols":[{"l":"Student","x":"E(r.name)"},{"l":"Adm. No.","x":"E(r.admission_number)"},{"l":"Class","x":"E(r.class_name||\u0027—\u0027)"},{"l":"Billed","x":"C(r.billed)"},{"l":"Paid","x":"C(r.paid)"},{"l":"Balance","x":"C(r.balance||0)"}]};
+await requireSchoolAdmin();
+initShell({ active: CFG.nav });
+setTopbarTitle(CFG.heading);
+if (CFG.addable === 0) document.getElementById("addBtn").style.display = "none";
+else document.getElementById("addBtn").innerHTML = '<i class="fa-solid fa-plus"></i> ' + CFG.addLabel;
+const PAGE = 10;
+let state = { search: "", status: "", offset: 0, total: 0 };
+
+/* Static page references.
+   NOTE: the statement filters (stmtYear / stmtTerm / stmtFrom / stmtTo /
+   stmtType) do NOT belong here — they are created dynamically inside the
+   statement modal each time it opens, so they must always be looked up
+   fresh at use time (the mk() helper does this). Hoisting them into
+   module-scope constants captures null and breaks the modal. */
+const listContainer = document.getElementById("listContainer");
+const pagerBar = document.getElementById("pagerBar");
+const REF = {};
+if (CFG.refs) await Promise.all(CFG.refs.map(async (r) => { try { const d = await apiGet(r.url); REF[r.refId] = (d[r.key] || []).map((x) => ({ id: x.id, label: (new Function("r", "return " + r.labelExpr))(x) })); } catch (e) { REF[r.refId] = []; } }));
+function R(rid, id) { if (!id) return "\u2014"; const hit = (REF[rid] || []).find((x) => x.id === id); return hit ? hit.label : "\u2014"; }
+function col(r, x) { return (new Function("r", "H", "const {E,D,B,C,R}=H; return (" + x + ");"))(r, Object.assign(H, { R })); }
+async function load() {
+  loadingState(listContainer, "Loading...");
+  pagerBar.style.display = "none";
+  try {
+    const p = new URLSearchParams();
+    if (state.search && CFG.search) p.set("search", state.search);
+    if (state.status && CFG.statuses) p.set("status", state.status);
+    p.set("limit", String(PAGE)); p.set("offset", String(state.offset));
+    const res = await apiGet(CFG.endpoint + "?" + p.toString());
+    const rows = res[CFG.key] || [];
+    state.total = res.total != null ? Number(res.total) : (state.offset + rows.length + (rows.length === PAGE ? 1 : 0));
+    render(rows); pager();
+  } catch (err) { errorState(listContainer, err.message); }
+}
+function render(rows) {
+  if (!rows.length) { emptyState(listContainer, { icon: CFG.icon, title: "Nothing here yet", message: "Use the button above to add the first record." }); return; }
+  listContainer.innerHTML = `<div class="sa-table-wrap"><table class="sa-table"><thead><tr>` + CFG.cols.map((c) => `<th>${c.l}</th>`).join("") + `<th></th></tr></thead><tbody>` + rows.map((r) => `<tr>` + CFG.cols.map((c) => `<td>${col(r, c.x)}</td>`).join("") + (CFG.toggle === false ? `<td><div class="sa-row-actions"><button data-a="stmt" data-id="${r.student_id || r.id}" title="Account statement"><i class="fa-solid fa-receipt"></i></button></div></td>` : `<td><div class="sa-row-actions"><button data-a="view" data-id="${r.student_id || r.id}" title="View"><i class="fa-solid fa-eye"></i></button><button data-a="edit" data-id="${r.id}" title="Edit"><i class="fa-solid fa-pen"></i></button><button data-a="toggle" data-id="${r.id}" data-s="${r.status}" title="Activate/Deactivate"><i class="fa-solid fa-power-off"></i></button></div></td>`) + `</tr>`).join("") + `</tbody></table></div>`;
+  cache = rows;
+  if (CFG.toggle === false || CFG.fields.length === 0) {
+    listContainer.querySelectorAll('[data-a="edit"],[data-a="toggle"]').forEach((b) => b.remove());
+  }
+  listContainer.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b.dataset.a, b.dataset.id, b.dataset.s)));
+}
+function pager() {
+  const hasPrev = state.offset > 0, hasNext = state.offset + PAGE < state.total;
+  if (!hasPrev && !hasNext) { pagerBar.style.display = "none"; return; }
+  pagerBar.style.display = "flex"; pagerBar.style.justifyContent = "space-between"; pagerBar.style.alignItems = "center";
+  pagerBar.innerHTML = `<span class="sa-cell-sub">${state.total} record(s)</span><div style="display:flex;gap:8px;"><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pP" ${hasPrev ? "" : "disabled"}><i class="fa-solid fa-chevron-left"></i></button><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pN" ${hasNext ? "" : "disabled"}><i class="fa-solid fa-chevron-right"></i></button></div>`;
+  pP.onclick = () => { state.offset -= PAGE; load(); }; pN.onclick = () => { state.offset += PAGE; load(); };
+}
+let cache = [];
+async function act(a, id, s) {
+  const rec = cache.find((x) => (x.student_id || x.id) === id);
+  if (a === "view") return view(rec);
+  if (a === "stmt") return stmtView(rec);
+  if (a === "edit") return form(rec);
+  if (a === "toggle") {
+    const ns = s === "active" ? "inactive" : "active";
+    if (!(await confirmDialog({ title: "Change status?", message: "It will be marked as " + ns + ".", confirmText: "Yes", danger: ns !== "active" }))) return;
+    try { await apiPatch(CFG.endpoint + "/" + id + "/status", { status: ns }); showToast("Updated.", "success"); load(); } catch (e) { showToast(e.message || "Failed.", "error"); }
+  }
+}
+function view(r) {
+  if (!CFG.fields.length) {
+    openModal(`<h3 class="sa-modal-title">${escapeHtml(r.name || "Record details")}</h3><div style="margin-top:14px;">` +
+      CFG.cols.map((c) => `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--text-secondary);font-weight:600;">${c.l}</span><span style="font-weight:700;text-align:right;">${col(r, c.x)}</span></div>`).join("") +
+      `<div class="sa-modal-actions"><button class="sa-btn sa-btn-primary" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button></div></div>`);
+    return;
+  }
+  openModal(`<h3 class="sa-modal-title">Record details</h3><div style="margin-top:14px;">` + CFG.fields.map((f) => { let v = r[f.id]; if (f.type === "ref") v = R(f.ref, v); else if (f.id === "status") v = badgeHtml(v); else v = escapeHtml(v ?? "\u2014"); return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--text-secondary);font-weight:600;">${f.label}</span><span style="font-weight:700;text-align:right;">${v}</span></div>`; }).join("") + `<div class="sa-modal-actions"><button class="sa-btn sa-btn-primary" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button></div></div>`);
+}
+async function stmtView(rec) {
+  const sid = rec.student_id || rec.id;
+  const mk = (el, html) => { const n = document.getElementById(el); if (n) n.innerHTML = html; };
+  openModal(`<h3 class="sa-modal-title">${escapeHtml(rec.name || "Student")} <span style="font-weight:500;color:var(--text-secondary);font-size:13px;">${escapeHtml(rec.admission_number || "")}</span></h3>` +
+    `<div class="sa-filters" style="margin-top:12px;">
+      <select class="sa-select" id="stmtYear" style="max-width:150px;"><option value="">All Years</option></select>
+      <select class="sa-select" id="stmtTerm" style="max-width:130px;"><option value="">All Terms</option></select>
+      <input type="date" class="sa-input" id="stmtFrom" title="From">
+      <input type="date" class="sa-input" id="stmtTo" title="To">
+      <select class="sa-select" id="stmtType" style="max-width:150px;">
+        <option value="">All Types</option>
+        <option value="CHARGE">Charges</option>
+        <option value="PAYMENT">Payments</option>
+        <option value="DISCOUNT">Discounts</option>
+        <option value="WAIVER">Waivers</option>
+        <option value="ADJUSTMENT">Adjustments</option>
+        <option value="REFUND">Refunds</option>
+        <option value="REVERSAL">Reversals</option>
+      </select>
+      <button class="sa-btn sa-btn-secondary sa-btn-sm" id="stmtApply"><i class="fa-solid fa-filter"></i> Apply</button>
+    </div>` +
+    `<div id="stmtBody" style="margin-top:12px;">Loading statement…</div>` +
+    `<div class="sa-modal-actions"><button class="sa-btn sa-btn-primary" id="stmtPrintBtn"><i class="fa-solid fa-print"></i> Print / PDF Statement</button><button class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button></div>`);
+
+  /* The modal markup exists now — bind its controls explicitly (they are
+     recreated each time this modal opens, so never hoist these). */
+  const stmtYear = document.getElementById("stmtYear");
+  const stmtTerm = document.getElementById("stmtTerm");
+  const stmtFrom = document.getElementById("stmtFrom");
+  const stmtTo = document.getElementById("stmtTo");
+  const stmtType = document.getElementById("stmtType");
+
+  let REFY = [], REFT = [];
+  try { REFY = (await apiGet("/api/academic-years")).academicYears || []; } catch (e) {}
+  try { REFT = (await apiGet("/api/terms")).terms || []; } catch (e) {}
+  mk("stmtYear", '<option value="">All Years</option>' + REFY.map((y) => `<option value="${y.id}">${escapeHtml(y.name)}</option>`).join(""));
+  mk("stmtTerm", '<option value="">All Terms</option>' + REFT.map((t) => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join(""));
+
+  async function loadStatement() {
+    mk("stmtBody", "Loading statement…");
+    try {
+      const p = new URLSearchParams();
+      if (stmtYear.value) p.set("academic_year_id", stmtYear.value);
+      if (stmtTerm.value) p.set("term_id", stmtTerm.value);
+      if (stmtFrom.value) p.set("from", stmtFrom.value);
+      if (stmtTo.value) p.set("to", stmtTo.value);
+      if (stmtType.value) p.set("transaction_type", stmtType.value);
+      const d = await apiGet("/api/students/" + sid + "/statement" + (p.toString() ? "?" + p.toString() : ""));
+      renderStatement(d);
+    } catch (err) {
+      mk("stmtBody", `<p>${escapeHtml(err.message || "Could not load statement.")}</p>`);
+    }
+  }
+  function renderStatement(d) {
+    const lines = d.lines || [];
+    const st = d.student || {};
+    const per = d.period || {};
+    const t = d.totals || {};
+    const ctxTerm = per.term_name || (lines.find((l) => l.term_name) || {}).term_name || "";
+    /* Currency stated once above the table; every value always shown. */
+    const num = (v) => Number(v || 0).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const body = lines.length
+      ? `<p style="margin:0 0 8px;font-size:12px;color:var(--text-secondary);font-weight:600;">All amounts are in KSh (Kenyan Shillings).</p><div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Date</th><th>Description</th><th style="text-align:right;">Debit</th><th style="text-align:right;">Credit</th><th style="text-align:right;">Balance</th></tr></thead><tbody>` +
+        lines.map((l) => `<tr><td>${escapeHtml(formatDate(l.date || l.transaction_date))}</td><td>${escapeHtml(l.description || l.entry_type || l.transaction_type || "—")}${l.receipt_no ? " <span class=\"sa-badge sa-badge-info\">" + escapeHtml(l.receipt_no) + "</span>" : ""}${l.term_name ? " <span class=\"sa-badge sa-badge-success\">" + escapeHtml(l.term_name) + "</span>" : ""}</td><td style="text-align:right;">${num(l.debit)}</td><td style="text-align:right;">${num(l.credit)}</td><td style="text-align:right;font-weight:700;">${num(l.balance)}</td></tr>`).join("") +
+        `</tbody></table></div>`
+      : `<p>No transactions recorded for this selection.</p>`;
+    const meta = `<div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;">` +
+      `<span><strong>Class:</strong> ${escapeHtml(st.class_name || "—")}</span>` +
+      `<span><strong>Guardian:</strong> ${escapeHtml([st.guardian_name, st.guardian_phone].filter(Boolean).join(" · ") || "—")}</span>` +
+      (per.from && per.to ? `<span><strong>Period:</strong> ${formatDate(per.from)} – ${formatDate(per.to)}</span>` : "") +
+      (ctxTerm ? `<span><strong>${escapeHtml(ctxTerm)}</strong></span>` : "") +
+      `</div>`;
+    const closing = Number(t.balance || 0);
+    const balanceLine = closing >= 0
+      ? `<span>Outstanding Balance: <strong>${formatCurrency(closing)}</strong></span>`
+      : `<span>Outstanding Balance: <strong>${formatCurrency(0)}</strong></span><span style="color:#047857;">Available Credit: <strong>${formatCurrency(Math.abs(closing))}</strong></span>`;
+    mk("stmtBody", meta + body +
+      `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">` +
+      `<span>Opening Balance: <strong>${formatCurrency(t.opening_balance || 0)}</strong></span>` +
+      `<span>Total Charges: <strong>${formatCurrency(t.charged || 0)}</strong></span>` +
+      `<span>Payments/Credits: <strong>${formatCurrency(t.paid || 0)}</strong></span>` +
+      balanceLine + `</div>`);
+    window.__lastStatementData = d;
+  }
+
+  document.getElementById("stmtApply").addEventListener("click", loadStatement);
+  [stmtYear, stmtTerm].forEach((el) => el.addEventListener("change", loadStatement));
+  document.getElementById("stmtPrintBtn").addEventListener("click", async () => {
+    try { await printStudentStatement(sid, { name: rec.name || "", admission_number: rec.admission_number || "", class_name: rec.class_name || "" }, window.__lastStatementData || null); showToast("Opening print dialog…", "info"); } catch (e) { showToast(e.message || "Could not print statement.", "error"); }
+  });
+
+  await loadStatement();
+}
+function form(rec) {
+  const isEdit = !!rec;
+  openModal(`<h3 class="sa-modal-title">${isEdit ? "Edit record" : "Add record"}</h3><form id="gf" class="sa-form-grid" novalidate style="margin-top:14px;">` + CFG.fields.map((f) => { const v = rec ? (rec[f.id] ?? "") : ""; const req = f.req ? ' <span class="req">*</span>' : ""; let inp; if (f.type === "select") inp = `<select class="sa-select" data-f="${f.id}">` + f.options.map((o) => `<option value="${o}"${String(v) === o ? " selected" : ""}>${o}</option>`).join("") + `</select>`; else if (f.type === "checkbox") inp = `<input type="checkbox" data-f="${f.id}" ${v ? "checked" : ""}>`; else if (f.type === "textarea") inp = `<textarea class="sa-input" data-f="${f.id}" rows="2">${escapeHtml(v)}</textarea>`; else if (f.type === "ref") inp = `<select class="sa-select" data-f="${f.id}"><option value="">None</option>` + (REF[f.ref] || []).map((o) => `<option value="${o.id}"${v === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("") + `</select>`; else inp = `<input class="sa-input" type="${f.type || "text"}" data-f="${f.id}" value="${escapeHtml(String(v ?? "").slice(0, f.type === "date" ? 10 : 999))}">`; return `<div class="sa-form-group${f.full ? " full" : ""}"><label>${f.label}${req}</label>${inp}</div>`; }).join("") + `<div class="sa-modal-actions" style="grid-column:1/-1;"><button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button><button type="submit" class="sa-btn sa-btn-primary" id="gfs">Save</button></div></form>`);
+  document.getElementById("gf").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {};
+    CFG.fields.forEach((f) => { const el = document.querySelector('[data-f="' + f.id + '"]'); payload[f.id] = f.type === "checkbox" ? el.checked : el.value.trim(); });
+    for (const f of CFG.fields) if (f.req && !payload[f.id]) { showToast(f.label + " is required.", "error"); return; }
+    const sb = document.getElementById("gfs"); sb.disabled = true; sb.innerHTML = "Saving...";
+    try {
+      if (isEdit) await apiPut(CFG.endpoint + "/" + rec.id, payload); else await apiPost(CFG.endpoint, payload);
+      showToast("Saved successfully.", "success"); document.getElementById("modalRoot").innerHTML = ""; state.offset = 0; load();
+    } catch (err) { showToast(err.message || "Save failed.", "error"); sb.disabled = false; sb.innerHTML = "Save"; }
+  });
+}
+document.getElementById("addBtn").addEventListener("click", () => form(null));
+const si = document.getElementById("searchInput");
+si.style.display = CFG.search ? "block" : "none";
+si.addEventListener("input", (e) => { clearTimeout(window.__t); window.__t = setTimeout(() => { state.search = e.target.value.trim(); state.offset = 0; load(); }, 350); });
+const ss = document.getElementById("statusSel");
+ss.style.display = CFG.statuses ? "block" : "none";
+if (CFG.statuses) { ss.innerHTML = '<option value="">All Statuses</option>' + CFG.statuses.map((s) => `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join(""); ss.addEventListener("change", (e) => { state.status = e.target.value; state.offset = 0; load(); }); }
+load();
+</script>
+</body>
+</html>

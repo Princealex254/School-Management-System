@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Structure v2 | ShuleSmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+<aside class="sa-sidebar" id="sidebar"></aside>
+<div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main">
+<header class="sa-topbar" id="topbar"></header>
+<main class="sa-content">
+<div class="sa-page-head"><div><h1>Fee Structure</h1><p>Define fees, amounts and due dates.</p></div><button class="sa-btn sa-btn-primary" id="addBtn"><i class="fa-solid fa-plus"></i> Add Fee</button></div>
+<div class="sa-card"><div class="sa-card-body">
+<div class="sa-filters"><input type="text" class="sa-input" id="searchInput" placeholder="Search..."><select class="sa-select" id="statusSel"></select></div>
+<div id="listContainer"></div>
+<div id="pagerBar" style="display:none;margin-top:16px;"></div>
+</div></div>
+</main>
+</div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost, apiPut, apiPatch } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, initials, formatDate, formatCurrency, badgeHtml, loadingState, emptyState, errorState, openModal, closeModal, confirmDialog } from "../js/common.js";
+const H = { E: escapeHtml, D: formatDate, B: badgeHtml, C: formatCurrency };
+const CFG = {"refs":[{"key":"academicYears","url":"/api/academic-years","refId":"ay","labelExpr":"r.name"},{"key":"terms","url":"/api/terms","refId":"trm","labelExpr":"r.name"},{"key":"classes","url":"/api/classes","refId":"cls","labelExpr":"r.name+(r.stream?' - '+r.stream:'')"}],"desc":"Define what each class should pay.","key":"feeStructures","icon":"fa-solid fa-list-check","nav":"fee-structure","heading":"Fee Structure","fields":[],"endpoint":"/api/fee-structures","addLabel":"Add Fee Structure","title":"Fee Structures","statuses":["active","archived"],"search":false,"toggle":true,"cols":[{"x":"E(r.title)+' <span class=\"sa-badge sa-badge-info\">v'+(r.version||1)+'</span>'","l":"Structure"},{"x":"R('ay', r.academic_year_id)","l":"Year"},{"x":"R('trm', r.term_id)","l":"Term"},{"x":"R('cls', r.class_id)","l":"Class"},{"x":"C(r.total||0)","l":"Total"},{"x":"String(r.item_count||0)+' items'","l":"Items"},{"x":"String(r.students_charged||0)+' charged'","l":"Charged"},{"x":"B(r.status)","l":"Status"}]};
+await requireSchoolAdmin();
+initShell({ active: CFG.nav });
+setTopbarTitle(CFG.heading);
+if (CFG.addable === 0) document.getElementById("addBtn").style.display = "none";
+else document.getElementById("addBtn").innerHTML = '<i class="fa-solid fa-plus"></i> ' + CFG.addLabel;
+const PAGE = 10;
+let state = { search: "", status: "", offset: 0, total: 0 };
+
+/* Element references — previously used undeclared, so the list never rendered. */
+const listContainer = document.getElementById("listContainer");
+const pagerBar = document.getElementById("pagerBar");
+const REF = {};
+if (CFG.refs) await Promise.all(CFG.refs.map(async (r) => { try { const d = await apiGet(r.url); REF[r.refId] = (d[r.key] || []).map((x) => ({ id: x.id, label: (new Function("r", "return " + r.labelExpr))(x) })); } catch (e) { REF[r.refId] = []; } }));
+function R(rid, id) { if (!id) return "\u2014"; const hit = (REF[rid] || []).find((x) => x.id === id); return hit ? hit.label : "\u2014"; }
+function col(r, x) { return (new Function("r", "H", "const {E,D,B,C,R}=H; return (" + x + ");"))(r, Object.assign(H, { R })); }
+async function load() {
+  loadingState(listContainer, "Loading...");
+  pagerBar.style.display = "none";
+  try {
+    const p = new URLSearchParams();
+    if (state.search && CFG.search) p.set("search", state.search);
+    if (state.status && CFG.statuses) p.set("status", state.status);
+    p.set("limit", String(PAGE)); p.set("offset", String(state.offset));
+    const res = await apiGet(CFG.endpoint + "?" + p.toString());
+    const rows = res[CFG.key] || [];
+    state.total = res.total != null ? Number(res.total) : (state.offset + rows.length + (rows.length === PAGE ? 1 : 0));
+    render(rows); pager();
+  } catch (err) { errorState(listContainer, err.message); }
+}
+function render(rows) {
+  if (!rows.length) { emptyState(listContainer, { icon: CFG.icon, title: "Nothing here yet", message: "Use the button above to add the first record." }); return; }
+  listContainer.innerHTML = `<div class="sa-table-wrap"><table class="sa-table"><thead><tr>` + CFG.cols.map((c) => `<th>${c.l}</th>`).join("") + `<th></th></tr></thead><tbody>` + rows.map((r) => `<tr>` + CFG.cols.map((c) => `<td>${col(r, c.x)}</td>`).join("") + (CFG.toggle === false ? "" : `<td><div class="sa-row-actions"><button data-a="view" data-id="${r.id}" title="View"><i class="fa-solid fa-eye"></i></button><button data-a="edit" data-id="${r.id}" title="Edit"><i class="fa-solid fa-pen"></i></button><button data-a="toggle" data-id="${r.id}" data-s="${r.status}" title="Activate/Deactivate"><i class="fa-solid fa-power-off"></i></button></div></td>`) + `</tr>`).join("") + `</tbody></table></div>`;
+  cache = rows;
+  listContainer.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b.dataset.a, b.dataset.id, b.dataset.s)));
+}
+function pager() {
+  const hasPrev = state.offset > 0, hasNext = state.offset + PAGE < state.total;
+  if (!hasPrev && !hasNext) { pagerBar.style.display = "none"; return; }
+  pagerBar.style.display = "flex"; pagerBar.style.justifyContent = "space-between"; pagerBar.style.alignItems = "center";
+  pagerBar.innerHTML = `<span class="sa-cell-sub">${state.total} record(s)</span><div style="display:flex;gap:8px;"><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pP" ${hasPrev ? "" : "disabled"}><i class="fa-solid fa-chevron-left"></i></button><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pN" ${hasNext ? "" : "disabled"}><i class="fa-solid fa-chevron-right"></i></button></div>`;
+  pP.onclick = () => { state.offset -= PAGE; load(); }; pN.onclick = () => { state.offset += PAGE; load(); };
+}
+let cache = [];
+async function fsView(rec) {
+  try {
+    const d = await apiGet(CFG.endpoint + "/" + rec.id);
+    const st = d.structure || {};
+    const rows = (d.items || []).map((i) =>
+      `<tr><td>${escapeHtml(i.item_name)}</td><td style="text-align:right;">${formatCurrency(i.amount)}</td><td style="text-align:center;">${i.mandatory ? "Yes" : "Optional"}</td></tr>`).join("");
+
+    /* Load current term / year so we can show whether this structure's
+       term is the active one (generation is only allowed for it). */
+    let termCurrent = false;
+    let termLabel = st.term_id ? (REF.trm || []).find((o) => o.id === st.term_id)?.label : "";
+    let yearLabel = st.academic_year_id ? (REF.ay || []).find((o) => o.id === st.academic_year_id)?.label : "";
+    try {
+      const termsRes = await apiGet("/api/terms");
+      const t = (termsRes.terms || []).find((x) => x.id === st.term_id);
+      if (t) { termCurrent = Number(t.is_current) === 1; termLabel = t.name || termLabel; }
+      const yearsRes = await apiGet("/api/academic-years");
+      const y = (yearsRes.academicYears || []).find((x) => x.id === st.academic_year_id);
+      if (y) yearLabel = y.name || yearLabel;
+    } catch (e) { /* context display only — generation is still guarded server-side */ }
+
+    const classLabel = st.class_id ? (REF.cls || []).find((o) => o.id === st.class_id)?.label : "";
+    const canGenerate = !!st.term_id && termCurrent && !!st.class_id;
+    const context = `
+      <div style="margin-top:14px;padding:12px;border:1px solid var(--border);border-radius:12px;font-size:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 16px;">
+        <div><span style="color:var(--text-secondary);font-weight:600;">Term</span><div style="font-weight:700;">${escapeHtml(termLabel || "—")} ${termCurrent ? '<span class="sa-badge sa-badge-success">Active</span>' : '<span class="sa-badge sa-badge-warning">Not active</span>'}</div></div>
+        <div><span style="color:var(--text-secondary);font-weight:600;">Academic Year</span><div style="font-weight:700;">${escapeHtml(yearLabel || "—")}</div></div>
+        <div><span style="color:var(--text-secondary);font-weight:600;">Class</span><div style="font-weight:700;">${escapeHtml(classLabel || "All classes")}</div></div>
+      </div>
+      ${canGenerate ? "" : `<p class="sa-cell-sub" style="margin-top:10px;color:var(--danger);font-weight:600;">Charges can only be generated for the current, active term and a specific class. Please edit this structure to select the active term and a class before generating.</p>`}`;
+
+    openModal(`<h3 class="sa-modal-title">${escapeHtml(d.structure.title)} <span class="sa-badge sa-badge-info">v${d.structure.version}</span> ${badgeHtml(d.structure.status)}</h3>
+      ${context}
+      <div class="sa-table-wrap" style="margin-top:14px;"><table class="sa-table">
+        <thead><tr><th>Fee Item</th><th style="text-align:right;">Amount</th><th>Mandatory</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <strong>Total: ${formatCurrency(d.total)}</strong>
+        <span class="sa-cell-sub">${d.students_charged} student(s) charged</span>
+      </div>
+      <div class="sa-modal-actions">
+        <button class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button>
+        <button class="sa-btn sa-btn-primary" id="genBtn" ${canGenerate ? "" : "disabled"}><i class="fa-solid fa-bolt"></i> Generate Charges (${d.students_charged} already charged)</button>
+      </div>`);
+    document.getElementById("genBtn").addEventListener("click", async () => {
+      try {
+        const r = await apiPost(`${CFG.endpoint}/${rec.id}/generate`, {});
+        showToast(r.message, "success");
+        document.getElementById("modalRoot").innerHTML = "";
+        load();
+      } catch (e) { showToast(e.message, "error"); }
+    });
+  } catch (err) { showToast(err.message || "Load failed.", "error"); }
+}
+
+async function act(a, id, s) {
+  const rec = cache.find((x) => x.id === id);
+  if (a === "view") return fsView(rec);
+  if (a === "edit") return fsForm(rec);
+  if (a === "toggle") {
+    const ns = s === "active" ? "archived" : "active";
+    if (!(await confirmDialog({ title: "Change status?", message: "It will be marked as " + ns + ".", confirmText: "Yes", danger: ns !== "active" }))) return;
+    try { await apiPatch(CFG.endpoint + "/" + id + "/status", { status: ns }); showToast("Updated.", "success"); load(); } catch (e) { showToast(e.message || "Failed.", "error"); }
+  }
+}
+function view(r) {
+  openModal(`<h3 class="sa-modal-title">Record details</h3><div style="margin-top:14px;">` + CFG.fields.map((f) => { let v = r[f.id]; if (f.type === "ref") v = R(f.ref, v); else if (f.id === "status") v = badgeHtml(v); else v = escapeHtml(v ?? "\u2014"); return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--text-secondary);font-weight:600;">${f.label}</span><span style="font-weight:700;text-align:right;">${v}</span></div>`; }).join("") + `<div class="sa-modal-actions"><button class="sa-btn sa-btn-primary" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button></div></div>`);
+}
+function form(rec) {
+  const isEdit = !!rec;
+  openModal(`<h3 class="sa-modal-title">${isEdit ? "Edit record" : "Add record"}</h3><form id="gf" class="sa-form-grid" novalidate style="margin-top:14px;">` + CFG.fields.map((f) => { const v = rec ? (rec[f.id] ?? "") : ""; const req = f.req ? ' <span class="req">*</span>' : ""; let inp; if (f.type === "select") inp = `<select class="sa-select" data-f="${f.id}">` + f.options.map((o) => `<option value="${o}"${String(v) === o ? " selected" : ""}>${o}</option>`).join("") + `</select>`; else if (f.type === "checkbox") inp = `<input type="checkbox" data-f="${f.id}" ${v ? "checked" : ""}>`; else if (f.type === "textarea") inp = `<textarea class="sa-input" data-f="${f.id}" rows="2">${escapeHtml(v)}</textarea>`; else if (f.type === "ref") inp = `<select class="sa-select" data-f="${f.id}"><option value="">None</option>` + (REF[f.ref] || []).map((o) => `<option value="${o.id}"${v === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("") + `</select>`; else inp = `<input class="sa-input" type="${f.type || "text"}" data-f="${f.id}" value="${escapeHtml(String(v ?? "").slice(0, f.type === "date" ? 10 : 999))}">`; return `<div class="sa-form-group${f.full ? " full" : ""}"><label>${f.label}${req}</label>${inp}</div>`; }).join("") + `<div class="sa-modal-actions" style="grid-column:1/-1;"><button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button><button type="submit" class="sa-btn sa-btn-primary" id="gfs">Save</button></div></form>`);
+  document.getElementById("gf").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {};
+    CFG.fields.forEach((f) => { const el = document.querySelector('[data-f="' + f.id + '"]'); payload[f.id] = f.type === "checkbox" ? el.checked : el.value.trim(); });
+    for (const f of CFG.fields) if (f.req && !payload[f.id]) { showToast(f.label + " is required.", "error"); return; }
+    const sb = document.getElementById("gfs"); sb.disabled = true; sb.innerHTML = "Saving...";
+    try {
+      if (isEdit) await apiPut(CFG.endpoint + "/" + rec.id, payload); else await apiPost(CFG.endpoint, payload);
+      showToast("Saved successfully.", "success"); document.getElementById("modalRoot").innerHTML = ""; state.offset = 0; load();
+    } catch (err) { showToast(err.message || "Save failed.", "error"); sb.disabled = false; sb.innerHTML = "Save"; }
+  });
+}
+document.getElementById("addBtn").addEventListener("click", () => fsForm(null));
+
+/* ---------- Fee structure form with line items ---------- */
+function itemRow(it = {}) {
+  return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+    <input class="sa-input" style="flex:2;" placeholder="Fee item e.g. Tuition" data-in="name" value="${escapeHtml(it.item_name || "")}">
+    <input class="sa-input" style="flex:1;" type="number" placeholder="Amount" data-in="amount" value="${it.amount ?? ""}">
+    <label style="white-space:nowrap;font-size:12px;"><input type="checkbox" data-in="mandatory" ${it.mandatory === 0 ? "" : "checked"}> Mandatory</label>
+    <button type="button" class="sa-btn sa-btn-danger sa-btn-sm" onclick="this.closest('div').remove()">×</button>
+  </div>`;
+}
+
+function fsForm(rec) {
+  const isEdit = !!rec;
+  openModal(`<h3 class="sa-modal-title">${isEdit ? "Edit Fee Structure" : "Add Fee Structure"}</h3>
+    <form id="ff" class="sa-form-grid" novalidate style="margin-top:14px;">
+      <div class="sa-form-group full"><label>Structure Name <span class="req">*</span></label><input class="sa-input" data-f="name" value="${escapeHtml(rec?.title || "")}" placeholder="e.g. Grade 7 - Term 1 - 2026"></div>
+      <div class="sa-form-group"><label>Academic Year</label><select class="sa-select" data-f="academic_year_id"><option value="">None</option>${(REF.ay||[]).map(o=>`<option value="${o.id}"${rec&&rec.academic_year_id===o.id?" selected":""}>${escapeHtml(o.label)}</option>`).join("")}</select></div>
+      <div class="sa-form-group"><label>Term</label><select class="sa-select" data-f="term_id"><option value="">None</option>${(REF.trm||[]).map(o=>`<option value="${o.id}"${rec&&rec.term_id===o.id?" selected":""}>${escapeHtml(o.label)}</option>`).join("")}</select></div>
+      <div class="sa-form-group"><label>Applicable Class</label><select class="sa-select" data-f="class_id"><option value="">All classes</option>${(REF.cls||[]).map(o=>`<option value="${o.id}"${rec&&rec.class_id===o.id?" selected":""}>${escapeHtml(o.label)}</option>`).join("")}</select></div>
+      <div class="sa-form-group"><label>Stream (optional)</label><input class="sa-input" data-f="stream" value="${escapeHtml(rec?.stream || "")}"></div>
+      <div class="sa-form-section-title">Fee Items</div>
+      <div id="itemsWrap" style="grid-column:1/-1;display:flex;flex-direction:column;gap:8px;">${isEdit ? "" : itemRow()}</div>
+      <div style="grid-column:1/-1;"><button type="button" class="sa-btn sa-btn-secondary sa-btn-sm" id="addItemBtn"><i class="fa-solid fa-plus"></i> Add fee item</button></div>
+      <div class="sa-form-group full"><label>Notes</label><input class="sa-input" data-f="notes" value="${escapeHtml(rec?.notes || "")}"></div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;"><button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button><button type="submit" class="sa-btn sa-btn-primary" id="ffs">Save</button></div>
+    </form>`);
+
+  const wrap = document.getElementById("itemsWrap");
+  document.getElementById("addItemBtn").addEventListener("click", () => wrap.insertAdjacentHTML("beforeend", itemRow()));
+
+  document.getElementById("ff").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const g = (f) => document.querySelector(`[data-f="${f}"]`).value.trim();
+    const items = [...wrap.querySelectorAll("[data-in=name]")].map((n) => ({
+      item_name: n.value.trim(),
+      amount: Number(n.parentElement.querySelector("[data-in=amount]").value),
+      mandatory: n.parentElement.querySelector("[data-in=mandatory]").checked
+    })).filter((i) => i.item_name && i.amount > 0);
+
+    if (!g("name")) { showToast("Structure name is required.", "error"); return; }
+    if (items.length === 0) { showToast("Add at least one fee item.", "error"); return; }
+
+    const body = { name: g("name"), academic_year_id: g("academic_year_id"), term_id: g("term_id"), class_id: g("class_id"), stream: g("stream"), notes: g("notes"), items };
+    const sb = document.getElementById("ffs");
+    sb.disabled = true; sb.innerHTML = "Saving...";
+    try {
+      const res = isEdit ? await apiPut(CFG.endpoint + "/" + rec.id, body) : await apiPost(CFG.endpoint, body);
+      showToast(res.message || "Saved.", "success");
+      document.getElementById("modalRoot").innerHTML = "";
+      load();
+    } catch (err) {
+      showToast(err.message || "Save failed.", "error");
+      sb.disabled = false; sb.innerHTML = "Save";
+    }
+  });
+}
+const si = document.getElementById("searchInput");
+si.style.display = CFG.search ? "block" : "none";
+si.addEventListener("input", (e) => { clearTimeout(window.__t); window.__t = setTimeout(() => { state.search = e.target.value.trim(); state.offset = 0; load(); }, 350); });
+const ss = document.getElementById("statusSel");
+ss.style.display = CFG.statuses ? "block" : "none";
+if (CFG.statuses) { ss.innerHTML = '<option value="">All Statuses</option>' + CFG.statuses.map((s) => `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join(""); ss.addEventListener("change", (e) => { state.status = e.target.value; state.offset = 0; load(); }); }
+load();
+</script>
+</body>
+</html>

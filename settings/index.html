@@ -1,0 +1,467 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings | ShuleSmart</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Settings</h1>
+          <p>Manage your school profile and preferences.</p>
+        </div>
+      </div>
+      <div id="moduleSlot"></div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPut } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, initials } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "settings" });
+setTopbarTitle("Settings");
+
+/* Display context populated by requireSchoolAdmin() */
+const school = window.currentSchool || {};
+const admin = window.currentAdmin || {};
+
+const SCHOOL_TYPES = ["Primary School", "Junior School", "Secondary School", "Private School", "Academy"];
+const slot = document.getElementById("moduleSlot");
+
+slot.innerHTML = `
+  <!-- ============ School profile ============ -->
+  <div class="sa-card">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h3 style="font-size:16px;"><i class="fa-solid fa-school" style="color:var(--primary);margin-right:8px;"></i>School Profile</h3>
+      <span class="sa-cell-sub">Shown across your portal and receipts</span>
+    </div>
+    <form id="schoolForm" class="sa-form-grid" novalidate style="padding:20px;">
+      <div class="sa-form-group">
+        <label>School Code</label>
+        <input class="sa-input" value="${escapeHtml(school.school_code || "")}" readonly disabled title="Assigned by ShuleSmart — cannot be changed">
+      </div>
+      <div class="sa-form-group">
+        <label>School Name <span style="color:var(--danger);">*</span></label>
+        <input class="sa-input" id="s_name" value="${escapeHtml(school.name || "")}">
+      </div>
+      <div class="sa-form-group">
+        <label>School Type <span style="color:var(--danger);">*</span></label>
+        <select class="sa-select" id="s_type">
+          <option value="">Select type</option>
+          ${SCHOOL_TYPES.map((t) => `<option${school.school_type === t ? " selected" : ""}>${t}</option>`).join("")}
+        </select>
+      </div>
+      <div class="sa-form-group">
+        <label>County <span style="color:var(--danger);">*</span></label>
+        <input class="sa-input" id="s_county" value="${escapeHtml(school.county || "")}">
+      </div>
+      <div class="sa-form-group">
+        <label>Email</label>
+        <input class="sa-input" type="email" id="s_email" value="${escapeHtml(school.email || "")}">
+      </div>
+      <div class="sa-form-group full">
+        <label>Phone</label>
+        <input class="sa-input" type="tel" id="s_phone" value="${escapeHtml(school.phone || "")}">
+      </div>
+      <div class="sa-form-group full">
+        <label>Physical Address</label>
+        <input class="sa-input" id="s_address" value="${escapeHtml(school.physical_address || "")}">
+      </div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;margin-top:6px;">
+        <button type="submit" class="sa-btn sa-btn-primary" id="schoolSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save School Profile</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ My profile ============ -->
+  <div class="sa-card" style="margin-top:16px;">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);">
+      <h3 style="font-size:16px;"><i class="fa-solid fa-user-gear" style="color:var(--primary);margin-right:8px;"></i>My Profile</h3>
+      <span class="sa-cell-sub">${escapeHtml(admin.email || "")}</span>
+    </div>
+    <form id="profileForm" class="sa-form-grid" novalidate style="padding:20px;">
+      <div class="sa-form-group">
+        <label>Display Name <span style="color:var(--danger);">*</span></label>
+        <input class="sa-input" id="p_name" value="${escapeHtml(admin.name || "")}">
+      </div>
+      <div class="sa-form-group">
+        <label>Phone</label>
+        <input class="sa-input" type="tel" id="p_phone" value="${escapeHtml(admin.phone || "")}">
+      </div>
+      <div class="sa-form-group full">
+        <label>Email (managed by sign-in)</label>
+        <input class="sa-input" type="email" value="${escapeHtml(admin.email || "")}" readonly disabled>
+      </div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;margin-top:6px;">
+        <button type="submit" class="sa-btn sa-btn-primary" id="profileSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save My Profile</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ Grading system ============ -->
+  <div class="sa-card" style="margin-top:16px;">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h3 style="font-size:16px;"><i class="fa-solid fa-graduation-cap" style="color:var(--primary);margin-right:8px;"></i>Grading System</h3>
+      <span class="sa-cell-sub">Applies to exams &amp; results</span>
+    </div>
+    <form id="gradingForm" novalidate style="padding:20px;">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:6px;">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="gradingMode" value="marks"> Marks only (numeric scores)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="gradingMode" value="grades"> Letter grades only (A, B+, C− …)
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="gradingMode" value="both"> Both marks &amp; letter grades
+        </label>
+      </div>
+      <p class="sa-cell-sub" id="gradingHint" style="margin-bottom:12px;"></p>
+      <div id="scaleWrap" style="display:none;">
+        <div class="sa-table-wrap"><table class="sa-table" style="max-width:460px;">
+          <thead><tr><th>Grade</th><th>Minimum %</th><th></th></tr></thead>
+          <tbody id="scaleRows"></tbody>
+        </table></div>
+        <button type="button" class="sa-btn sa-btn-secondary sa-btn-sm" id="addBandBtn" style="margin-top:10px;"><i class="fa-solid fa-plus"></i> Add band</button>
+        <p class="sa-cell-sub" style="margin-top:8px;">Bands match top-down by minimum score — e.g. B+ covers 70 up to the band above it.</p>
+      </div>
+      <div class="sa-modal-actions">
+        <button type="submit" class="sa-btn sa-btn-primary" id="gradingSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save Grading Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ Academic context ============ -->
+  <div class="sa-card" style="margin-top:16px;">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);">
+      <h3 style="font-size:16px;"><i class="fa-solid fa-calendar-check" style="color:var(--primary);margin-right:8px;"></i>Academic Context</h3>
+      <span class="sa-cell-sub">Used when auto-posting fees to new students</span>
+    </div>
+    <div style="padding:10px 20px 20px;" id="academicBody"><p class="sa-cell-sub">Loading…</p></div>
+  </div>
+
+  <!-- ============ Numbering (admission + receipts) ============ -->
+  <div class="sa-card" style="margin-top:16px;">
+    <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h3 style="font-size:16px;"><i class="fa-solid fa-hashtag" style="color:var(--primary);margin-right:8px;"></i>Numbering</h3>
+      <span class="sa-cell-sub">How admission numbers flow &amp; how receipts look</span>
+    </div>
+    <form id="numberingForm" class="sa-form-grid" novalidate style="padding:20px;">
+
+      <div class="sa-form-section-title" style="grid-column:1/-1;">Admission Numbers</div>
+      <div class="sa-form-group">
+        <label>Prefix</label>
+        <input class="sa-input" id="n_adm_prefix" value="ADM" maxlength="8" placeholder="e.g. ADM">
+      </div>
+      <div class="sa-form-group">
+        <label>Start from</label>
+        <input class="sa-input" id="n_adm_start" type="number" min="1" step="1" value="1">
+      </div>
+      <div class="sa-form-group">
+        <label>Minimum digits</label>
+        <input class="sa-input" id="n_adm_padding" type="number" min="1" max="8" step="1" value="4">
+      </div>
+      <div class="sa-form-group" style="align-self:end;">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;cursor:pointer;min-height:38px;">
+          <input type="checkbox" id="n_adm_auto" checked> Auto-generate on new student
+        </label>
+        <p class="sa-cell-sub">When off, admission numbers must be entered manually.</p>
+      </div>
+      <div class="sa-form-group full">
+        <label>Preview</label>
+        <input class="sa-input" id="n_adm_preview" value="ADM-0001" readonly disabled>
+      </div>
+
+      <div class="sa-form-section-title" style="grid-column:1/-1;margin-top:8px;">Receipt Numbers</div>
+      <div class="sa-form-group">
+        <label>Receipt prefix</label>
+        <input class="sa-input" id="n_rcpt_prefix" value="RCT" maxlength="8" placeholder="e.g. RCT">
+      </div>
+      <div class="sa-form-group">
+        <label>Sequence digits</label>
+        <input class="sa-input" id="n_rcpt_digits" type="number" min="1" max="8" step="1" value="6">
+      </div>
+      <div class="sa-form-group full">
+        <label>Preview</label>
+        <input class="sa-input" id="n_rcpt_preview" value="RCT-2026-000001" readonly disabled>
+        <p class="sa-cell-sub">Format: PREFIX-YEAR-SEQUENCE (e.g. RCT-2026-000001).</p>
+      </div>
+
+      <div class="sa-modal-actions" style="grid-column:1/-1;margin-top:6px;">
+        <button type="submit" class="sa-btn sa-btn-primary" id="numberingSaveBtn"><i class="fa-solid fa-floppy-disk"></i> Save Numbering</button>
+      </div>
+    </form>
+  </div>
+`;
+
+/* ---------------- School profile ---------------- */
+document.getElementById("schoolForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById("s_name").value.trim(),
+    school_type: document.getElementById("s_type").value,
+    county: document.getElementById("s_county").value.trim(),
+    email: document.getElementById("s_email").value.trim(),
+    phone: document.getElementById("s_phone").value.trim(),
+    physical_address: document.getElementById("s_address").value.trim()
+  };
+  if (!payload.name) return showToast("School name is required.", "error");
+  if (!payload.school_type) return showToast("School type is required.", "error");
+  if (!payload.county) return showToast("County is required.", "error");
+
+  const btn = document.getElementById("schoolSaveBtn");
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+  try {
+    await apiPut("/api/school/settings", payload);
+
+    /* Keep live context + shell branding in sync */
+    Object.assign(window.currentSchool, payload);
+    const brandName = document.querySelector(".sa-brand-name");
+    const chip = document.querySelector(".sa-school-chip");
+    if (brandName) brandName.textContent = payload.name;
+    if (chip) chip.innerHTML = '<i class="fa-solid fa-school"></i> ' + escapeHtml(payload.name);
+
+    showToast("School profile updated.", "success");
+  } catch (err) {
+    showToast(err.message || "Could not save school profile.", "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save School Profile';
+  }
+});
+
+/* ---------------- My profile ---------------- */
+document.getElementById("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = {
+    display_name: document.getElementById("p_name").value.trim(),
+    phone: document.getElementById("p_phone").value.trim()
+  };
+  if (!payload.display_name) return showToast("Display name is required.", "error");
+
+  const btn = document.getElementById("profileSaveBtn");
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+  try {
+    const res = await apiPut("/api/auth/profile", payload);
+    const user = res.user || {};
+
+    /* Keep live context + topbar identity in sync */
+    window.currentAdmin.name = user.display_name || payload.display_name;
+    window.currentAdmin.phone = user.phone || "";
+    const chipName = document.querySelector(".sa-avatar-name");
+    const avatar = document.querySelector(".sa-avatar");
+    if (chipName) chipName.textContent = window.currentAdmin.name;
+    if (avatar) avatar.textContent = initials(window.currentAdmin.name);
+
+    showToast("Profile updated.", "success");
+  } catch (err) {
+    showToast(err.message || "Could not save profile.", "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save My Profile';
+  }
+});
+
+/* ---------------- Grading system ---------------- */
+let gradeScale = [];
+
+const scaleRows = document.getElementById("scaleRows");
+const modeHint = document.getElementById("gradingHint");
+const scaleWrap = document.getElementById("scaleWrap");
+
+function renderScaleRows() {
+  scaleRows.innerHTML = gradeScale.map((g, i) => `
+    <tr data-i="${i}">
+      <td><input class="sa-input" data-f="grade" value="${escapeHtml(g.grade || "")}" style="max-width:110px;"></td>
+      <td><input class="sa-input" data-f="min" type="number" min="0" max="100" value="${g.min ?? ""}" style="max-width:130px;"></td>
+      <td style="width:44px;"><button type="button" class="sa-btn sa-btn-danger sa-btn-sm" data-del="${i}" title="Remove band"><i class="fa-solid fa-xmark"></i></button></td>
+    </tr>`).join("");
+}
+
+scaleRows.addEventListener("input", (e) => {
+  const tr = e.target.closest("tr[data-i]");
+  if (!tr) return;
+  const i = Number(tr.dataset.i);
+  if (!gradeScale[i]) return;
+  if (e.target.dataset.f === "grade") gradeScale[i].grade = e.target.value;
+  else gradeScale[i].min = e.target.value;
+});
+scaleRows.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-del]");
+  if (!btn) return;
+  gradeScale.splice(Number(btn.dataset.del), 1);
+  renderScaleRows();
+});
+
+function setGradingMode(mode) {
+  const useScale = mode !== "marks";
+  scaleWrap.style.display = useScale ? "" : "none";
+  modeHint.textContent =
+    mode === "both" ? "Results show numeric marks alongside letter grades computed from these bands." :
+    mode === "grades" ? "Scores are still captured as marks out of 100, but results display letter grades using these bands." :
+    "Results display numeric marks out of 100. Switch to letter grades to show A / B+ / C− style grades.";
+}
+document.querySelectorAll('input[name="gradingMode"]').forEach((r) =>
+  r.addEventListener("change", () => setGradingMode(document.querySelector('input[name="gradingMode"]:checked').value))
+);
+document.getElementById("addBandBtn").addEventListener("click", () => {
+  gradeScale.push({ grade: "", min: "" });
+  renderScaleRows();
+});
+
+(async function loadGrading() {
+  try {
+    const res = await apiGet("/api/school/settings");
+    const g = res.grading || {};
+    const mode = ["grades", "both"].includes(g.mode) ? g.mode : "marks";
+    gradeScale = Array.isArray(g.scale) && g.scale.length
+      ? g.scale.map((x) => ({ grade: x.grade, min: x.min }))
+      : [{ grade: "A", min: 80 }, { grade: "B", min: 60 }, { grade: "C", min: 40 }, { grade: "D", min: 0 }];
+    document.querySelector(`input[name="gradingMode"][value="${mode}"]`).checked = true;
+    setGradingMode(mode);
+    renderScaleRows();
+  } catch (err) { /* defaults stay */ }
+})();
+
+document.getElementById("gradingForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const mode = document.querySelector('input[name="gradingMode"]:checked').value;
+  const payload = { grading_mode: mode };
+  if (mode === "grades") {
+    const clean = gradeScale
+      .map((g) => ({ grade: (g.grade || "").trim(), min: g.min }))
+      .filter((g) => g.grade && String(g.min).trim() !== "" && !isNaN(Number(g.min)))
+      .map((g) => ({ grade: g.grade, min: Math.max(0, Math.min(100, Number(g.min))) }));
+    if (clean.length === 0) return showToast("Add at least one grade band with a minimum %.", "error");
+    clean.sort((a, b) => b.min - a.min);
+    payload.grade_scale = clean;
+  }
+
+  const btn = document.getElementById("gradingSaveBtn");
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+  try {
+    const res = await apiPut("/api/school/settings", payload);
+    if (res.grading_saved === false) {
+      showToast(res.warning || "Could not save grading settings — database migration required.", "warning");
+    } else {
+      gradeScale = (res.grading && res.grading.scale) || [];
+      renderScaleRows();
+      showToast("Grading settings saved.", "success");
+    }
+  } catch (err) {
+    showToast(err.message || "Could not save grading settings.", "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Grading Settings';
+  }
+});
+
+/* ---------------- Academic context ---------------- */
+(async function loadAcademic() {
+  const el = document.getElementById("academicBody");
+  try {
+    const [yearsRes, termsRes] = await Promise.all([
+      apiGet("/api/academic-years"),
+      apiGet("/api/terms")
+    ]);
+    const years = yearsRes.academicYears || [];
+    const terms = termsRes.terms || [];
+    const curYear = years.find((y) => y.is_current);
+    const curTerm = terms.find((t) => t.is_current);
+
+    const item = (icon, label, value, link) => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+        <span style="width:34px;height:34px;border-radius:10px;background:var(--background);display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;"><i class="${icon}"></i></span>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary);">${label}</div>
+          <div style="font-weight:700;">${escapeHtml(value || "Not set")}</div>
+        </div>
+        <a href="${link}" class="sa-btn sa-btn-secondary sa-btn-sm">Manage</a>
+      </div>`;
+
+    el.innerHTML =
+      item("fa-calendar-check", "Current Academic Year", curYear ? curYear.name : "", "../academic-years/") +
+      item("fa-calendar-days", "Current Term", curTerm ? curTerm.name : "", "../terms/") +
+      `<p class="sa-cell-sub" style="margin-top:10px;">New students are automatically charged using the active fee structure matching their class and the current term.</p>`;
+  } catch (err) {
+    el.innerHTML = `<p class="sa-cell-sub">${escapeHtml(err.message || "Could not load academic context.")}</p>`;
+  }
+})();
+
+/* ---------------- Numbering (admission numbers + receipts) ---------------- */
+(function initNumbering() {
+  const $ = (id) => document.getElementById(id);
+  const admPref = $("n_adm_prefix"), admStart = $("n_adm_start"), admPad = $("n_adm_padding"), admAuto = $("n_adm_auto");
+  const rcptPref = $("n_rcpt_prefix"), rcptDig = $("n_rcpt_digits");
+  const admPrev = $("n_adm_preview"), rcptPrev = $("n_rcpt_preview");
+
+  function numInt(v, dflt, min, max) {
+    const n = parseInt(v, 10);
+    if (Number.isNaN(n)) return dflt;
+    return Math.max(min, Math.min(max, n));
+  }
+  function updatePreviews() {
+    const p = (admPref.value.trim().toUpperCase() || "ADM");
+    const start = numInt(admStart.value, 1, 1, 99999999);
+    const pad = numInt(admPad.value, 4, 1, 8);
+    admPrev.value = `${p}-${String(start).padStart(pad, "0")}`;
+    const rp = (rcptPref.value.trim().toUpperCase() || "RCT");
+    const rd = numInt(rcptDig.value, 6, 1, 8);
+    const yr = String(new Date().getFullYear());
+    rcptPrev.value = `${rp}-${yr}-${String(1).padStart(rd, "0")}`;
+  }
+  [admPref, admStart, admPad, rcptPref, rcptDig].forEach((el) => el.addEventListener("input", updatePreviews));
+
+  /* Load current values from the per-school finance settings. */
+  (async function load() {
+    try {
+      const res = await apiGet("/api/finance/settings");
+      const s = res.settings || {};
+      admPref.value = s.admission_number_prefix || "ADM";
+      admStart.value = s.admission_number_start != null ? s.admission_number_start : 1;
+      admPad.value = s.admission_number_padding || 4;
+      admAuto.checked = s.admission_auto_generate !== false;
+      rcptPref.value = s.receipt_prefix || "RCT";
+      rcptDig.value = s.receipt_digits || 6;
+      updatePreviews();
+    } catch (e) { /* keep defaults */ }
+  })();
+
+  $("numberingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("numberingSaveBtn");
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+    try {
+      const payload = {
+        admission_number_prefix: admPref.value.trim(),
+        admission_number_start: parseInt(admStart.value, 10) || 1,
+        admission_number_padding: parseInt(admPad.value, 10) || 4,
+        admission_auto_generate: admAuto.checked,
+        receipt_prefix: rcptPref.value.trim(),
+        receipt_digits: parseInt(rcptDig.value, 10) || 6
+      };
+      await apiPut("/api/finance/settings", payload);
+      showToast("Numbering settings saved.", "success");
+      updatePreviews();
+    } catch (err) {
+      showToast(err.message || "Could not save numbering settings.", "error");
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Numbering';
+    }
+  });
+})();
+</script>
+</body>
+</html>
