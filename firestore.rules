@@ -1,0 +1,259 @@
+rules_version = '2';
+
+// ============================================================
+// ShuleSmart — Cloud Firestore Security Rules
+// Product by Prince Alex Digital
+// ============================================================
+// Deploy with:
+//   firebase deploy --only firestore:rules
+// …or paste into Console → Firestore → Rules → Publish.
+//
+// Model (mirrors the former Cloudflare Worker authorisation):
+//   * Every platform user has a document at users/{firebaseUid}.
+//   * super_owner/owner administer all schools platform-wide.
+//   * school_admins are bound to one school via school_id and hold
+//     FULL management rights over everything inside their school.
+//   * Tenant docs are validated on BOTH sides of a write:
+//       - reads/edits/deletes check the existing document,
+//       - creates check the incoming payload (request.resource),
+//     which is why create vs read are declared separately.
+// ============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---------- identity helpers ---------- */
+    function signedIn()         { return request.auth != null; }
+    function profileExists()    { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function caller()           { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+
+    function isOwner() {
+      return signedIn() && profileExists()
+        && (caller().platform_role == 'super_owner'
+            || caller().platform_role == 'owner')
+        && caller().status == 'active';
+    }
+
+    function isAdminOf(schoolId) {
+      return signedIn() && profileExists()
+        && caller().platform_role == 'school_admin'
+        && caller().status == 'active'
+        && caller().school_id == schoolId;
+    }
+
+    function mayAccess(schoolId) {
+      return isOwner() || isAdminOf(schoolId);
+    }
+
+    /* NOTE: Portal-account management ("Portal Users") is restricted to the
+       School Head in application code (requirePortalManager). The rules
+       below therefore only enforce TENANT isolation: any active school_admin
+       may touch users documents of their OWN school, never another's. */
+
+    /* ---------- tenant write helpers ----------
+       mayRead  – existing doc (or singleton id) belongs to my school
+       mayCreate– the INCOMING payload carries my school_id            */
+    function mayRead(sid)   { return mayAccess(sid); }
+    function mayCreate(sid) { return mayAccess(sid); }
+    function mayEdit(oldSid, newSid) {
+      return mayAccess(oldSid) && mayAccess(newSid);
+    }
+
+    /* ---------- users (profiles keyed by Firebase UID) ----------
+       ONE store for every sign-in profile: platform owners, and all
+       school portal accounts created either by the Owner or by a
+       school's own School Head ("Portal Users" screen).
+       Rules enforce TENANT ISOLATION ONLY; who may open the Portal
+       Users screen (the Head) is enforced in application code. */
+    match /users/{userId} {
+      // READ: your own profile · owners anywhere · any active
+      // school_admin reading documents inside their own school.
+      allow get: if signedIn() && (
+        request.auth.uid == userId
+        || isOwner()
+        || isAdminOf(resource.data.get('school_id', ''))
+      );
+
+      // LIST: owners platform-wide · a school_admin lists their own
+      // school's accounts. The app MUST send the matching equality
+      // filter where('school_id', '==', <its own school id>), which
+      // lets Firestore prove this condition from query constraints.
+      // (Single-equality queries need no composite index.)
+      allow list: if isOwner()
+        || isAdminOf(resource.data.get('school_id', ''));
+
+      // CREATE: owners anywhere · a school_admin creates an account
+      // bound to THEIR school, always as a school_admin profile.
+      allow create: if isOwner()
+        || (
+          isAdminOf(request.resource.data.get('school_id', ''))
+          && request.resource.data.get('platform_role', '') == 'school_admin'
+        );
+
+      // Delete remains an owner-only action (heads deactivate instead).
+      allow delete: if isOwner();
+
+      // UPDATE: owners · a user renaming themselves (name+phone only) ·
+      // a school_admin editing their school's accounts with binding
+      // fields (school_id, platform_role, firebase_uid, email,
+      // created_at, id) immutable through hasOnly().
+      allow update: if isOwner()
+        || (
+          request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['display_name', 'phone', 'updated_at'])
+        )
+        || (
+          isAdminOf(resource.data.get('school_id', ''))
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['display_name', 'phone', 'role', 'status', 'menu_access', 'updated_at'])
+        );
+    }
+
+    /* ---------- schools (tenant registry) ----------
+       A school_admin holds FULL management rights over their OWN school's
+       record (profile + grading settings): they can read (get) and update it.
+       Owners additionally act platform-wide. Only owners may create/delete a
+       school or administer schools they do not belong to. */
+    match /schools/{schoolId} {
+      allow read: if signedIn() && (isOwner() || isAdminOf(schoolId));
+      allow update: if mayAccess(schoolId);
+      allow create, delete: if isOwner();
+    }
+    /* ---------- tenant collections (every doc carries school_id) ----
+       IMPORTANT: a CREATE has no existing document, so `resource` is null and
+       `resource.data.school_id` cannot be read — that silently DENIED every
+       create (e.g. adding an academic year). Creates therefore validate the
+       INCOMING payload via request.resource.data.school_id, while reads,
+       updates and deletes keep validating the EXISTING document via resource. */
+    match /classes/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /subjects/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /teachers/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /staff/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /students/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /academic_years/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /terms/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /attendance/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /exams/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /marks/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    // The ledger and the activity log are append-only.
+    match /activity_logs/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read: if mayAccess(resource.data.school_id);
+    }
+    match /student_ledger/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read: if mayAccess(resource.data.school_id);
+    }
+    match /student_enrollments/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /payments/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update: if mayAccess(resource.data.school_id);
+    }
+    match /receipts/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update: if mayAccess(resource.data.school_id);
+    }
+    match /refunds/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read: if mayAccess(resource.data.school_id);
+    }
+    match /payment_allocations/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /invoices/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /fee_structures/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /fee_structures_v2/{docId} { allow read: if mayAccess(resource.data.school_id); } // legacy alias
+    match /fee_categories/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /student_charges/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /student_charge_items/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /promotion_batches/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /promotion_mappings/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+    match /student_promotions/{docId} {
+      allow create: if mayAccess(request.resource.data.school_id);
+      allow read, update, delete: if mayAccess(resource.data.school_id);
+    }
+
+    /* ---------- per-school singleton documents ---------- */
+    match /finance_settings/{schoolId} {
+      allow read, write: if mayAccess(schoolId);
+    }
+
+    /* Admission-number counter is keyed by school_id (one doc per school,
+       holding the running last_no). Only the owning admin may touch it. */
+    match /admission_counters/{schoolId} {
+      allow read, write: if mayAccess(schoolId);
+    }
+
+    /* Counters are keyed "{schoolId}_{year}" — the regex pins the
+       caller's own school prefix so cross-tenant access fails closed. */
+    match /receipt_counters/{key} {
+      allow read, write: if signedIn() && profileExists()
+        && key.matches(caller().school_id + '_[0-9]{4}');
+    }
+    match /invoice_counters/{key} {
+      allow read, write: if signedIn() && profileExists()
+        && key.matches(caller().school_id + '_[0-9]{4}');
+    }
+
+    /* ---------- deny everything else ---------- */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

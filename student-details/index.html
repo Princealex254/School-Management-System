@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Details | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Student Details</h1>
+          <p>Financial profile — balances are always derived live from the append-only ledger.</p>
+        </div>
+      </div>
+
+      <!-- Student picker (shown when no ?id= is present) -->
+      <div class="sa-card" id="pickerCard">
+        <div class="sa-card-body">
+          <h3 style="font-size:15px;margin-bottom:12px;">Find a student</h3>
+          <div class="sa-filters"><input type="text" class="sa-input" id="pickSearch" placeholder="Search by name or admission number…"></div>
+          <div id="pickResults" style="margin-top:14px;"></div>
+        </div>
+      </div>
+
+      <!-- Finance profile -->
+      <div id="financeArea" style="display:none;">
+        <div class="sa-card" style="margin-bottom:20px;">
+          <div class="sa-card-body" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;">
+            <div>
+              <h2 style="font-size:19px;font-family:var(--font-display);" id="fStudentName">—</h2>
+              <p class="sa-cell-sub" style="margin-top:4px;"><span id="fStudentMeta">—</span></p>
+            </div>
+            <button class="sa-btn sa-btn-ghost sa-btn-sm" id="changeBtn"><i class="fa-solid fa-repeat"></i> Change student</button>
+          </div>
+        </div>
+
+        <div class="sa-stats-grid" id="finStats"></div>
+
+        <div class="sa-card" style="margin-bottom:20px;">
+          <div class="sa-card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="sa-btn sa-btn-primary sa-btn-sm" id="qaStatement"><i class="fa-solid fa-file-lines"></i> Generate Statement</button>
+            <button class="sa-btn sa-btn-secondary sa-btn-sm" id="qaPayment"><i class="fa-solid fa-hand-holding-dollar"></i> Record Payment</button>
+            <button class="sa-btn sa-btn-secondary sa-btn-sm" id="qaLedger"><i class="fa-solid fa-list-ul"></i> View Ledger</button>
+            <button class="sa-btn sa-btn-secondary sa-btn-sm" id="qaReceipts"><i class="fa-solid fa-receipt"></i> View Receipts</button>
+            <button class="sa-btn sa-btn-ghost sa-btn-sm" id="qaCredit"><i class="fa-solid fa-percent"></i> Discount / Waiver</button>
+          </div>
+        </div>
+
+        <div class="sa-grid-2">
+          <div class="sa-card">
+            <div class="sa-card-header" style="padding:18px 22px 0;"><h3 style="font-size:15px;">Recent Transactions</h3><p>Newest entries on the student's ledger.</p></div>
+            <div class="sa-card-body" id="finTransactions"></div>
+          </div>
+          <div class="sa-card">
+            <div class="sa-card-header" style="padding:18px 22px 0;"><h3 style="font-size:15px;">Recent Receipts</h3></div>
+            <div class="sa-card-body" id="finReceipts"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, formatDate, formatCurrency, loadingState, emptyState, openModal, closeModal } from "../js/common.js";
+import { printStudentStatement } from "../js/print.js";
+
+await requireSchoolAdmin();
+initShell({ active: "students" });
+setTopbarTitle("Student Finance");
+
+let currentStudent = null;
+
+/* Element references — previously used undeclared, so the finance view
+   could not render (ReferenceError). */
+const pickerCard = document.getElementById("pickerCard");
+const pickSearch = document.getElementById("pickSearch");
+const financeArea = document.getElementById("financeArea");
+const fStudentName = document.getElementById("fStudentName");
+const fStudentMeta = document.getElementById("fStudentMeta");
+const changeBtn = document.getElementById("changeBtn");
+const finStats = document.getElementById("finStats");
+const finTransactions = document.getElementById("finTransactions");
+const finReceipts = document.getElementById("finReceipts");
+
+function statCard(icon, color, value, label) {
+  return `<div class="sa-stat-card">
+    <div class="sa-stat-icon" style="background:${color}1A;color:${color};"><i class="${icon}"></i></div>
+    <div><div class="sa-stat-value">${value}</div><div class="sa-stat-label">${escapeHtml(label)}</div></div>
+  </div>`;
+}
+
+/* ---------- Student picker ---------- */
+async function searchStudents(q) {
+  const box = document.getElementById("pickResults");
+  try {
+    const d = await apiGet("/api/students?limit=20" + (q ? "&search=" + encodeURIComponent(q) : ""));
+    const rows = d.students || [];
+    box.innerHTML = rows.length
+      ? `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Student</th><th>Class</th><th></th></tr></thead><tbody>` +
+        rows.map((s) => `<tr>
+          <td>${escapeHtml(s.first_name + " " + s.last_name)}<div class="sa-cell-sub">${escapeHtml(s.admission_number || "")}</div></td>
+          <td>${escapeHtml(s.class_name || "—")}</td>
+          <td><button class="sa-btn sa-btn-secondary sa-btn-sm" data-sid="${s.id}">Open Finance</button></td>
+        </tr>`).join("") + `</tbody></table></div>`
+      : `<p class="sa-cell-sub">No students matched.</p>`;
+    box.querySelectorAll("[data-sid]").forEach((b) => b.addEventListener("click", () => {
+      const stu = rows.find((x) => x.id === b.dataset.sid);
+      window.location.href = "../student-details/?id=" + encodeURIComponent(stu.id);
+    }));
+  } catch (e) { box.innerHTML = `<p class="sa-cell-sub">${escapeHtml(e.message || "Search failed.")}</p>`; }
+}
+
+/* ---------- Finance profile ---------- */
+async function loadFinance(studentId) {
+  loadingState(financeArea, "Loading financial profile…");
+  pickerCard.style.display = "none";
+  financeArea.style.display = "block";
+  try {
+    const d = await apiGet(`/api/students/${studentId}/finance`);
+    currentStudent = d.student || { id: studentId };
+    fStudentName.textContent = d.student.name;
+    fStudentMeta.textContent = [d.student.admission_number, d.student.class_name].filter(Boolean).join(" • ");
+    renderFinance(d);
+  } catch (err) {
+    financeArea.innerHTML = `<div class="sa-card"><div class="sa-card-body"><div class="sa-state"><i class="fa-solid fa-triangle-exclamation"></i><h4>Unable to load</h4><p>${escapeHtml(err.message || "")}</p></div></div></div>`;
+  }
+}
+
+function renderFinance(d) {
+  const s = d.summary || {};
+  finStats.innerHTML =
+    statCard("fa-solid fa-triangle-exclamation", "#DC2626", formatCurrency(s.outstanding_balance || 0), "Current Outstanding Balance") +
+    statCard("fa-solid fa-piggy-bank", "#059669", formatCurrency(s.available_credit || 0), "Available Credit") +
+    statCard("fa-solid fa-file-invoice-dollar", "#2563EB", formatCurrency(d.charges || 0), "Total Charges") +
+    statCard("fa-solid fa-hand-holding-dollar", "#7C3AED", formatCurrency(d.payments || 0), "Total Payments") +
+    statCard("fa-solid fa-percent", "#D97706", formatCurrency(d.discounts_waivers || 0), "Discounts / Waivers");
+
+  const tx = d.recent_transactions || [];
+  finTransactions.innerHTML = tx.length
+    ? `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Date</th><th>Description</th><th style="text-align:right;">Debit</th><th style="text-align:right;">Credit</th></tr></thead><tbody>` +
+      tx.map((l) => `<tr>
+        <td>${formatDate(l.transaction_date)}</td>
+        <td>${escapeHtml(l.description || l.entry_type || l.transaction_type || "—")}${l.receipt_no ? ` <span class="sa-badge sa-badge-info">${escapeHtml(l.receipt_no)}</span>` : ""}<div class="sa-cell-sub">${escapeHtml(l.entry_type || "")}</div></td>
+        <td style="text-align:right;">${Number(l.debit) ? formatCurrency(l.debit) : "—"}</td>
+        <td style="text-align:right;">${Number(l.credit) ? formatCurrency(l.credit) : "—"}</td>
+      </tr>`).join("") + `</tbody></table></div>`
+    : emptyState(finTransactions, { icon: "fa-solid fa-list-ul", title: "No transactions yet", message: "Charges and payments will appear here." });
+
+  const rc = d.recent_receipts || [];
+  finReceipts.innerHTML = rc.length
+    ? rc.map((r) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <strong style="font-size:13px;">${escapeHtml(r.receipt_number)}</strong> ${r.status !== "ISSUED" ? `<span class="sa-badge sa-badge-danger">${escapeHtml(String(r.status).toLowerCase())}</span>` : ""}
+            <div class="sa-cell-sub">${formatDate(r.payment_date)} • ${escapeHtml(r.method || "—")} ${r.reference ? "• " + escapeHtml(r.reference) : ""}</div>
+          </div>
+          <strong>${formatCurrency(r.amount)}</strong>
+        </div>`).join("")
+    : emptyState(finReceipts, { icon: "fa-solid fa-receipt", title: "No receipts yet", message: "Receipts appear after payments are recorded." });
+}
+/* ---------- Quick actions ---------- */
+document.getElementById("qaStatement").addEventListener("click", () => {
+  if (!currentStudent) return;
+  printStudentStatement(currentStudent.id, currentStudent).then(() => showToast("Opening print dialog…", "info")).catch((e) => showToast(e.message || "Could not print.", "error"));
+});
+
+document.getElementById("qaPayment").addEventListener("click", () => {
+  if (!currentStudent) return;
+  openModal(`<h3 class="sa-modal-title">Record Payment — ${escapeHtml(currentStudent.name || "")}</h3>
+    <form id="payForm" class="sa-form-grid" novalidate style="margin-top:14px;">
+      <div class="sa-form-group"><label>Amount (KSh) <span class="req">*</span></label><input class="sa-input" type="number" min="0.01" step="0.01" id="payAmount"></div>
+      <div class="sa-form-group"><label>Method</label><select class="sa-select" id="payMethod"><option>Cash</option><option>M-Pesa</option><option>Bank</option><option>Card</option><option>Other</option></select></div>
+      <div class="sa-form-group"><label>Reference</label><input class="sa-input" id="payRef" placeholder="e.g. M-Pesa code TGH123ABC"></div>
+      <div class="sa-form-group"><label>Payment Date</label><input class="sa-input" type="date" id="payDate" value="${new Date().toISOString().slice(0, 10)}"></div>
+      <div class="sa-form-group full"><label>Payer Name (optional)</label><input class="sa-input" id="payPayer"></div>
+      <div class="sa-form-group full"><label>Notes</label><textarea class="sa-input" id="payNotes" rows="2"></textarea></div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;">
+        <button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button>
+        <button type="submit" class="sa-btn sa-btn-primary" id="payBtn"><i class="fa-solid fa-hand-holding-dollar"></i> Record Payment</button>
+      </div>
+    </form>`);
+  document.getElementById("payForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const amount = Number(document.getElementById("payAmount").value);
+    if (!(amount > 0)) { showToast("Enter a valid amount.", "warning"); return; }
+    const btn = document.getElementById("payBtn");
+    btn.disabled = true; btn.innerHTML = "Recording…";
+    try {
+      const res = await apiPost("/api/payments", {
+        student_id: currentStudent.id,
+        amount,
+        method: document.getElementById("payMethod").value,
+        reference: document.getElementById("payRef").value.trim() || null,
+        payment_date: document.getElementById("payDate").value || undefined,
+        payer_name: document.getElementById("payPayer").value.trim() || null,
+        notes: document.getElementById("payNotes").value.trim() || null
+      });
+      closeModal();
+      showToast(res.message + " Receipt " + res.receipt_no, "success");
+      loadFinance(currentStudent.id);
+    } catch (err) {
+      showToast(err.message || "Could not record the payment.", "error");
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i> Record Payment';
+    }
+  });
+});
+document.getElementById("qaLedger").addEventListener("click", () => {
+  if (!currentStudent) return;
+  showToast("Open Fees & Balances and use the statement icon for the full ledger view with filters.", "info");
+});
+
+document.getElementById("qaReceipts").addEventListener("click", () => {
+  if (!currentStudent) return;
+  window.location.href = "../receipts/";
+});
+
+/* ---------- Discount / Waiver ---------- */
+document.getElementById("qaCredit").addEventListener("click", () => {
+  if (!currentStudent) return;
+  openModal(`<h3 class="sa-modal-title">Discount / Waiver — ${escapeHtml(currentStudent.name || "")}</h3>
+    <p class="sa-modal-message" style="margin-top:8px;">Posts a CREDIT entry to the ledger. Original charges are never modified.</p>
+    <form id="crForm" class="sa-form-grid" novalidate style="margin-top:12px;">
+      <div class="sa-form-group"><label>Type</label><select class="sa-select" id="crType"><option>DISCOUNT</option><option>SCHOLARSHIP</option><option>WAIVER</option><option>SPECIAL_ADJUSTMENT</option></select></div>
+      <div class="sa-form-group"><label>Amount (KSh) <span class="req">*</span></label><input class="sa-input" type="number" min="0.01" step="0.01" id="crAmount"></div>
+      <div class="sa-form-group full"><label>Reason <span class="req">*</span></label><textarea class="sa-input" id="crReason" rows="2" placeholder="e.g. Sibling discount approved by head teacher"></textarea></div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;">
+        <button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button>
+        <button type="submit" class="sa-btn sa-btn-primary" id="crBtn">Post Credit</button>
+      </div>
+    </form>`);
+  document.getElementById("crForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const amount = Number(document.getElementById("crAmount").value);
+    const reason = document.getElementById("crReason").value.trim();
+    if (!(amount > 0)) { showToast("Enter a valid amount.", "warning"); return; }
+    if (!reason) { showToast("A reason is required.", "warning"); return; }
+    const btn = document.getElementById("crBtn");
+    btn.disabled = true; btn.innerHTML = "Posting…";
+    try {
+      await apiPost(`/api/students/${currentStudent.id}/credits`, { type: document.getElementById("crType").value, amount, reason });
+      closeModal();
+      showToast("Credit posted to the ledger.", "success");
+      loadFinance(currentStudent.id);
+    } catch (err) {
+      showToast(err.message || "Could not post credit.", "error");
+      btn.disabled = false; btn.innerHTML = "Post Credit";
+    }
+  });
+});
+
+/* ---------- Boot ---------- */
+changeBtn.addEventListener("click", () => {
+  pickerCard.style.display = "block";
+  financeArea.style.display = "none";
+  searchStudents(pickSearch.value.trim());
+});
+
+let pickT;
+pickSearch.addEventListener("input", (e) => { clearTimeout(pickT); pickT = setTimeout(() => searchStudents(e.target.value.trim()), 350); });
+
+const params = new URLSearchParams(window.location.search);
+const sid = params.get("id");
+if (sid) loadFinance(sid);
+else { pickerCard.style.display = "block"; searchStudents(""); }
+</script>
+</body>
+</html>

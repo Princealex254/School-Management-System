@@ -1,0 +1,832 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<meta name="description" content="Sign in securely to your ShuleSmart school management dashboard.">
+<meta name="theme-color" content="#1E3A8A">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+/* ============================================================
+   ShuleSmart — Design Tokens (shared with landing page)
+   ============================================================ */
+:root{
+  --primary:#1E3A8A;
+  --primary-light:#2563EB;
+  --accent:#14B8A6;
+  --dark:#0F172A;
+  --background:#F8FAFC;
+  --white:#FFFFFF;
+  --text-secondary:#64748B;
+  --border:#E2E8F0;
+
+  --font-display:'Plus Jakarta Sans','Inter',sans-serif;
+  --font-body:'Inter',sans-serif;
+
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:24px;
+
+  --shadow-sm:0 1px 2px rgba(15,23,42,0.06);
+  --shadow-md:0 8px 24px rgba(15,23,42,0.08);
+  --shadow-lg:0 20px 50px rgba(15,23,42,0.14);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  font-family:var(--font-body);
+  color:var(--dark);
+  background:var(--background);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+h1,h2,h3{font-family:var(--font-display);color:var(--dark);line-height:1.15;letter-spacing:-0.02em;}
+
+@media(prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+}
+
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px;}
+
+.skip-link{
+  position:absolute;left:-999px;top:auto;background:var(--primary);color:#fff;padding:12px 18px;
+  border-radius:8px;z-index:2000;font-weight:700;
+}
+.skip-link:focus{left:16px;top:16px;}
+
+/* ============================================================
+   Page shell — two column layout
+   ============================================================ */
+.auth-shell{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+}
+
+/* ============================================================
+   Left — Branding panel
+   ============================================================ */
+.brand-panel{
+  position:relative;
+  background:linear-gradient(155deg, var(--dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+  color:#fff;
+  padding:56px 60px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+}
+.brand-panel::before{
+  content:'';position:absolute;top:-160px;right:-140px;width:420px;height:420px;
+  background:radial-gradient(circle, rgba(20,184,166,0.25), transparent 70%);
+  border-radius:50%;
+}
+.brand-panel::after{
+  content:'';position:absolute;bottom:-180px;left:-140px;width:420px;height:420px;
+  background:radial-gradient(circle, rgba(37,99,235,0.3), transparent 70%);
+  border-radius:50%;
+}
+/* Decorative grid pattern, pure CSS */
+.brand-pattern{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at 30% 20%, rgba(0,0,0,0.9), transparent 72%);
+  -webkit-mask-image:radial-gradient(circle at 30% 20%, rgba(0,0,0,0.9), transparent 72%);
+  pointer-events:none;
+}
+
+.brand-panel-top{position:relative;z-index:1;}
+.brand-panel-mid{position:relative;z-index:1;margin-top:auto;padding:48px 0;}
+.brand-panel-bottom{position:relative;z-index:1;}
+
+.brand-logo{font-family:var(--font-display);font-weight:800;font-size:28px;letter-spacing:-0.02em;}
+.brand-logo .smart{color:var(--accent);}
+
+.brand-headline{font-size:clamp(26px,2.6vw,34px);color:#fff;margin:34px 0 16px;max-width:420px;}
+.brand-desc{font-size:15.5px;color:rgba(255,255,255,0.78);max-width:400px;margin-bottom:8px;}
+
+.brand-benefits{display:flex;flex-direction:column;gap:16px;margin-top:36px;}
+.brand-benefit{display:flex;align-items:center;gap:14px;}
+.brand-benefit i{
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16);
+  color:var(--accent);font-size:15px;
+}
+.brand-benefit span{font-size:14.5px;font-weight:600;color:rgba(255,255,255,0.92);}
+
+.brand-panel-bottom{font-size:13px;color:rgba(255,255,255,0.6);font-weight:600;padding-top:20px;border-top:1px solid rgba(255,255,255,0.12);}
+
+/* ============================================================
+   Right — Login form panel
+   ============================================================ */
+.form-panel{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px 32px;
+  background:var(--background);
+}
+.form-card{
+  width:100%;max-width:420px;
+}
+.form-back{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13.5px;font-weight:700;color:var(--text-secondary);
+  margin-bottom:28px;transition:color 0.2s ease;
+}
+.form-back:hover{color:var(--primary-light);}
+
+.form-mobile-logo{display:none;font-family:var(--font-display);font-weight:800;font-size:24px;margin-bottom:28px;}
+.form-mobile-logo .shule{color:var(--primary);}
+.form-mobile-logo .smart{color:var(--accent);}
+
+.form-card h1{font-size:28px;margin-bottom:8px;}
+.form-card>p.subtitle{color:var(--text-secondary);font-size:15px;margin-bottom:30px;}
+
+/* Feedback / alert area */
+.feedback{
+  display:none;align-items:flex-start;gap:12px;
+  padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:20px;
+  font-size:13.8px;font-weight:600;line-height:1.5;
+  opacity:0;transform:translateY(-6px);
+  transition:opacity 0.25s ease, transform 0.25s ease;
+}
+.feedback.show{display:flex;opacity:1;transform:translateY(0);}
+.feedback i{margin-top:1px;font-size:16px;flex-shrink:0;}
+.feedback.success{background:rgba(20,184,166,0.1);border:1.5px solid var(--accent);color:#0D6E63;}
+.feedback.error{background:rgba(220,38,38,0.08);border:1.5px solid #FCA5A5;color:#B91C1C;}
+.feedback.info{background:rgba(37,99,235,0.08);border:1.5px solid #93C5FD;color:var(--primary);}
+
+.field{margin-bottom:20px;}
+.field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:8px;}
+.input-wrap{position:relative;display:flex;align-items:center;}
+.input-wrap i.leading-icon{
+  position:absolute;left:15px;color:var(--text-secondary);font-size:15px;pointer-events:none;
+}
+.input-wrap input{
+  width:100%;padding:13.5px 15px 13.5px 44px;
+  border:1.5px solid var(--border);border-radius:11px;
+  font-family:var(--font-body);font-size:14.5px;background:#fff;
+  transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input-wrap input:focus{
+  outline:none;border-color:var(--primary-light);box-shadow:0 0 0 4px rgba(37,99,235,0.12);
+}
+.input-wrap.has-toggle input{padding-right:46px;}
+.toggle-password{
+  position:absolute;right:6px;
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);font-size:15px;
+  transition:color 0.2s ease, background 0.2s ease;
+}
+.toggle-password:hover{color:var(--primary-light);background:rgba(37,99,235,0.06);}
+
+.field-error{display:none;color:#DC2626;font-size:12.5px;font-weight:600;margin-top:7px;}
+.field.invalid .input-wrap input{border-color:#DC2626;}
+.field.invalid .field-error{display:block;}
+
+.form-meta-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:26px;flex-wrap:wrap;gap:10px;
+}
+.remember-wrap{display:flex;align-items:center;gap:9px;}
+.remember-wrap input[type="checkbox"]{
+  width:17px;height:17px;accent-color:var(--primary-light);cursor:pointer;
+}
+.remember-wrap label{font-size:13.5px;font-weight:600;color:var(--text-secondary);cursor:pointer;}
+.forgot-link{font-size:13.5px;font-weight:700;color:var(--primary-light);}
+.forgot-link:hover{text-decoration:underline;}
+
+.btn-signin{
+  width:100%;position:relative;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 20px;border-radius:12px;
+  background:linear-gradient(135deg,var(--primary-light),var(--primary));
+  color:#fff;font-family:var(--font-display);font-weight:700;font-size:15px;
+  box-shadow:0 10px 24px rgba(37,99,235,0.28);
+  transition:transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+.btn-signin:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 16px 32px rgba(37,99,235,0.36);}
+.btn-signin:disabled{opacity:0.75;cursor:not-allowed;transform:none;}
+
+.spinner{
+  width:17px;height:17px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,0.4);
+  border-top-color:#fff;
+  animation:spin 0.7s linear infinite;
+  display:none;
+}
+.btn-signin.loading .spinner{display:inline-block;}
+.btn-signin.loading .btn-label::after{content:'Signing In...';}
+.btn-signin.loading .btn-label{font-size:0;}
+.btn-signin.loading .btn-label::after{font-size:15px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ============================================================
+   Forgot Password overlay
+   ============================================================ */
+.overlay{
+  position:fixed;inset:0;z-index:1000;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(15,23,42,0.55);
+  padding:24px;
+  opacity:0;transition:opacity 0.25s ease;
+}
+.overlay.show{display:flex;opacity:1;}
+.overlay-card{
+  position:relative;width:100%;max-width:420px;
+  background:#fff;border-radius:20px;
+  box-shadow:0 24px 60px rgba(15,23,42,0.25);
+  padding:36px 32px 32px;
+  transform:translateY(12px) scale(0.98);
+  transition:transform 0.28s ease;
+}
+.overlay.show .overlay-card{transform:translateY(0) scale(1);}
+.overlay-close{
+  position:absolute;top:16px;right:16px;
+  width:34px;height:34px;border-radius:8px;border:none;background:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;line-height:1;color:var(--text-secondary);
+  transition:background 0.2s ease,color 0.2s ease;
+}
+.overlay-close:hover{background:rgba(15,23,42,0.06);color:var(--dark);}
+.overlay-head{text-align:center;margin-bottom:24px;}
+.overlay-icon{
+  width:56px;height:56px;border-radius:16px;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(37,99,235,0.1);color:var(--primary-light);font-size:22px;
+}
+.overlay-head h2{font-family:var(--font-display);font-size:21px;margin:0 0 8px;}
+.overlay-head p{font-size:13.5px;color:var(--text-secondary);line-height:1.5;margin:0;}
+.overlay-form .field{margin-bottom:20px;}
+
+.help-block{
+  margin-top:32px;text-align:center;font-size:13.5px;color:var(--text-secondary);
+}
+.help-block .wa-link{
+  display:inline-flex;align-items:center;gap:7px;
+  margin-top:10px;font-weight:700;color:#128C7E;
+}
+.help-block .wa-link:hover{text-decoration:underline;}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media(max-width:960px){
+  .auth-shell{grid-template-columns:1fr;}
+  .brand-panel{display:none;}
+  .form-panel{min-height:100vh;padding:36px 20px;}
+  .form-mobile-logo{display:block;}
+}
+@media(max-width:420px){
+  .form-card h1{font-size:24px;}
+  .form-meta-row{align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<a href="#loginForm" class="skip-link">Skip to sign in form</a>
+
+<div class="auth-shell">
+
+  <!-- ============================================================
+       Left — Branding panel
+       ============================================================ -->
+  <aside class="brand-panel" aria-hidden="true">
+    <div class="brand-pattern"></div>
+
+    <div class="brand-panel-top">
+      <div class="brand-logo">Shule<span class="smart">Smart</span></div>
+    </div>
+
+    <div class="brand-panel-mid">
+      <h2 class="brand-headline">The Smarter Way to Manage Your School.</h2>
+      <p class="brand-desc">Access your school's management platform securely and manage everything from one place.</p>
+
+      <div class="brand-benefits">
+        <div class="brand-benefit"><i class="fa-solid fa-shield-halved"></i><span>Secure Access</span></div>
+        <div class="brand-benefit"><i class="fa-solid fa-user-shield"></i><span>Role-Based Dashboard</span></div>
+        <div class="brand-benefit"><i class="fa-solid fa-earth-africa"></i><span>Manage Your School Anywhere</span></div>
+      </div>
+    </div>
+
+    <div class="brand-panel-bottom">A Product by Prince Alex Digital</div>
+  </aside>
+
+  <!-- ============================================================
+       Right — Login form panel
+       ============================================================ -->
+  <main class="form-panel">
+    <div class="form-card">
+      <a href="/" class="form-back"><i class="fa-solid fa-arrow-left"></i> Back to Website</a>
+
+      <div class="form-mobile-logo">Shule<span class="smart">Smart</span></div>
+
+      <h1>Welcome Back</h1>
+      <p class="subtitle">Sign in to access your ShuleSmart dashboard.</p>
+
+      <!-- Feedback / alert region -->
+      <div class="feedback" id="feedback" role="status" aria-live="polite">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="feedbackText"></span>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field" id="field-email">
+          <label for="email">Email Address</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-envelope leading-icon"></i>
+            <input type="email" id="email" name="email" placeholder="you@school.ac.ke" autocomplete="email" required>
+          </div>
+          <span class="field-error" id="error-email">Please enter a valid email address.</span>
+        </div>
+
+        <div class="field" id="field-password">
+          <label for="password">Password</label>
+          <div class="input-wrap has-toggle">
+            <i class="fa-solid fa-lock leading-icon"></i>
+            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+              <i class="fa-solid fa-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+          <span class="field-error" id="error-password">Please enter your password.</span>
+        </div>
+
+        <div class="form-meta-row">
+          <div class="remember-wrap">
+            <input type="checkbox" id="rememberMe" name="rememberMe">
+            <label for="rememberMe">Remember Me</label>
+          </div>
+          <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-signin" id="signInBtn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label" id="btnLabel">Sign In</span>
+        </button>
+      </form>
+
+      <div class="help-block">
+        <p>Need help accessing your account?</p>
+        <a class="wa-link" href="https://wa.me/254717384875?text=Hello%20Prince%20Alex%20Digital.%20I%20need%20help%20accessing%20my%20ShuleSmart%20account." target="_blank" rel="noopener">
+          <i class="fa-brands fa-whatsapp"></i> Contact Prince Alex Digital
+        </a>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- ============================================================
+     Forgot Password overlay
+     ============================================================ -->
+<div class="overlay" id="forgotOverlay" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+  <div class="overlay-card">
+    <button type="button" class="overlay-close" id="forgotCloseBtn" aria-label="Close reset panel"><i class="fa-solid fa-xmark"></i></button>
+    <div class="overlay-head">
+      <div class="overlay-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h2 id="forgotTitle">Reset your password</h2>
+      <p>Enter your email address and we'll check your account, then send you a secure reset link.</p>
+    </div>
+    <form id="forgotForm" class="overlay-form" novalidate>
+      <div class="field" id="field-forgot-email">
+        <label for="forgotEmail">Email address</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-envelope leading-icon"></i>
+          <input type="email" id="forgotEmail" name="forgotEmail" placeholder="Enter your email address" autocomplete="email" required>
+        </div>
+        <span class="field-error" id="error-forgot-email">Please enter a valid email address.</span>
+      </div>
+      <button type="submit" class="btn-signin" id="resetBtn">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label" id="resetBtnLabel">Send Reset Link</span>
+      </button>
+      <button type="button" class="form-back" id="backToLoginBtn" style="margin-top:14px;justify-content:center;"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+/* ============================================================
+   ShuleSmart — Login Page Logic
+   Handles: field validation, Firebase email/password auth,
+   Remember Me persistence, loading state, user feedback,
+   password visibility toggle, and existing-session redirects.
+   ============================================================ */
+
+import { auth } from "../js/firebase-config.js";
+import { db } from "../js/firestore-db.js";
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  fetchSignInMethodsForEmail
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+/* ---------- DOM references ---------- */
+const loginForm      = document.getElementById('loginForm');
+const emailInput     = document.getElementById('email');
+const passwordInput  = document.getElementById('password');
+const rememberMe     = document.getElementById('rememberMe');
+const signInBtn      = document.getElementById('signInBtn');
+const btnLabel       = document.getElementById('btnLabel');
+const togglePassword = document.getElementById('togglePassword');
+const toggleIcon     = document.getElementById('toggleIcon');
+const feedback       = document.getElementById('feedback');
+const feedbackText   = document.getElementById('feedbackText');
+const feedbackIcon   = feedback.querySelector('i');
+
+let isSubmitting = false;   // guards against duplicate submissions
+let hasRedirected = false;  // guards against an infinite redirect loop
+
+/* ============================================================
+   Role-based redirect handler
+   ------------------------------------------------------------
+   For now every authenticated user goes to the owner dashboard.
+   Later, this function can be expanded to look up the user's
+   role (owner / school_admin / teacher / staff) — e.g. from a
+   Firestore user profile or custom claims — and redirect them
+   to the appropriate dashboard, WITHOUT needing to change any
+   of the sign-in logic above it.
+   ============================================================ */
+async function redirectUser(user) {
+  if (hasRedirected) return; // prevent duplicate/looping redirects
+  hasRedirected = true;
+
+  // Read this user's platform profile directly by UID. The document ID
+  // *is* the Firebase Auth UID, and the security rules explicitly allow
+  // every signed-in user to read their own record — no list/query needed,
+  // so school admins can never be blocked here.
+  let role = null;
+  try {
+    const docSnap = await db.collection("users").doc(user.uid).get();
+    if (docSnap.exists) {
+      role = docSnap.data().platform_role || null;
+    }
+  } catch (err) {
+    console.error("ShuleSmart: role lookup failed", err);
+  }
+
+  if (role === "school_admin") {
+    window.location.href = "/dashboard/";
+    return;
+  }
+
+  if (role === "super_owner" || role === "owner") {
+    window.location.href = "/owner-dashboard/";
+    return;
+  }
+
+  // Unregistered or inactive account: stay on the login screen and
+  // explain, instead of silently dumping everyone on one dashboard.
+  showMessage(
+    "No ShuleSmart profile is linked to this login (" +
+      (user.email || "unknown email") +
+      "). Please contact your platform administrator.",
+    "error"
+  );
+}
+
+/* ============================================================
+   Existing session detection
+   ------------------------------------------------------------
+   If the user is already signed in when this page loads, send
+   them straight to their dashboard instead of showing the form.
+   ============================================================ */
+onAuthStateChanged(auth, (user) => {
+  if (user && !hasRedirected) {
+    redirectUser(user);
+  }
+});
+
+/* ============================================================
+   Feedback message system
+   ============================================================ */
+const feedbackIcons = {
+  success: 'fa-solid fa-circle-check',
+  error: 'fa-solid fa-circle-exclamation',
+  info: 'fa-solid fa-circle-info'
+};
+
+function showMessage(message, type) {
+  type = type || 'info';
+  feedback.className = 'feedback show ' + type;
+  feedbackIcon.className = feedbackIcons[type] || feedbackIcons.info;
+  feedbackText.textContent = message;
+  feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function clearMessage() {
+  feedback.classList.remove('show');
+}
+
+/* ============================================================
+   Field validation
+   ============================================================ */
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function setFieldInvalid(fieldId, isInvalid) {
+  const field = document.getElementById(fieldId);
+  if (field) field.classList.toggle('invalid', isInvalid);
+}
+
+function validateEmailField() {
+  const valid = isValidEmail(emailInput.value);
+  setFieldInvalid('field-email', !valid);
+  return valid;
+}
+
+function validatePasswordField() {
+  const valid = passwordInput.value.trim().length > 0;
+  setFieldInvalid('field-password', !valid);
+  return valid;
+}
+
+emailInput.addEventListener('blur', validateEmailField);
+passwordInput.addEventListener('blur', validatePasswordField);
+emailInput.addEventListener('input', () => {
+  if (document.getElementById('field-email').classList.contains('invalid')) validateEmailField();
+});
+passwordInput.addEventListener('input', () => {
+  if (document.getElementById('field-password').classList.contains('invalid')) validatePasswordField();
+});
+
+/* ============================================================
+   Password visibility toggle
+   ============================================================ */
+togglePassword.addEventListener('click', () => {
+  const isHidden = passwordInput.getAttribute('type') === 'password';
+  passwordInput.setAttribute('type', isHidden ? 'text' : 'password');
+  toggleIcon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+  togglePassword.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+});
+
+/* ============================================================
+   Forgot Password overlay
+   ------------------------------------------------------------
+   Opens a modal panel, validates the email, attempts an advisory
+   existence check (fetchSignInMethodsForEmail), then sends a Firebase
+   password reset email. The check is advisory ONLY because this project
+   has email-enumeration protection enabled (empty results are ambiguous).
+   All feedback is shown in the main feedback area so the user always
+   knows what happened.
+   ============================================================ */
+const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+const forgotOverlay        = document.getElementById('forgotOverlay');
+const forgotCloseBtn      = document.getElementById('forgotCloseBtn');
+const backToLoginBtn      = document.getElementById('backToLoginBtn');
+const forgotForm          = document.getElementById('forgotForm');
+const forgotEmail         = document.getElementById('forgotEmail');
+const resetBtn            = document.getElementById('resetBtn');
+const resetBtnLabel       = document.getElementById('resetBtnLabel');
+
+let isResetting = false;
+
+/*
+ * Strict existence gate.
+ * OFF by default because this Firebase project has "Email enumeration
+ * protection" enabled, which makes fetchSignInMethodsForEmail return an
+ * empty list for REAL accounts too — a strict gate would wrongly block
+ * legitimate users. Set to true ONLY if you have disabled email
+ * enumeration protection in Firebase Console (Authentication → Settings
+ * → Protection → Email enumeration protection).
+ */
+const STRICT_EXISTENCE_GATE = false;
+
+function openForgotOverlay() {
+  forgotForm.reset();
+  setFieldInvalid('field-forgot-email', false);
+  forgotOverlay.classList.add('show');
+  setTimeout(() => forgotEmail.focus(), 250);
+}
+
+function closeForgotOverlay() {
+  forgotOverlay.classList.remove('show');
+}
+
+forgotPasswordLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  clearMessage();
+  openForgotOverlay();
+});
+
+forgotCloseBtn.addEventListener('click', closeForgotOverlay);
+backToLoginBtn.addEventListener('click', closeForgotOverlay);
+
+// Close when clicking the backdrop (outside the card).
+forgotOverlay.addEventListener('click', (e) => {
+  if (e.target === forgotOverlay) closeForgotOverlay();
+});
+
+// Close on Escape key.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && forgotOverlay.classList.contains('show')) closeForgotOverlay();
+});
+
+forgotForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (isResetting) return;
+
+  const email = forgotEmail.value.trim();
+  if (!isValidEmail(email)) {
+    setFieldInvalid('field-forgot-email', true);
+    document.getElementById('error-forgot-email').textContent = 'Please enter a valid email address.';
+    forgotEmail.focus();
+    return;
+  }
+  setFieldInvalid('field-forgot-email', false);
+
+  isResetting = true;
+  resetBtn.disabled = true;
+  resetBtn.classList.add('loading');
+
+  try {
+    // 1) Existence check — ADVISORY ONLY, never a hard gate.
+    //
+    //    IMPORTANT: this Firebase project has "Email enumeration
+    //    protection" ENABLED (Authentication → Settings → Protection).
+    //    Under that setting fetchSignInMethodsForEmail/createAuthUri
+    //    deliberately return an EMPTY list even for accounts that really
+    //    exist (verified: a real account and a fake email both return no
+    //    signInMethods). An empty result is therefore AMBIGUOUS — never
+    //    proof that an account is missing — so we must not block on it.
+    let found = null; // true = definitely exists · null = ambiguous
+    try {
+      resetBtnLabel.textContent = 'Checking...';
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      found = methods.length > 0 || null; // empty → ambiguous, not "missing"
+    } catch (checkErr) {
+      console.warn('ShuleSmart: account-existence check failed — continuing to reset', checkErr);
+      found = null;
+    }
+
+    // Strict "No account found" gate — ONLY meaningful when email
+    // enumeration protection has been disabled in the Firebase console.
+    // Out of the box (protection ON) it would wrongly block every real
+    // account, so it is off by default.
+    if (found !== true && STRICT_EXISTENCE_GATE) {
+      setFieldInvalid('field-forgot-email', true);
+      document.getElementById('error-forgot-email').textContent =
+        'No account found with this email address.';
+      forgotEmail.focus();
+      return;
+    }
+
+    // 2) Send the reset email. With enumeration protection ON this call
+    //    resolves successfully even when the account does not exist, so
+    //    the success message below is deliberately neutral unless the
+    //    existence check returned a clear positive.
+    resetBtnLabel.textContent = 'Sending...';
+    await sendPasswordResetEmail(auth, email);
+
+    // Success — close the overlay and confirm on the login form.
+    closeForgotOverlay();
+    showMessage(
+      found === true
+        ? 'Password reset link sent! Check your email inbox.'
+        : 'If a ShuleSmart account exists for this email, a password reset link has been sent.',
+      'success'
+    );
+    forgotForm.reset();
+
+  } catch (error) {
+    console.error('ShuleSmart: password reset error', error);
+    // Keep the overlay open and show the error inside it.
+    setFieldInvalid('field-forgot-email', true);
+    let msg = 'Something went wrong. Please try again.';
+    if (error && error.code === 'auth/too-many-requests') {
+      msg = 'Too many attempts. Please wait a moment and try again.';
+    } else if (error && error.code === 'auth/network-request-failed') {
+      msg = "Couldn't reach Firebase. If you're testing locally, make sure you're on the deployed site or a normal localhost server, and check that no ad-blocker or privacy extension is blocking Google login services.";
+    }
+    document.getElementById('error-forgot-email').textContent = msg;
+  } finally {
+    isResetting = false;
+    resetBtn.disabled = false;
+    resetBtn.classList.remove('loading');
+    resetBtnLabel.textContent = 'Send Reset Link';
+  }
+});
+
+/* ============================================================
+   Loading state helpers
+   ============================================================ */
+function setLoading(isLoading) {
+  isSubmitting = isLoading;
+  signInBtn.disabled = isLoading;
+  signInBtn.classList.toggle('loading', isLoading);
+  btnLabel.textContent = isLoading ? 'Signing In...' : 'Sign In';
+}
+
+/* ============================================================
+   Friendly error message mapping
+   ------------------------------------------------------------
+   Firebase error codes are translated into clear, professional
+   messages. Raw Firebase errors are never shown to the user.
+   ============================================================ */
+function getFriendlyErrorMessage(error) {
+  const code = error && error.code ? error.code : '';
+
+  switch (code) {
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/missing-password':
+      return 'Please enter your password.';
+    case 'auth/user-not-found':
+    case 'auth/invalid-credential':
+      return 'No account was found with these details.';
+    case 'auth/wrong-password':
+      return 'The password you entered is incorrect.';
+    case 'auth/user-disabled':
+      return 'Your account has been temporarily disabled.';
+    case 'auth/too-many-requests':
+      return 'Too many unsuccessful attempts. Please try again later.';
+    case 'auth/network-request-failed':
+      return 'Unable to sign in. Please check your internet connection and try again.';
+    default:
+      return 'Something went wrong. Please try again.';
+  }
+}
+
+/* ============================================================
+   Form submission — Firebase email/password sign-in
+   ============================================================ */
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (isSubmitting) return; // prevent duplicate submissions
+
+  clearMessage();
+
+  const emailValid = validateEmailField();
+  const passwordValid = validatePasswordField();
+
+  if (!emailValid) {
+    showMessage('Please enter a valid email address.', 'error');
+    emailInput.focus();
+    return;
+  }
+
+  if (!passwordValid) {
+    showMessage('Please enter your password.', 'error');
+    passwordInput.focus();
+    return;
+  }
+
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  setLoading(true);
+
+  try {
+    // Respect the Remember Me checkbox before authenticating.
+    const persistence = rememberMe.checked ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(auth, persistence);
+
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+
+    showMessage('Signed in successfully. Redirecting to your dashboard...', 'success');
+    await redirectUser(credential.user);
+
+  } catch (error) {
+    console.error('ShuleSmart sign-in error:', error);
+    showMessage(getFriendlyErrorMessage(error), 'error');
+    setLoading(false);
+  }
+});
+</script>
+</body>
+</html>

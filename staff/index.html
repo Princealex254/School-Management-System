@@ -1,0 +1,124 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+<aside class="sa-sidebar" id="sidebar"></aside>
+<div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main">
+<header class="sa-topbar" id="topbar"></header>
+<main class="sa-content">
+<div class="sa-page-head"><div><h1>Staff</h1><p>Manage non-teaching staff at your school.</p></div><button class="sa-btn sa-btn-primary" id="addBtn"><i class="fa-solid fa-plus"></i> Add Staff</button></div>
+<div class="sa-card"><div class="sa-card-body">
+<div class="sa-filters"><input type="text" class="sa-input" id="searchInput" placeholder="Search..."><select class="sa-select" id="statusSel"></select></div>
+<div id="listContainer"></div>
+<div id="pagerBar" style="display:none;margin-top:16px;"></div>
+</div></div>
+</main>
+</div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost, apiPut, apiPatch } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, initials, formatDate, formatCurrency, badgeHtml, loadingState, emptyState, errorState, openModal, closeModal, confirmDialog } from "../js/common.js";
+const H = { E: escapeHtml, D: formatDate, B: badgeHtml, C: formatCurrency };
+const CFG = {"nav":"staff","title":"Staff","heading":"Staff","desc":"Manage all school staff and the roles they hold.","icon":"fa-solid fa-user-tie","addLabel":"Add Staff","endpoint":"/api/staff","key":"staff","search":true,"statuses":["active","inactive"],"fields":[{"id":"staff_number","label":"Staff Number","req":true},{"id":"first_name","label":"First Name","req":true},{"id":"last_name","label":"Last Name","req":true},{"id":"department","label":"Department","type":"select","options":["Accountant","Secretary","Librarian","Security","Support","Other"]},{"id":"role","label":"Staff Role","type":"select","req":true,"options":["","School Head","Deputy Head","Senior Teacher","Teacher","Accountant","Bursar","Secretary","Clerk","Librarian","Lab Technician","Nurse","Security","Support Staff","Other"]},{"id":"email","label":"Email","type":"email"},{"id":"phone","label":"Phone","type":"tel"},{"id":"employment_date","label":"Employment Date","type":"date"}],"cols":[{"l":"Name","x":"E(r.first_name+' '+r.last_name)"},{"l":"Staff No.","x":"E(r.staff_number)"},{"l":"Dept.","x":"E(r.department||'\u2014')"},{"l":"Role","x":"E(r.role||'\u2014')"},{"l":"Phone","x":"E(r.phone||'\u2014')"},{"l":"Status","x":"B(r.status)"}]};
+await requireSchoolAdmin();
+initShell({ active: CFG.nav });
+setTopbarTitle(CFG.heading);
+if (CFG.addable === 0) document.getElementById("addBtn").style.display = "none";
+else document.getElementById("addBtn").innerHTML = '<i class="fa-solid fa-plus"></i> ' + CFG.addLabel;
+const PAGE = 10;
+let state = { search: "", status: "", offset: 0, total: 0 };
+
+/* Element references — previously used undeclared, so the list never rendered. */
+const listContainer = document.getElementById("listContainer");
+const pagerBar = document.getElementById("pagerBar");
+const REF = {};
+if (CFG.refs) await Promise.all(CFG.refs.map(async (r) => { try { const d = await apiGet(r.url); REF[r.refId] = (d[r.key] || []).map((x) => ({ id: x.id, label: (new Function("r", "return " + r.labelExpr))(x) })); } catch (e) { REF[r.refId] = []; } }));
+function R(rid, id) { if (!id) return "\u2014"; const hit = (REF[rid] || []).find((x) => x.id === id); return hit ? hit.label : "\u2014"; }
+function col(r, x) { return (new Function("r", "H", "const {E,D,B,C,R}=H; return (" + x + ");"))(r, Object.assign(H, { R })); }
+async function load() {
+  loadingState(listContainer, "Loading...");
+  pagerBar.style.display = "none";
+  try {
+    const p = new URLSearchParams();
+    if (state.search && CFG.search) p.set("search", state.search);
+    if (state.status && CFG.statuses) p.set("status", state.status);
+    p.set("limit", String(PAGE)); p.set("offset", String(state.offset));
+    const res = await apiGet(CFG.endpoint + "?" + p.toString());
+    const rows = res[CFG.key] || [];
+    state.total = res.total != null ? Number(res.total) : (state.offset + rows.length + (rows.length === PAGE ? 1 : 0));
+    render(rows); pager();
+  } catch (err) { errorState(listContainer, err.message); }
+}
+function render(rows) {
+  if (!rows.length) { emptyState(listContainer, { icon: CFG.icon, title: "Nothing here yet", message: "Use the button above to add the first record." }); return; }
+  listContainer.innerHTML = `<div class="sa-table-wrap"><table class="sa-table"><thead><tr>` + CFG.cols.map((c) => `<th>${c.l}</th>`).join("") + `<th></th></tr></thead><tbody>` + rows.map((r) => `<tr>` + CFG.cols.map((c) => `<td>${col(r, c.x)}</td>`).join("") + (CFG.toggle === false ? "" : `<td><div class="sa-row-actions"><button data-a="view" data-id="${r.id}" title="View"><i class="fa-solid fa-eye"></i></button><button data-a="edit" data-id="${r.id}" title="Edit"><i class="fa-solid fa-pen"></i></button><button data-a="toggle" data-id="${r.id}" data-s="${r.status}" title="Activate/Deactivate"><i class="fa-solid fa-power-off"></i></button></div></td>`) + `</tr>`).join("") + `</tbody></table></div>`;
+  cache = rows;
+  listContainer.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b.dataset.a, b.dataset.id, b.dataset.s)));
+}
+function pager() {
+  const hasPrev = state.offset > 0, hasNext = state.offset + PAGE < state.total;
+  if (!hasPrev && !hasNext) { pagerBar.style.display = "none"; return; }
+  pagerBar.style.display = "flex"; pagerBar.style.justifyContent = "space-between"; pagerBar.style.alignItems = "center";
+  pagerBar.innerHTML = `<span class="sa-cell-sub">${state.total} record(s)</span><div style="display:flex;gap:8px;"><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pP" ${hasPrev ? "" : "disabled"}><i class="fa-solid fa-chevron-left"></i></button><button class="sa-btn sa-btn-secondary sa-btn-sm" id="pN" ${hasNext ? "" : "disabled"}><i class="fa-solid fa-chevron-right"></i></button></div>`;
+  pP.onclick = () => { state.offset -= PAGE; load(); }; pN.onclick = () => { state.offset += PAGE; load(); };
+}
+let cache = [];
+async function act(a, id, s) {
+  const rec = cache.find((x) => x.id === id);
+  if (a === "view") return view(rec);
+  if (a === "edit") return form(rec);
+  if (a === "toggle") {
+    const ns = s === "active" ? "inactive" : "active";
+    if (!(await confirmDialog({ title: "Change status?", message: "It will be marked as " + ns + ".", confirmText: "Yes", danger: ns !== "active" }))) return;
+    try { await apiPatch(CFG.endpoint + "/" + id + "/status", { status: ns }); showToast("Updated.", "success"); load(); } catch (e) { showToast(e.message || "Failed.", "error"); }
+  }
+}
+function view(r) {
+  openModal(`<h3 class="sa-modal-title">Record details</h3><div style="margin-top:14px;">` + CFG.fields.map((f) => { let v = r[f.id]; if (f.type === "ref") v = R(f.ref, v); else if (f.id === "status") v = badgeHtml(v); else v = escapeHtml(v ?? "\u2014"); return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;"><span style="color:var(--text-secondary);font-weight:600;">${f.label}</span><span style="font-weight:700;text-align:right;">${v}</span></div>`; }).join("") + `<div class="sa-modal-actions"><button class="sa-btn sa-btn-primary" onclick="document.getElementById('modalRoot').innerHTML=''">Close</button></div></div>`);
+}
+function form(rec) {
+  const isEdit = !!rec;
+  openModal(`<h3 class="sa-modal-title">${isEdit ? "Edit record" : "Add record"}</h3><form id="gf" class="sa-form-grid" novalidate style="margin-top:14px;">` + CFG.fields.map((f) => { const v = rec ? (rec[f.id] ?? "") : ""; const req = f.req ? ' <span class="req">*</span>' : ""; let inp; if (f.type === "select") inp = `<select class="sa-select" data-f="${f.id}">` + f.options.map((o) => `<option value="${o}"${String(v) === o ? " selected" : ""}>${o}</option>`).join("") + `</select>`; else if (f.type === "checkbox") inp = `<input type="checkbox" data-f="${f.id}" ${v ? "checked" : ""}>`; else if (f.type === "textarea") inp = `<textarea class="sa-input" data-f="${f.id}" rows="2">${escapeHtml(v)}</textarea>`; else if (f.type === "ref") inp = `<select class="sa-select" data-f="${f.id}"><option value="">None</option>` + (REF[f.ref] || []).map((o) => `<option value="${o.id}"${v === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("") + `</select>`; else inp = `<input class="sa-input" type="${f.type || "text"}" data-f="${f.id}" value="${escapeHtml(String(v ?? "").slice(0, f.type === "date" ? 10 : 999))}">`; return `<div class="sa-form-group${f.full ? " full" : ""}"><label>${f.label}${req}</label>${inp}</div>`; }).join("") + `<div class="sa-modal-actions" style="grid-column:1/-1;"><button type="button" class="sa-btn sa-btn-ghost" onclick="document.getElementById('modalRoot').innerHTML=''">Cancel</button><button type="submit" class="sa-btn sa-btn-primary" id="gfs">Save</button></div></form>`);
+  document.getElementById("gf").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {};
+    CFG.fields.forEach((f) => { const el = document.querySelector('[data-f="' + f.id + '"]'); payload[f.id] = f.type === "checkbox" ? el.checked : el.value.trim(); });
+    for (const f of CFG.fields) if (f.req && !payload[f.id]) { showToast(f.label + " is required.", "error"); return; }
+    const sb = document.getElementById("gfs"); sb.disabled = true; sb.innerHTML = "Saving...";
+    try {
+      if (isEdit) await apiPut(CFG.endpoint + "/" + rec.id, payload); else await apiPost(CFG.endpoint, payload);
+      showToast("Saved successfully.", "success"); document.getElementById("modalRoot").innerHTML = ""; state.offset = 0; load();
+    } catch (err) { showToast(err.message || "Save failed.", "error"); sb.disabled = false; sb.innerHTML = "Save"; }
+  });
+}
+document.getElementById("addBtn").addEventListener("click", () => form(null));
+const si = document.getElementById("searchInput");
+si.style.display = CFG.search ? "block" : "none";
+si.addEventListener("input", (e) => { clearTimeout(window.__t); window.__t = setTimeout(() => { state.search = e.target.value.trim(); state.offset = 0; load(); }, 350); });
+const ss = document.getElementById("statusSel");
+ss.style.display = CFG.statuses ? "block" : "none";
+if (CFG.statuses) { ss.innerHTML = '<option value="">All Statuses</option>' + CFG.statuses.map((s) => `<option value="${s}">${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join(""); ss.addEventListener("change", (e) => { state.status = e.target.value; state.offset = 0; load(); }); }
+load();
+</script>
+</body>
+</html>

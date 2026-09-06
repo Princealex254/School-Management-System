@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marks | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Marks</h1>
+          <p>Record and edit examination marks.</p>
+        </div>
+      </div>
+      <div class="sa-card" style="margin-bottom:20px;">
+        <div class="sa-card-body" style="padding:16px 22px;">
+          <div class="sa-filters">
+            <select class="sa-select" id="examSel"><option value="">Select exam…</option></select>
+            <select class="sa-select" id="classSel"><option value="">Select class…</option></select>
+            <select class="sa-select" id="subjectSel"><option value="">Select subject…</option></select>
+            <button class="sa-btn sa-btn-primary sa-btn-sm" id="loadBtn"><i class="fa-solid fa-list-ol"></i> Load Roster</button>
+          </div>
+          <div id="marksInfo" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
+      <div class="sa-card">
+        <div class="sa-card-body">
+          <div id="rosterWrap">
+            <div class="sa-state"><i class="fa-solid fa-pen-to-square"></i><h4>No roster loaded</h4><p>Choose an exam, class and subject, then click “Load Roster”.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+        <button class="sa-btn sa-btn-primary" id="saveBtn" disabled><i class="fa-solid fa-floppy-disk"></i> Save Marks</button>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, loadingState, errorState } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "marks" });
+setTopbarTitle("Marks");
+
+/* Static page references (exist at load time). */
+const examSel = document.getElementById("examSel");
+const classSel = document.getElementById("classSel");
+const subjectSel = document.getElementById("subjectSel");
+const loadBtn = document.getElementById("loadBtn");
+const rosterWrap = document.getElementById("rosterWrap");
+const saveBtn = document.getElementById("saveBtn");
+const marksInfo = document.getElementById("marksInfo");
+
+let totalStudents = 0;
+let rosterRows = [];
+let rosterSearch = "";
+let rosterSearchInput = null;
+
+function fill(sel, rows, placeholder) {
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    rows.map((r) => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join("");
+}
+
+async function loadRefs() {
+  try {
+    const [ex, cl, su] = await Promise.all([
+      apiGet("/api/exams"),
+      apiGet("/api/classes"),
+      apiGet("/api/subjects")
+    ]);
+    fill(examSel, (ex.exams || []).map((e) => ({ id: e.id, name: e.name })), "Select exam…");
+    fill(classSel, (cl.classes || []).map((c) => ({ id: c.id, name: c.name + (c.stream ? " - " + c.stream : "") })), "Select class…");
+    fill(subjectSel, (su.subjects || []).map((s) => ({ id: s.id, name: s.name })), "Select subject…");
+  } catch (e) {
+    showToast("Could not load exams / classes / subjects.", "error");
+  }
+}
+
+function scoreInputs() {
+  return [...rosterWrap.querySelectorAll("input[data-sid]")];
+}
+
+/* Render the roster table applying the current student-name/admission search.
+   Hides rows that don't match while keeping their scores intact. */
+function renderRoster(rows) {
+  const term = rosterSearch.trim().toLowerCase();
+  const shown = term
+    ? rows.filter((r) =>
+        String(r.name || "").toLowerCase().includes(term) ||
+        String(r.admission_number || "").toLowerCase().includes(term)
+      )
+    : rows;
+
+  const tableHtml =
+    `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Adm. No.</th><th>Student</th><th style="width:160px;">Score (%)</th></tr></thead><tbody>` +
+    shown.map((r) =>
+      `<tr><td>${escapeHtml(r.admission_number || "—")}</td><td>${escapeHtml(r.name)}</td>` +
+      `<td><input class="sa-input" type="number" min="0" max="100" step="0.5" data-sid="${r.student_id}" value="${r.score == null ? "" : escapeHtml(String(r.score))}" placeholder="—"></td></tr>`
+    ).join("") + `</tbody></table></div>`;
+
+  const emptyBelow = shown.length === 0
+    ? `<div class="sa-state"><i class="fa-solid fa-user-slash"></i><h4>No student matches “${escapeHtml(term)}”</h4><p>Try a different name or admission number.</p></div>`
+    : "";
+
+  rosterWrap.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <div class="sa-input-icon" style="position:relative;flex:1;max-width:340px;">
+        <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-secondary);font-size:13px;"></i>
+        <input type="text" id="rosterSearch" class="sa-input" placeholder="Search student by name or admission no…" style="padding-left:34px;" value="${escapeHtml(rosterSearch)}">
+      </div>
+      <span class="sa-cell-sub" id="rosterCount">${shown.length} of ${rows.length} shown</span>
+    </div>${tableHtml}${emptyBelow}`;
+
+  rosterSearchInput = document.getElementById("rosterSearch");
+  rosterSearchInput.addEventListener("input", (e) => {
+    rosterSearch = e.target.value;
+    renderRoster(rosterRows);
+    updateInfo();
+  });
+  scoreInputs().forEach((i) => i.addEventListener("input", updateInfo));
+}
+
+function updateInfo() {
+  if (!totalStudents) { marksInfo.innerHTML = ""; return; }
+  const visible = scoreInputs();
+  const filled = visible.filter((i) => i.value !== "").length;
+  const total = rosterSearch.trim() ? visible.length : totalStudents;
+  marksInfo.innerHTML =
+    `<span class="sa-badge sa-badge-info">${filled} of ${total} marked</span>` +
+    (filled < total ? `<span class="sa-badge sa-badge-neutral">${total - filled} blank (saved as no score)</span>` : "");
+}
+
+async function loadRoster() {
+  if (!examSel.value || !classSel.value || !subjectSel.value) {
+    showToast("Choose an exam, class and subject.", "warning");
+    return;
+  }
+  loadingState(rosterWrap, "Loading roster…");
+  try {
+    const p = new URLSearchParams({ exam_id: examSel.value, class_id: classSel.value, subject_id: subjectSel.value });
+    const d = await apiGet("/api/marks?" + p.toString());
+    const rows = d.roster || [];
+    totalStudents = rows.length;
+
+    if (!rows.length) {
+      rosterWrap.innerHTML = `<div class="sa-state"><i class="fa-solid fa-user-graduate"></i><h4>No students in this class</h4><p>Add students to this class to enter marks.</p></div>`;
+      saveBtn.disabled = true;
+      marksInfo.innerHTML = "";
+      return;
+    }
+
+    rosterRows = rows;
+    rosterSearch = "";
+    renderRoster(rows);
+    saveBtn.disabled = false;
+    updateInfo();
+  } catch (err) {
+    errorState(rosterWrap, err.message || "Could not load the roster.");
+    saveBtn.disabled = true;
+    marksInfo.innerHTML = "";
+  }
+}
+
+async function save() {
+  const marks = scoreInputs()
+    .map((i) => ({ student_id: i.dataset.sid, score: i.value === "" ? null : Number(i.value) }))
+    .filter((m) => m.score === null || (!isNaN(m.score) && m.score >= 0 && m.score <= 100));
+  if (!marks.length) { showToast("Nothing to save.", "warning"); return; }
+
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+  try {
+    const res = await apiPost("/api/marks", {
+      exam_id: examSel.value,
+      subject_id: subjectSel.value,
+      class_id: classSel.value,
+      marks
+    });
+    showToast(res.message || "Marks saved successfully.", "success");
+    await loadRoster();
+  } catch (err) {
+    showToast(err.message || "Could not save marks.", "error");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Marks';
+  }
+}
+
+loadBtn.addEventListener("click", loadRoster);
+[examSel, classSel, subjectSel].forEach((sel) => sel.addEventListener("change", () => {
+  rosterWrap.innerHTML = `<div class="sa-state"><i class="fa-solid fa-pen-to-square"></i><h4>No roster loaded</h4><p>Choose an exam, class and subject, then click “Load Roster”.</p></div>`;
+  saveBtn.disabled = true;
+  totalStudents = 0;
+  marksInfo.innerHTML = "";
+}));
+saveBtn.addEventListener("click", save);
+
+await loadRefs();
+</script>
+</body>
+</html>

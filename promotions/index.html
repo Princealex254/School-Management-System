@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promotions | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+<style>
+  .promo-step{display:flex;align-items:center;gap:10px;font-weight:700;margin:0 0 12px;}
+  .promo-step .n{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+  .promo-table td,.promo-table th{font-size:13px;}
+  .statchip{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;min-width:130px;}
+  .promo-note{display:flex;gap:10px;align-items:flex-start;background:rgba(37,99,235,0.06);border:1px solid #BFDBFE;color:#1E40AF;border-radius:12px;padding:11px 14px;font-size:13px;margin:12px 0;}
+  .promo-note.warn{background:rgba(217,119,6,0.07);border-color:#FDE68A;color:#92400E;}
+  .promo-note i{margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Promotions &amp; Year Rollover</h1>
+          <p>Close the academic year in a few clicks: map classes, review students, confirm.</p>
+        </div>
+      </div>
+      <div id="app"></div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost, apiPut } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, formatDate, formatCurrency, confirmDialog, openModal, closeModal } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "promotions" });
+setTopbarTitle("Promotions & Year Rollover");
+
+const app = document.getElementById("app");
+const ACTIONS = [
+  ["promote", "Promote"],
+  ["repeat", "Repeat"],
+  ["graduate", "Graduate"],
+  ["transfer", "Transfer"],
+  ["leave", "Leave School"]
+];
+const money = (v) => formatCurrency(Number(v || 0));
+
+let years = [], terms = [], batches = [], preview = null;
+let schoolClasses = [];
+let currentYear = null;   // the "from" year for this rollover
+let draftId = null;       // id of an open draft batch, when one exists
+
+/* ================= Data loading ================= */
+function termCountFor(yid) {
+  return terms.filter((t) => t.academic_year_id === yid).length;
+}
+
+async function loadBase() {
+  const [y, t, b] = await Promise.all([
+    apiGet("/api/academic-years"),
+    apiGet("/api/terms").catch(() => ({ terms: [] })),
+    apiGet("/api/promotions/batches").catch(() => ({ batches: [] }))
+  ]);
+  years = y.academicYears || [];
+  terms = t.terms || [];
+  batches = b.batches || [];
+}
+
+async function loadSchoolClasses() {
+  try {
+    const r = await apiGet("/api/classes");
+    schoolClasses = (r.classes || []).map((c) => ({ class_id: c.id, class_name: (c.name || "") + (c.stream ? " - " + c.stream : "") }));
+  } catch (e) { schoolClasses = []; }
+}
+
+function sortedClasses() {
+  return [...schoolClasses].sort((a, b) => String(a.class_name).localeCompare(String(b.class_name), undefined, { numeric: true }));
+}
+
+function classLabel(id) {
+  const c = schoolClasses.find((x) => x.class_id === id);
+  return c ? c.class_name : "";
+}
+
+/* ================= Small helpers ================= */
+function balancePill(bal) {
+  const b = Number(bal || 0);
+  if (b > 0) return `<span class="sa-badge sa-badge-danger">${money(b)} due</span>`;
+  if (b < 0) return `<span class="sa-badge sa-badge-info">${money(Math.abs(b))} credit</span>`;
+  return `<span class="sa-badge sa-badge-success">Cleared</span>`;
+}
+
+function errorCard(message) {
+  return `<div class="sa-card"><div style="padding:40px 20px;text-align:center;">
+    <i class="fa-solid fa-circle-exclamation" style="font-size:34px;color:#B91C1C;"></i>
+    <h3 style="margin:12px 0 6px;">Could not load promotions</h3>
+    <p class="sa-cell-sub" style="margin:0 0 16px;">${escapeHtml(message || "Something went wrong.")}</p>
+    <button class="sa-btn sa-btn-primary" onclick="window.location.reload()"><i class="fa-solid fa-rotate-right"></i> Try again</button>
+  </div></div>`;
+}
+
+function renderLoading() {
+  app.innerHTML = '<p class="sa-cell-sub"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading…</p>';
+}
+function readiness() {
+  const cur = years.find((y) => y.is_current) || null;
+  const others = years.filter((y) => !cur || y.id !== cur.id);
+  const readyOthers = others.filter((y) => termCountFor(y.id) > 0);
+  return { current: cur, others, readyOthers, ok: !!cur && readyOthers.length > 0 };
+}
+
+function renderGate() {
+  const st = readiness();
+  const item = (ok, title, hint) => `
+    <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+      <i class="fa-solid ${ok ? "fa-circle-check" : "fa-circle-xmark"}" style="color:${ok ? "var(--success)" : "#B91C1C"};font-size:18px;margin-top:2px;"></i>
+      <div><div style="font-weight:700;">${title}</div>${hint ? `<div class="sa-cell-sub">${escapeHtml(hint)}</div>` : ""}</div>
+    </div>`;
+  const cur = st.current;
+  const others = st.others;
+  app.innerHTML = `
+    <div class="sa-card">
+      <div style="padding:20px;">
+        <h2 style="font-size:17px;margin-bottom:2px;"><i class="fa-solid fa-clipboard-check" style="color:var(--primary);margin-right:8px;"></i>Before you can run the rollover</h2>
+        <p class="sa-cell-sub" style="margin-bottom:6px;">Year-end promotion requires the new academic year and its first term to exist already.</p>
+        ${item(!!cur, "A current academic year is marked", cur ? cur.name : "Open Academic Years and tick Current Year on this year.")}
+        ${item(others.length > 0, "The next academic year exists", others.length ? "Found: " + others.map((y) => y.name).join(", ") : "Create the new year on the Academic Years page.")}
+        ${item(st.readyOthers.length > 0, "The new year has its first term", st.readyOthers.length ? "" : "Add Term 1 under the new year on the Terms page.")}
+        <div class="sa-modal-actions">
+          <a class="sa-btn sa-btn-secondary" href="../academic-years/"><i class="fa-solid fa-calendar"></i> Academic Years</a>
+          <a class="sa-btn sa-btn-secondary" href="../terms/"><i class="fa-solid fa-calendar-days"></i> Terms</a>
+          <button class="sa-btn sa-btn-primary" id="recheckBtn"><i class="fa-solid fa-rotate-right"></i> Re-check</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById("recheckBtn").addEventListener("click", boot);
+}
+
+function historyHtml() {
+  if (!batches.length) return "";
+  return `
+    <div class="sa-card" style="margin-top:16px;">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);"><h3 style="font-size:16px;"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);margin-right:8px;"></i>Previous Batches</h3></div>
+      <div class="sa-table-wrap"><table class="sa-table promo-table"><thead><tr><th>From</th><th>To</th><th>Students</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>
+        ${batches.map((b) => `<tr>
+          <td>${escapeHtml(b.from_year_name || "—")}</td>
+          <td>${escapeHtml(b.to_year_name || "—")}</td>
+          <td>${b.student_count ?? 0}</td>
+          <td>${escapeHtml(b.status)}</td>
+          <td>${formatDate(b.created_at)}</td>
+          <td><button class="sa-btn ${b.status === "draft" ? "sa-btn-secondary" : "sa-btn-ghost"} sa-btn-sm" data-open="${b.id}">${b.status === "draft" ? "Continue" : "View"}</button></td>
+        </tr>`).join("")}
+      </tbody></table></div>
+    </div>`;
+}
+
+function guessNext(name) {
+  const m = String(name || "").match(/^(.*?)(\d+)\s*$/);
+  if (m) {
+    const target = m[1] + String(Number(m[2]) + 1);
+    const hit = schoolClasses.find((c) => c.class_name.toLowerCase() === target.toLowerCase());
+    if (hit) return hit.class_id;
+  }
+  return "";
+}
+
+function destOptions(selected) {
+  return '<option value="">Choose…</option>' + sortedClasses().map((c) => `<option value="${c.class_id}"${c.class_id === selected ? " selected" : ""}>${escapeHtml(c.class_name)}</option>`).join("");
+}
+
+function actionOptions(selected) {
+  return ACTIONS.map(([v, l]) => `<option value="${v}"${selected === v ? " selected" : ""}>${l}</option>`).join("");
+}
+async function renderMappingEditor({ fromYear, toYears, draft = null, savedMapping = [] }) {
+  const totals = preview.totals || {};
+  const classList = (preview.classes || []).filter((c) => c.count > 0);
+  const draftNote = draft
+    ? `<div class="promo-note warn"><i class="fa-solid fa-triangle-exclamation"></i><div><b>An open draft exists.</b> The mapping below was restored. Adjust it and press start again — or discard the draft to begin totally fresh.</div></div>`
+    : "";
+  const mapByClass = new Map(savedMapping.map((m) => [m.class_id, m]));
+
+  app.innerHTML = `
+    <div class="sa-card">
+      <div style="padding:18px 20px 0;">
+        <div class="promo-step"><span class="n">1</span> Roll over <span class="sa-badge sa-badge-info">${escapeHtml(fromYear.name)}</span> to</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
+          <select class="sa-select" id="toYearSel" style="min-width:250px;">${toYears.map((y) => `<option value="${y.id}"${termCountFor(y.id) > 0 ? "" : " disabled"}>${escapeHtml(y.name)}${termCountFor(y.id) > 0 ? "" : " — create its first term first"}</option>`).join("")}</select>
+        </div>
+        <p class="sa-cell-sub">New year missing? Create it (and its Term 1) on Academic Years / Terms, then come back.</p>
+      </div>
+      <div style="padding:4px 20px 20px;">
+        ${draftNote}
+        <div class="promo-step" style="margin-top:10px;"><span class="n">2</span> Map what happens to each class</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 12px;">
+          <div class="statchip"><div class="sa-cell-sub">Students</div><div style="font-weight:800;font-size:18px;">${totals.students ?? 0}</div></div>
+          <div class="statchip"><div class="sa-cell-sub">Outstanding carried</div><div style="font-weight:800;font-size:18px;color:#B91C1C;">${money(totals.outstanding)}</div></div>
+          <div class="statchip"><div class="sa-cell-sub">Credits carried</div><div style="font-weight:800;font-size:18px;color:#047857;">${money(totals.credits)}</div></div>
+          ${totals.unassigned > 0 ? `<div class="statchip"><div class="sa-cell-sub" style="color:#D97706;">Students with no class</div><div style="font-weight:800;font-size:18px;color:#D97706;">${totals.unassigned}</div></div>` : ""}
+        </div>
+        ${classList.length ? `
+        <div class="sa-table-wrap"><table class="sa-table promo-table">
+          <thead><tr><th>Class</th><th>Students</th><th>Balances</th><th>Action</th><th>Destination class</th></tr></thead>
+          <tbody id="mapRows">${classList.map((c) => {
+            const prev = mapByClass.get(c.class_id);
+            const bal = (c.students || []).reduce((s, x) => s + Number(x.balance || 0), 0);
+            const act = prev ? prev.action : "promote";
+            const dst = prev ? (prev.to_class_id || "") : guessNext(c.class_name);
+            return `<tr data-cid="${escapeHtml(c.class_id)}">
+              <td><b>${escapeHtml(c.class_name)}</b></td>
+              <td>${c.count}</td>
+              <td>${balancePill(bal)}</td>
+              <td><select class="sa-select" data-act style="min-width:125px;"><option value="promote"${act === "promote" ? " selected" : ""}>Promote</option><option value="graduate"${act === "graduate" ? " selected" : ""}>Graduate</option><option value="skip"${act === "skip" ? " selected" : ""}>Skip</option></select></td>
+              <td><select class="sa-select" data-dest style="min-width:175px;">${destOptions(dst)}</select></td>
+            </tr>`;
+          }).join("")}</tbody>
+        </table></div>` : `
+        <div class="sa-state">
+          <i class="fa-solid fa-users-slash" style="font-size:32px;color:var(--text-secondary);"></i>
+          <h3 style="margin:10px 0 4px;">No classes with students</h3>
+          <p>Add students to classes on the Students page first, then come back to run the rollover.</p>
+          <a class="sa-btn sa-btn-primary" href="../students/"><i class="fa-solid fa-users"></i> Open Students</a>
+        </div>`}
+        <p class="sa-cell-sub" style="margin-top:8px;"><i class="fa-solid fa-shield-halved"></i> Balances stay on every ledger automatically — promotion never resets money.</p>
+        ${totals.unassigned > 0 ? `<p class="sa-cell-sub" style="margin-top:6px;color:#D97706;"><i class="fa-solid fa-triangle-exclamation"></i> ${totals.unassigned} active student(s) are not assigned to any class and will be skipped. Assign classes on the Students page first.</p>` : ""}
+<div class="sa-modal-actions" style="justify-content:flex-start;margin-top:14px;">
+          <button class="sa-btn sa-btn-primary" id="startPromoBtn" ${classList.length ? "" : "disabled"}><i class="fa-solid fa-forward"></i> Start Promotion</button>
+          ${draft ? `<button class="sa-btn sa-btn-danger" id="discardBtn"><i class="fa-solid fa-trash-can"></i> Discard Draft</button>` : ""}
+        </div>
+      </div>
+    </div>
+    ${historyHtml()}`;
+
+  if (document.getElementById("discardBtn")) {
+    document.getElementById("discardBtn").addEventListener("click", () => discardDraft(draft));
+  }
+  document.getElementById("startPromoBtn").addEventListener("click", startPromotion);
+  document.querySelectorAll("#mapRows tr").forEach((tr) => {
+    tr.querySelector("[data-act]").addEventListener("change", () => syncMapRow(tr));
+    syncMapRow(tr);
+  });
+  document.querySelectorAll("[data-open]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const bd = batches.find((x) => x.id === b.dataset.open);
+      if (!bd) return;
+      if (bd.status === "draft") loadBatch(bd.id);
+      else loadBatch(bd.id, { readOnly: true });
+    });
+  });
+}
+
+function syncMapRow(tr) {
+  const act = tr.querySelector("[data-act]").value;
+  tr.querySelector("[data-dest]").disabled = act !== "promote";
+  tr.style.opacity = act === "skip" ? "0.5" : "";
+}
+
+function collectMapping() {
+  const out = [];
+  let bad = null;
+  document.querySelectorAll("#mapRows tr[data-cid]").forEach((tr) => {
+    const action = tr.querySelector("[data-act]").value;
+    const destSel = tr.querySelector("[data-dest]");
+    if (action === "promote" && !destSel.value && !bad) bad = tr;
+    out.push({ class_id: tr.dataset.cid, action, to_class_id: action === "promote" ? (destSel.value || null) : null });
+  });
+  if (bad) {
+    bad.scrollIntoView({ behavior: "smooth", block: "center" });
+    bad.querySelector("[data-dest]").style.outline = "2px solid #B91C1C";
+    showToast(`Choose a destination class for ${bad.querySelector("td b").textContent}.`, "error");
+    return null;
+  }
+  return out;
+}
+
+async function startPromotion() {
+  const toId = document.getElementById("toYearSel").value;
+  if (!toId) return showToast("Choose the destination academic year.", "error");
+  const mapping = collectMapping();
+  if (!mapping) return;
+  const btn = document.getElementById("startPromoBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Preparing…';
+  try {
+    let id = draftId;
+    if (id) {
+      const d = batches.find((b) => b.id === id) || (preview && preview.batch) || null;
+      /* If the admin pointed the mapping at a different year than the draft
+         was created with, discard the old draft and start clean. */
+      if (d && d.to_academic_year_id && d.to_academic_year_id !== toId) {
+        try { await apiPost(`/api/promotions/batches/${id}/discard`, {}); } catch { /* ignore */ }
+        batches = batches.filter((b) => b.id !== id);
+        draftId = null;
+        id = null;
+      }
+    }
+    if (!id) {
+      const r = await apiPost("/api/promotions/batches", { from_academic_year_id: currentYear.id, to_academic_year_id: toId });
+      id = r.batch.id;
+    }
+    await apiPut(`/api/promotions/batches/${id}/mapping`, { mapping });
+    const g = await apiPost(`/api/promotions/batches/${id}/generate`, {});
+    showToast(g.message || `${g.generated} student(s) prepared.`, "success");
+    await loadBatch(id);
+  } catch (e) {
+    showToast(e.message || "Could not start the promotion.", "error");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-forward"></i> Start Promotion';
+  }
+}
+
+/* ================= Step 3 — review & confirm ================= */
+let batch = null, batchStudents = [];
+let wizFilter = { q: "", classId: "", action: "" };
+const OUTCOME = { promote: "Promoted", repeat: "Repeating", graduate: "Graduated", transfer: "Transferred", leave: "Left" };
+
+async function loadBatch(id, opts = {}) {
+  renderLoading();
+  wizFilter = { q: "", classId: "", action: "" };
+  try {
+    const g = await apiGet(`/api/promotions/batches/${id}`);
+    batch = g.batch;
+    batchStudents = g.students || [];
+    renderWizard({ readOnly: opts.readOnly || batch.status !== "draft" });
+  } catch (e) {
+    app.innerHTML = errorCard(e.message);
+  }
+}
+
+function wizCounts() {
+  const c = { promote: 0, repeat: 0, graduate: 0, transfer: 0, leave: 0, outstanding: 0, credits: 0 };
+  for (const s of batchStudents) {
+    if (c[s.action] != null) c[s.action]++;
+    const bal = Number(s.balance || 0);
+    if (bal > 0) c.outstanding += bal;
+    if (bal < 0) c.credits += Math.abs(bal);
+  }
+  return c;
+}
+
+function wizRow(s, readOnly) {
+  const cls = classLabel(s.from_class_id || s.current_class_id) || "No class";
+  const defDest = s.to_class_id || (s.action === "repeat" ? (s.from_class_id || s.current_class_id || "") : "");
+  const badge = s.status === "failed" ? "sa-badge-danger" : s.status === "completed" ? "sa-badge-success" : "sa-badge-info";
+  return `<tr data-sid="${escapeHtml(s.student_id)}" data-name="${escapeHtml(String(s.student_name || "").toLowerCase())}" data-cid="${escapeHtml(s.from_class_id || s.current_class_id || "")}" data-act="${escapeHtml(s.action)}">
+    <td><b>${escapeHtml(s.student_name || "—")}</b><div class="sa-cell-sub">${escapeHtml(s.admission_number || "")}</div></td>
+    <td>${escapeHtml(cls)}</td>
+    <td>${balancePill(s.balance)}</td>
+    ${readOnly
+      ? `<td><span class="sa-badge ${badge}">${escapeHtml(OUTCOME[s.action] || s.action)}</span>${s.status === "failed" ? '<div class="sa-cell-sub" style="color:#B91C1C;">processing failed</div>' : ""}</td>
+         <td>${escapeHtml(classLabel(s.to_class_id) || "—")}</td>`
+      : `<td><select class="sa-select" data-sact style="min-width:125px;">${ACTIONS.map(([v, l]) => `<option value="${v}"${s.action === v ? " selected" : ""}>${l}</option>`).join("")}</select></td>
+         <td><select class="sa-select" data-sdest style="min-width:175px;">${destOptions(defDest)}</select></td>`}
+  </tr>`;
+}
+
+function renderWizard({ readOnly }) {
+  const c = wizCounts();
+  const classIds = [...new Set(batchStudents.map((s) => s.from_class_id || s.current_class_id || ""))];
+  const classOpts = '<option value="">All classes</option>' + classIds.map((cid) => `<option value="${escapeHtml(cid)}"${wizFilter.classId === cid ? " selected" : ""}>${escapeHtml(classLabel(cid) || "No class")}</option>`).join("");
+  app.innerHTML = `
+    <div class="sa-card">
+      <div style="padding:18px 20px 0;">
+        <div class="promo-step"><span class="n">3</span> Review &amp; confirm</div>
+        <p class="sa-cell-sub" style="margin:0 0 12px;">Rollover from <b>${escapeHtml(batch.from_year_name || "")}</b> to <b>${escapeHtml(batch.to_year_name || "")}</b>. The class mapping set the defaults — adjust individual students here if needed.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 4px;">
+          ${[["promote", "Promoting"], ["repeat", "Repeating"], ["graduate", "Graduating"], ["transfer", "Transferring"], ["leave", "Leaving"]].map(([k, l]) => `<div class="statchip"><div class="sa-cell-sub">${l}</div><div style="font-weight:800;font-size:18px;">${c[k]}</div></div>`).join("")}
+          <div class="statchip"><div class="sa-cell-sub">Outstanding carried</div><div style="font-weight:800;font-size:18px;color:#B91C1C;">${money(c.outstanding)}</div></div>
+          <div class="statchip"><div class="sa-cell-sub">Credits carried</div><div style="font-weight:800;font-size:18px;color:#047857;">${money(c.credits)}</div></div>
+        </div>
+        ${readOnly ? `<p class="sa-cell-sub" style="margin-top:8px;"><i class="fa-solid fa-lock"></i> This batch is <b>${escapeHtml(batch.status)}</b> — shown read-only.</p>` : ""}
+      </div>
+      <div style="padding:10px 20px 20px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;">
+          <input class="sa-input" id="wizQ" placeholder="Search name or admission no…" style="min-width:230px;" value="${escapeHtml(wizFilter.q)}">
+          <select class="sa-select" id="wizClass" style="min-width:170px;">${classOpts}</select>
+          <select class="sa-select" id="wizAction" style="min-width:140px;">
+            <option value="">All actions</option>
+            ${ACTIONS.map(([v, l]) => `<option value="${v}"${wizFilter.action === v ? " selected" : ""}>${l}</option>`).join("")}
+          </select>
+          <span class="sa-cell-sub"><b id="wizVisCount">0</b> of ${batchStudents.length} shown</span>
+        </div>
+        ${batchStudents.length ? `
+        <div class="sa-table-wrap"><table class="sa-table promo-table">
+          <thead><tr><th>Student</th><th>Current class</th><th>Balance carried</th><th>${readOnly ? "Outcome" : "Action"}</th><th>${readOnly ? "Destination" : "Destination class"}</th></tr></thead>
+          <tbody id="wizRows">${batchStudents.map((s) => wizRow(s, readOnly)).join("")}</tbody>
+        </table></div>` : `
+        <div class="sa-state">
+          <i class="fa-solid fa-users-slash" style="font-size:32px;color:var(--text-secondary);"></i>
+          <h3 style="margin:10px 0 4px;">No students prepared yet</h3>
+          <p>Go back to the mapping step and press Start Promotion to prepare students.</p>
+        </div>`}
+        <div class="sa-modal-actions" style="justify-content:flex-start;margin-top:14px;">
+          <button class="sa-btn sa-btn-ghost" id="wizBack"><i class="fa-solid fa-arrow-left"></i> Back to Mapping</button>
+          ${readOnly ? "" : `
+          <button class="sa-btn sa-btn-danger" id="wizDiscard"><i class="fa-solid fa-trash-can"></i> Discard Draft</button>
+          <button class="sa-btn sa-btn-primary" id="wizComplete"><i class="fa-solid fa-circle-check"></i> Complete Rollover</button>`}
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById("wizBack").addEventListener("click", boot);
+  if (!readOnly) {
+    document.getElementById("wizDiscard").addEventListener("click", () => discardDraft(batch));
+    document.getElementById("wizComplete").addEventListener("click", completeRollover);
+  }
+  const qEl = document.getElementById("wizQ");
+  qEl.addEventListener("input", () => { wizFilter.q = qEl.value; applyWizFilters(); });
+  const cEl = document.getElementById("wizClass");
+  cEl.addEventListener("change", () => { wizFilter.classId = cEl.value; applyWizFilters(); });
+  const aEl = document.getElementById("wizAction");
+  aEl.addEventListener("change", () => { wizFilter.action = aEl.value; applyWizFilters(); });
+  applyWizFilters();
+
+  document.querySelectorAll("#wizRows tr[data-sid]").forEach((tr) => {
+    const s = batchStudents.find((x) => x.student_id === tr.dataset.sid);
+    if (!s) return;
+    const actSel = tr.querySelector("[data-sact]");
+    const dstSel = tr.querySelector("[data-sdest]");
+    if (actSel && dstSel) {
+      const sync = () => { dstSel.disabled = !(actSel.value === "promote" || actSel.value === "repeat"); };
+      actSel.addEventListener("change", async () => { sync(); await saveOverride(s, actSel.value, dstSel.value); });
+      dstSel.addEventListener("change", () => saveOverride(s, actSel.value, dstSel.value));
+      sync();
+    }
+  });
+}
+
+function applyWizFilters() {
+  const q = wizFilter.q.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll("#wizRows tr[data-sid]").forEach((tr) => {
+    const s = batchStudents.find((x) => x.student_id === tr.dataset.sid) || {};
+    const okQ = !q || tr.dataset.name.includes(q) || String(s.admission_number || "").toLowerCase().includes(q);
+    const okC = !wizFilter.classId || tr.dataset.cid === wizFilter.classId;
+    const okA = !wizFilter.action || tr.dataset.act === wizFilter.action;
+    const show = okQ && okC && okA;
+    tr.style.display = show ? "" : "none";
+    if (show) visible++;
+  });
+  const cnt = document.getElementById("wizVisCount");
+  if (cnt) cnt.textContent = visible;
+}
+
+async function saveOverride(s, action, toClassId) {
+  const needsDest = action === "promote" || action === "repeat";
+  const dest = needsDest ? (toClassId || null) : null;
+  if (needsDest && !dest) return showToast("Choose a destination class first.", "error");
+  try {
+    await apiPut(`/api/promotions/batches/${batch.id}/students/${s.student_id}`, { action, to_class_id: dest });
+    s.action = action;
+    s.to_class_id = dest;
+    showToast(`${s.student_name || "Student"} → ${OUTCOME[action] || action}.`, "success");
+  } catch (e) {
+    showToast(e.message || "Could not update this student.", "error");
+  }
+  renderWizard({ readOnly: false });
+}
+
+function completeRollover() {
+  if (!batchStudents.length) return showToast("No students in this batch.", "error");
+  openModal(`
+    <h3 class="sa-modal-title">Complete the year rollover</h3>
+    <p class="sa-modal-message" style="margin-top:10px;">This permanently closes the <b>${escapeHtml(batch.from_year_name || "")}</b> placements for <b>${batchStudents.length}</b> student(s), creates the new year's placements and carries every balance across untouched. It cannot be undone.</p>
+    <div class="sa-form-group" style="margin-top:12px;"><label>Type <b>PROMOTE</b> to confirm</label><input class="sa-input" id="confirmWord" placeholder="PROMOTE" autocomplete="off" style="margin-top:6px;"></div>
+    <div class="sa-modal-actions"><button class="sa-btn sa-btn-ghost" id="cxCancel">Cancel</button><button class="sa-btn sa-btn-primary" id="cxGo"><i class="fa-solid fa-check"></i> Complete Rollover</button></div>`);
+  document.getElementById("cxCancel").addEventListener("click", closeModal);
+  const word = document.getElementById("confirmWord");
+  word.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("cxGo").click(); } });
+  word.focus();
+  document.getElementById("cxGo").addEventListener("click", async () => {
+    if (word.value.trim().toUpperCase() !== "PROMOTE") return showToast("Type PROMOTE exactly to confirm.", "error");
+    const btn = document.getElementById("cxGo");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing…';
+    try {
+      const r = await apiPost(`/api/promotions/batches/${batch.id}/complete`, { confirm: "PROMOTE" });
+      closeModal();
+      if (r && r.success === false) {
+        showToast(r.message || "Some students failed — the batch stays open so you can retry.", "error");
+        await loadBatch(batch.id);
+        return;
+      }
+      showDone((r && r.summary) || {}, (r && r.message) || "Year rollover completed.");
+    } catch (e) {
+      closeModal();
+      showToast(e.message || "Could not complete the rollover.", "error");
+      await loadBatch(batch.id);
+    }
+  });
+}
+
+function showDone(summary, message) {
+  const chips = [["promote", "Promoted"], ["repeat", "Repeating"], ["graduate", "Graduated"], ["transfer", "Transferred"], ["leave", "Left"]]
+    .map(([k, l]) => `<div class="statchip"><div class="sa-cell-sub">${l}</div><div style="font-weight:800;font-size:18px;">${summary[k] ?? 0}</div></div>`).join("");
+  app.innerHTML = `
+    <div class="sa-card"><div style="padding:40px 20px;text-align:center;">
+      <i class="fa-solid fa-circle-check" style="font-size:40px;color:var(--success);"></i>
+      <h2 style="margin:14px 0 6px;">Year rollover completed</h2>
+      <p class="sa-cell-sub" style="margin:0 0 18px;">${escapeHtml(message)}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">${chips}</div>
+      <div class="sa-modal-actions" style="justify-content:center;">
+        <a class="sa-btn sa-btn-secondary" href="../students/"><i class="fa-solid fa-users"></i> View Students</a>
+        <button class="sa-btn sa-btn-primary" id="doneBack"><i class="fa-solid fa-rotate-right"></i> Back to Promotions</button>
+      </div>
+    </div></div>`;
+  document.getElementById("doneBack").addEventListener("click", boot);
+}
+
+async function discardDraft(d) {
+  const ok = await confirmDialog({
+    title: "Discard this rollover draft?",
+    message: "The draft and every student prepared in it will be deleted. Nothing has been processed yet, so no records change. This cannot be undone.",
+    confirmText: "Discard Draft",
+    danger: true
+  });
+  if (!ok) return;
+  try {
+    const r = await apiPost(`/api/promotions/batches/${d.id}/discard`, {});
+    showToast(r.message || "Draft discarded.", "success");
+    boot();
+  } catch (e) {
+    showToast(e.message || "Could not discard the draft.", "error");
+  }
+}
+
+/* ================= Boot ================= */
+async function boot() {
+  renderLoading();
+  try {
+    await loadBase();
+    const st = readiness();
+    currentYear = st.current;
+    if (!st.ok) return renderGate();
+    await loadSchoolClasses();
+    let draft = batches.find((b) => b.status === "draft") || null;
+    const p = await apiGet(`/api/promotions/preview?from=${currentYear.id}`);
+    preview = p;
+    if (!draft && p.batch && p.batch.status === "draft") draft = p.batch;
+    draftId = draft ? draft.id : null;
+    let savedMapping = [];
+    if (draftId) {
+      try { savedMapping = (await apiGet(`/api/promotions/batches/${draftId}`)).mapping || []; } catch { savedMapping = []; }
+    }
+    renderMappingEditor({ fromYear: p.fromYear || currentYear, toYears: st.readyOthers, draft, savedMapping });
+  } catch (e) {
+    app.innerHTML = errorCard(e.message);
+  }
+}
+
+boot();</script>
+</body>
+</html>

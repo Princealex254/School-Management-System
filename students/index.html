@@ -1,0 +1,775 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Students</h1>
+          <p>Manage every student enrolled at your school.</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="sa-btn sa-btn-primary" id="addStudentBtn"><i class="fa-solid fa-user-plus"></i> Add Student</button>
+          <button class="sa-btn sa-btn-secondary" id="bulkUploadBtn"><i class="fa-solid fa-file-csv"></i> Bulk Upload</button>
+          <button class="sa-btn sa-btn-secondary" id="pdfBtn" title="Download the current list as PDF"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+
+      <div class="sa-card">
+        <div class="sa-card-body">
+          <div class="sa-filters">
+            <input type="text" class="sa-input" id="searchInput" placeholder="Search by name or admission number...">
+            <select class="sa-select" id="classFilter"><option value="">All Classes</option></select>
+            <select class="sa-select" id="statusFilter">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div id="listContainer"></div>
+          <div id="pagerBar" style="display:none;margin-top:16px;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost, apiPut, apiPatch } from "../js/api.js";
+import {
+  initShell,
+  setTopbarTitle,
+  showToast,
+  escapeHtml,
+  initials,
+  formatDate,
+  badgeHtml,
+  loadingState,
+  emptyState,
+  errorState,
+  openModal,
+  closeModal,
+  confirmDialog
+} from "../js/common.js";
+import { downloadStudentsPdf } from "../js/report-pdf.js";
+
+await requireSchoolAdmin();
+initShell({ active: "students" });
+setTopbarTitle("Students");
+
+const PAGE_SIZE = 20;
+/* Show 5 students by default; expand to 20 once a filter or search is applied. */
+const isFiltered = () => !!(studentsState.search || studentsState.classId || studentsState.status);
+const pageSize = () => (isFiltered() ? PAGE_SIZE : 5);
+const listEl = document.getElementById("listContainer");
+const pagerEl = document.getElementById("pagerBar");
+
+let classes = [];
+let studentsState = { search: "", classId: "", status: "", offset: 0, total: 0 };
+let searchTimer = null;
+
+function classNameOf(id) {
+  const c = classes.find((x) => x.id === id);
+  return c ? `${c.name}${c.stream ? " · " + c.stream : ""}` : "—";
+}
+
+async function loadClasses() {
+  try {
+    const res = await apiGet("/api/classes");
+    classes = res.classes || [];
+  } catch (err) {
+    console.error("ShuleSmart: classes load failed", err);
+    classes = [];
+  }
+  document.getElementById("classFilter").innerHTML =
+    '<option value="">All Classes</option>' +
+    classes
+      .map((c) => `<option value="${c.id}">${escapeHtml(c.name)}${c.stream ? " · " + escapeHtml(c.stream) : ""}</option>`)
+      .join("");
+}
+
+async function loadStudents() {
+  loadingState(listEl, "Loading students...");
+  pagerEl.style.display = "none";
+  try {
+    const params = new URLSearchParams();
+    if (studentsState.search) params.set("search", studentsState.search);
+    if (studentsState.classId) params.set("class_id", studentsState.classId);
+    if (studentsState.status) params.set("status", studentsState.status);
+    params.set("limit", String(pageSize()));
+    params.set("offset", String(studentsState.offset));
+
+    const res = await apiGet(`/api/students?${params.toString()}`);
+    renderList(res.students || []);
+    studentsState.total = res.total || 0;
+    renderPager();
+  } catch (err) {
+    errorState(listEl, err.message);
+  }
+}
+
+function renderList(students) {
+  if (students.length === 0) {
+    emptyState(listEl, {
+      icon: "fa-solid fa-user-graduate",
+      title: studentsState.offset === 0 ? "No students found" : "No more students",
+      message: studentsState.offset === 0 ? "Add your first student or adjust your filters." : ""
+    });
+    return;
+  }
+
+  listEl.innerHTML = `
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Adm. No.</th>
+            <th>Gender</th>
+            <th>Class</th>
+            <th>Guardian Phone</th>
+            <th>Status</th>
+            <th>Enrolled</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map((s) => `
+            <tr>
+              <td>
+                <div class="sa-entity">
+                  <span class="sa-entity-thumb">${initials(`${s.first_name} ${s.last_name}`)}</span>
+                  <div>
+                    <div class="sa-cell-primary">${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</div>
+                    <div class="sa-cell-sub">DOB ${formatDate(s.date_of_birth)}</div>
+                  </div>
+                </div>
+              </td>
+              <td>${escapeHtml(s.admission_number)}</td>
+              <td>${escapeHtml(s.gender || "—")}</td>
+              <td>${escapeHtml(classNameOf(s.class_id))}</td>
+              <td>${escapeHtml(s.guardian_phone || "—")}</td>
+              <td>${badgeHtml(s.status)}</td>
+              <td>${formatDate(s.enrollment_date)}</td>
+              <td>
+                <div class="sa-row-actions">
+                  <button data-action="view" data-id="${s.id}" title="View"><i class="fa-solid fa-eye"></i></button>
+                  <button data-action="edit" data-id="${s.id}" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                  <button data-action="toggle" data-id="${s.id}" data-status="${s.status}" title="Activate/Deactivate"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+  listEl.querySelectorAll("[data-action]").forEach((btn) => {
+    btn.addEventListener("click", () =>
+      handleAction(btn.getAttribute("data-action"), btn.getAttribute("data-id"), btn.getAttribute("data-status"))
+    );
+  });
+}
+
+function renderPager() {
+  const PS = pageSize();
+  const hasPrev = studentsState.offset > 0;
+  const hasNext = studentsState.offset + PS < studentsState.total;
+
+  if (!hasPrev && !hasNext) {
+    pagerEl.style.display = "none";
+    return;
+  }
+
+  pagerEl.style.display = "flex";
+  pagerEl.style.justifyContent = "space-between";
+  pagerEl.style.alignItems = "center";
+  pagerEl.innerHTML = `
+    <span class="sa-cell-sub">${studentsState.total} student(s) found</span>
+    <div style="display:flex;gap:8px;">
+      <button class="sa-btn sa-btn-secondary sa-btn-sm" id="prevPage" ${hasPrev ? "" : "disabled"}>
+        <i class="fa-solid fa-chevron-left"></i> Prev
+      </button>
+      <button class="sa-btn sa-btn-secondary sa-btn-sm" id="nextPage" ${hasNext ? "" : "disabled"}>
+        Next <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>`;
+
+  document.getElementById("prevPage").addEventListener("click", () => {
+    studentsState.offset = Math.max(0, studentsState.offset - pageSize());
+    loadStudents();
+  });
+  document.getElementById("nextPage").addEventListener("click", () => {
+    studentsState.offset += pageSize();
+    loadStudents();
+  });
+}
+
+/* ---------- Filters ---------- */
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    studentsState.search = e.target.value.trim();
+    studentsState.offset = 0;
+    loadStudents();
+  }, 350);
+});
+
+document.getElementById("classFilter").addEventListener("change", (e) => {
+  studentsState.classId = e.target.value;
+  studentsState.offset = 0;
+  loadStudents();
+});
+
+document.getElementById("statusFilter").addEventListener("change", (e) => {
+  studentsState.status = e.target.value;
+  studentsState.offset = 0;
+  loadStudents();
+});
+
+/* ---------- Add / Edit modal ---------- */
+function val(id) {
+  return document.getElementById(id).value.trim();
+}
+
+function openStudentModal(student) {
+  const isEdit = !!student;
+
+  openModal(`
+    <h3 class="sa-modal-title">${isEdit ? "Edit Student" : "Add Student"}</h3>
+    <form id="studentForm" class="sa-form-grid" novalidate style="margin-top:14px;">
+      <div class="sa-form-group">
+        <label>Admission Number <span class="req">*</span></label>
+        <input class="sa-input" id="f_admission" value="${escapeHtml(student?.admission_number || "")}" placeholder="e.g. ADM-001">
+      </div>
+      <div class="sa-form-group"><label>Status</label>
+        <select class="sa-select" id="f_status">
+          <option value="active"${!student || student.status === "active" ? " selected" : ""}>Active</option>
+          <option value="inactive"${student && student.status === "inactive" ? " selected" : ""}>Inactive</option>
+        </select>
+      </div>
+      <div class="sa-form-group"><label>First Name <span class="req">*</span></label><input class="sa-input" id="f_first" value="${escapeHtml(student?.first_name || "")}"></div>
+      <div class="sa-form-group"><label>Last Name <span class="req">*</span></label><input class="sa-input" id="f_last" value="${escapeHtml(student?.last_name || "")}"></div>
+      <div class="sa-form-group"><label>Gender</label>
+        <select class="sa-select" id="f_gender">
+          <option value="">Select gender</option>
+          <option value="Male"${student && student.gender === "Male" ? " selected" : ""}>Male</option>
+          <option value="Female"${student && student.gender === "Female" ? " selected" : ""}>Female</option>
+        </select>
+      </div>
+      <div class="sa-form-group"><label>Date of Birth</label><input type="date" class="sa-input" id="f_dob" value="${escapeHtml((student?.date_of_birth || "").slice(0, 10))}"></div>
+      <div class="sa-form-group"><label>Class</label>
+        <select class="sa-select" id="f_class">
+          <option value="">No class</option>
+          ${classes.map((c) => `<option value="${c.id}"${student && student.class_id === c.id ? " selected" : ""}>${escapeHtml(c.name)}${c.stream ? " · " + escapeHtml(c.stream) : ""}</option>`).join("")}
+        </select>
+      </div>
+      <div class="sa-form-group"><label>Enrollment Date</label><input type="date" class="sa-input" id="f_enroll" value="${escapeHtml((student?.enrollment_date || "").slice(0, 10))}"></div>
+      <div class="sa-form-section-title">Guardian Information</div>
+      <div class="sa-form-group"><label>Guardian Name</label><input class="sa-input" id="f_gname" value="${escapeHtml(student?.guardian_name || "")}"></div>
+      <div class="sa-form-group"><label>Guardian Phone</label><input class="sa-input" id="f_gphone" value="${escapeHtml(student?.guardian_phone || "")}" placeholder="07XX XXX XXX"></div>
+      <div class="sa-form-group full"><label>Guardian Email</label><input type="email" class="sa-input" id="f_gemail" value="${escapeHtml(student?.guardian_email || "")}"></div>
+      <div class="sa-form-group full"><label>Residential Address</label><input class="sa-input" id="f_address" value="${escapeHtml(student?.residential_address || "")}"></div>
+      <div class="sa-modal-actions" style="grid-column:1/-1;">
+        <button type="button" class="sa-btn sa-btn-ghost" id="studentCancel">Cancel</button>
+        <button type="submit" class="sa-btn sa-btn-primary" id="studentSaveBtn">${isEdit ? "Save Changes" : "Add Student"}</button>
+      </div>
+    </form>`);
+
+  document.getElementById("studentCancel").addEventListener("click", closeModal);
+
+  /* When adding a new student, pre-fill the next admission number from the
+     school's numbering scheme (only when auto-generation is enabled). */
+  if (!isEdit) {
+    apiGet("/api/students/next-admission")
+      .then((r) => {
+        const f = document.getElementById("f_admission");
+        if (f && !f.value && r && r.admission_number && r.auto_generate) f.value = r.admission_number;
+      })
+      .catch(() => {});
+  }
+
+  document.getElementById("studentForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      admission_number: val("f_admission"),
+      first_name: val("f_first"),
+      last_name: val("f_last"),
+      gender: val("f_gender"),
+      date_of_birth: val("f_dob"),
+      class_id: val("f_class"),
+      enrollment_date: val("f_enroll"),
+      guardian_name: val("f_gname"),
+      guardian_phone: val("f_gphone"),
+      guardian_email: val("f_gemail"),
+      residential_address: val("f_address"),
+      status: val("f_status")
+    };
+
+    if (!payload.admission_number || !payload.first_name || !payload.last_name) {
+      showToast("Admission number, first name and last name are required.", "error");
+      return;
+    }
+
+    const saveBtn = document.getElementById("studentSaveBtn");
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+    try {
+      if (isEdit) {
+        await apiPut(`/api/students/${student.id}`, payload);
+        showToast("Student updated successfully.", "success");
+      } else {
+        const res = await apiPost("/api/students", payload);
+        showToast("Student added successfully.", "success");
+        if (res && res.fees_auto_posted) {
+          showToast("Fee structure for this class/term was posted to the student's statement.", "info");
+        } else if (res && !res.fees_auto_posted) {
+          showToast("No active fee structure matched this class/term — no fees were posted.", "warning");
+        }
+      }
+      closeModal();
+      studentsState.offset = 0;
+      await loadStudents();
+    } catch (err) {
+      showToast(err.message || "Unable to save student.", "error");
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = isEdit ? "Save Changes" : "Add Student";
+    }
+  });
+}
+
+/* ---------- Row actions ---------- */
+async function handleAction(action, id, currentStatus) {
+  if (action === "view" || action === "edit") {
+    try {
+      const res = await apiGet(`/api/students/${id}`);
+      if (action === "view") openViewModal(res.student);
+      else openStudentModal(res.student);
+    } catch (err) {
+      showToast(err.message || "Unable to load the student.", "error");
+    }
+    return;
+  }
+
+  if (action === "toggle") {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    const ok = await confirmDialog({
+      title: `${newStatus === "active" ? "Activate" : "Deactivate"} this student?`,
+      message: `The student will be marked as ${newStatus}.`,
+      confirmText: `Yes, ${newStatus === "active" ? "Activate" : "Deactivate"}`,
+      danger: newStatus !== "active"
+    });
+    if (!ok) return;
+    try {
+      await apiPatch(`/api/students/${id}/status`, { status: newStatus });
+      showToast(`Student is now ${newStatus}.`, "success");
+      await loadStudents();
+    } catch (err) {
+      showToast(err.message || "Unable to update student.", "error");
+    }
+  }
+}
+
+function detailRow(label, value) {
+  return `<div style="display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13.5px;">
+    <span style="color:var(--text-secondary);font-weight:600;">${label}</span>
+    <span style="font-weight:700;text-align:right;">${value}</span>
+  </div>`;
+}
+
+function openViewModal(s) {
+  openModal(`
+    <h3 class="sa-modal-title">${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</h3>
+    <p class="sa-modal-message">Admission No. ${escapeHtml(s.admission_number)}</p>
+    <div style="margin-top:16px;">
+      ${detailRow("Class", escapeHtml(classNameOf(s.class_id)))}
+      ${detailRow("Gender", escapeHtml(s.gender || "—"))}
+      ${detailRow("Date of Birth", formatDate(s.date_of_birth))}
+      ${detailRow("Enrollment Date", formatDate(s.enrollment_date))}
+      ${detailRow("Guardian Name", escapeHtml(s.guardian_name || "—"))}
+      ${detailRow("Guardian Phone", escapeHtml(s.guardian_phone || "—"))}
+      ${detailRow("Guardian Email", escapeHtml(s.guardian_email || "—"))}
+      ${detailRow("Address", escapeHtml(s.residential_address || "—"))}
+      ${detailRow("Status", badgeHtml(s.status))}
+    </div>
+    <div class="sa-modal-actions">
+      <button type="button" class="sa-btn sa-btn-primary" id="viewClose">Close</button>
+    </div>`);
+  document.getElementById("viewClose").addEventListener("click", closeModal);
+}
+
+/* ---------- Bulk Upload ---------- */
+document.getElementById("bulkUploadBtn").addEventListener("click", () => openBulkUploadModal());
+
+function openBulkUploadModal() {
+  openModal(`
+    <h3 class="sa-modal-title"><i class="fa-solid fa-file-csv" style="color:var(--accent);"></i> Bulk Upload Students</h3>
+    <p class="sa-modal-message">Upload a CSV file to add multiple students at once.</p>
+    <div style="margin:16px 0;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <button type="button" class="sa-btn sa-btn-secondary sa-btn-sm" id="downloadTemplateBtn">
+          <i class="fa-solid fa-download"></i> Download Template
+        </button>
+        <span style="font-size:12.5px;color:var(--text-secondary);">Required: first_name, last_name | Optional: admission_number, gender, date_of_birth, class_name, guardian_name, guardian_phone, guardian_email, address, enrollment_date</span>
+      </div>
+      <div id="csvDropZone" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--background);">
+        <i class="fa-solid fa-cloud-arrow-up" style="font-size:36px;color:var(--primary-light);margin-bottom:12px;"></i>
+        <div style="font-weight:600;margin-bottom:4px;">Drop CSV file here or click to browse</div>
+        <div style="font-size:12.5px;color:var(--text-secondary);">Supports .csv files up to 5MB</div>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+      </div>
+    </div>
+    <div id="csvPreviewSection" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:600;">Preview (<span id="previewCount">0</span> rows)</span>
+        <span id="previewErrors" style="font-size:12.5px;color:var(--danger);"></span>
+      </div>
+      <div style="max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;">
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <thead style="background:var(--background);position:sticky;top:0;">
+            <tr>
+              <th style="padding:8px;text-align:left;">#</th>
+              <th style="padding:8px;text-align:left;">First Name</th>
+              <th style="padding:8px;text-align:left;">Last Name</th>
+              <th style="padding:8px;text-align:left;">Admission No.</th>
+              <th style="padding:8px;text-align:left;">Class</th>
+              <th style="padding:8px;text-align:left;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="uploadProgress" style="display:none;margin:12px 0;">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;">
+        <span>Uploading students...</span>
+        <span id="progressText">0 / 0</span>
+      </div>
+      <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+        <div id="progressBar" style="height:100%;width:0%;background:var(--primary);border-radius:4px;transition:width 0.3s;"></div>
+      </div>
+    </div>
+    <div id="uploadResults" style="display:none;margin:12px 0;">
+      <div id="resultsSummary" style="padding:12px;border-radius:8px;margin-bottom:8px;"></div>
+      <div id="resultsErrors" style="max-height:150px;overflow:auto;"></div>
+    </div>
+    <div class="sa-modal-actions">
+      <button type="button" class="sa-btn sa-btn-secondary" id="cancelBulkBtn">Cancel</button>
+      <button type="button" class="sa-btn sa-btn-primary" id="uploadCsvBtn" disabled>
+        <i class="fa-solid fa-upload"></i> Upload Students
+      </button>
+    </div>`);
+
+  const dropZone = document.getElementById("csvDropZone");
+  const fileInput = document.getElementById("csvFileInput");
+
+  document.getElementById("downloadTemplateBtn").addEventListener("click", downloadCsvTemplate);
+  document.getElementById("cancelBulkBtn").addEventListener("click", closeModal);
+  document.getElementById("uploadCsvBtn").addEventListener("click", uploadCsvStudents);
+
+  dropZone.addEventListener("click", () => fileInput.click());
+  dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = "var(--primary)";
+    dropZone.style.background = "rgba(37,99,235,0.05)";
+  });
+  dropZone.addEventListener("dragleave", () => {
+    dropZone.style.borderColor = "var(--border)";
+    dropZone.style.background = "var(--background)";
+  });
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = "var(--border)";
+    dropZone.style.background = "var(--background)";
+    const file = e.dataTransfer.files[0];
+    if (file) handleCsvFile(file);
+  });
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) handleCsvFile(file);
+  });
+}
+
+function downloadCsvTemplate() {
+  const headers = ["first_name","last_name","admission_number","gender","date_of_birth","class_name","guardian_name","guardian_phone","guardian_email","address","enrollment_date"];
+  const example = ["John","Doe","ADM-001","Male","2010-05-15","Grade 1","Jane Doe","+254712345678","jane@email.com","123 School St","2024-01-15"];
+  const csv = [headers.join(","), example.join(",")].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "students_upload_template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+let parsedStudents = [];
+
+function handleCsvFile(file) {
+  if (!file.name.endsWith(".csv")) {
+    showToast("Please upload a CSV file.", "error");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("File size must be less than 5MB.", "error");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    parseCsv(text);
+  };
+  reader.readAsText(file);
+}
+
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) {
+    showToast("CSV file is empty or has no data rows.", "error");
+    return;
+  }
+
+  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase().replace(/['"]/g, ""));
+  const requiredHeaders = ["first_name", "last_name"];
+  const missing = requiredHeaders.filter((h) => !headers.includes(h));
+  if (missing.length > 0) {
+    showToast(`Missing required columns: ${missing.join(", ")}`, "error");
+    return;
+  }
+
+  parsedStudents = [];
+  const errors = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = parseCsvLine(lines[i]);
+    if (values.length !== headers.length) {
+      errors.push(`Row ${i + 1}: Column count mismatch`);
+      continue;
+    }
+
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = (values[idx] || "").trim().replace(/^["']|["']$/g, "");
+    });
+
+    if (!row.first_name || !row.last_name) {
+      errors.push(`Row ${i + 1}: Missing first_name or last_name`);
+      continue;
+    }
+
+    parsedStudents.push({ ...row, _rowNum: i + 1 });
+  }
+
+  displayPreview(parsedStudents, errors);
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function displayPreview(students, errors) {
+  const previewSection = document.getElementById("csvPreviewSection");
+  const previewBody = document.getElementById("previewBody");
+  const previewCount = document.getElementById("previewCount");
+  const previewErrors = document.getElementById("previewErrors");
+  const uploadBtn = document.getElementById("uploadCsvBtn");
+
+  previewSection.style.display = "block";
+  previewCount.textContent = students.length;
+
+  if (errors.length > 0) {
+    previewErrors.textContent = `${errors.length} row(s) skipped due to errors`;
+  } else {
+    previewErrors.textContent = "";
+  }
+
+  previewBody.innerHTML = students.slice(0, 50).map((s) => {
+    const hasError = !s.first_name || !s.last_name;
+    return `<tr style="${hasError ? "background:rgba(239,68,68,0.05);" : ""}">
+      <td style="padding:8px;">${s._rowNum}</td>
+      <td style="padding:8px;">${escapeHtml(s.first_name)}</td>
+      <td style="padding:8px;">${escapeHtml(s.last_name)}</td>
+      <td style="padding:8px;">${escapeHtml(s.admission_number || "—")}</td>
+      <td style="padding:8px;">${escapeHtml(s.class_name || "—")}</td>
+      <td style="padding:8px;">
+        ${hasError ? '<span style="color:var(--danger);">Error</span>' : '<span style="color:var(--accent);">Ready</span>'}
+      </td>
+    </tr>`;
+  }).join("");
+
+  if (students.length > 50) {
+    previewBody.innerHTML += `<tr><td colspan="6" style="padding:8px;text-align:center;color:var(--text-secondary);">... and ${students.length - 50} more rows</td></tr>`;
+  }
+
+  uploadBtn.disabled = students.length === 0;
+}
+
+async function uploadCsvStudents() {
+  if (parsedStudents.length === 0) return;
+
+  const uploadBtn = document.getElementById("uploadCsvBtn");
+  const cancelBtn = document.getElementById("cancelBulkBtn");
+  const progressSection = document.getElementById("uploadProgress");
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
+  const resultsSection = document.getElementById("uploadResults");
+  const resultsSummary = document.getElementById("resultsSummary");
+  const resultsErrors = document.getElementById("resultsErrors");
+
+  uploadBtn.disabled = true;
+  cancelBtn.disabled = true;
+  progressSection.style.display = "block";
+  resultsSection.style.display = "none";
+
+  // Build class name -> id lookup
+  const classLookup = {};
+  classes.forEach((c) => {
+    const key = `${c.name}${c.stream ? " " + c.stream : ""}`.toLowerCase();
+    classLookup[key] = c.id;
+  });
+
+  let successCount = 0;
+  const errors = [];
+
+  for (let i = 0; i < parsedStudents.length; i++) {
+    const s = parsedStudents[i];
+    progressBar.style.width = `${((i + 1) / parsedStudents.length) * 100}%`;
+    progressText.textContent = `${i + 1} / ${parsedStudents.length}`;
+
+    try {
+      const payload = {
+        first_name: s.first_name,
+        last_name: s.last_name,
+        admission_number: s.admission_number || undefined,
+        gender: s.gender || null,
+        date_of_birth: s.date_of_birth || null,
+        guardian_name: s.guardian_name || null,
+        guardian_phone: s.guardian_phone || null,
+        guardian_email: s.guardian_email || null,
+        residential_address: s.address || null,
+        enrollment_date: s.enrollment_date || null,
+      };
+
+      // Resolve class name to class_id
+      if (s.class_name) {
+        const classKey = s.class_name.toLowerCase().trim();
+        payload.class_id = classLookup[classKey] || null;
+        if (!payload.class_id) {
+          errors.push(`Row ${s._rowNum}: Class "${s.class_name}" not found`);
+          continue;
+        }
+      }
+
+      await apiPost("/api/students", payload);
+      successCount++;
+    } catch (err) {
+      errors.push(`Row ${s._rowNum} (${s.first_name} ${s.last_name}): ${err.message}`);
+    }
+
+    // Small delay to avoid rate limiting
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
+  progressSection.style.display = "none";
+  resultsSection.style.display = "block";
+  cancelBtn.disabled = false;
+
+  if (successCount > 0) {
+    resultsSummary.style.background = "rgba(20,184,166,0.1)";
+    resultsSummary.innerHTML = `<i class="fa-solid fa-check-circle" style="color:var(--accent);"></i> <strong>${successCount}</strong> of ${parsedStudents.length} students uploaded successfully.`;
+  } else {
+    resultsSummary.style.background = "rgba(239,68,68,0.1)";
+    resultsSummary.innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--danger);"></i> No students were uploaded. Please fix the errors below.`;
+  }
+
+  if (errors.length > 0) {
+    resultsErrors.innerHTML = `<div style="font-size:12.5px;color:var(--danger);font-weight:600;margin-bottom:6px;">Errors (${errors.length}):</div>` +
+      errors.map((e) => `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-secondary);">${escapeHtml(e)}</div>`).join("");
+  }
+
+  if (successCount > 0) {
+    await loadStudents();
+  }
+}
+
+/* ---------- PDF download ---------- */
+document.getElementById("pdfBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("pdfBtn");
+  const original = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing…';
+  try {
+    /* Fetch the FULL filtered list (not just the current page). */
+    const params = new URLSearchParams();
+    if (studentsState.search) params.set("search", studentsState.search);
+    if (studentsState.classId) params.set("class_id", studentsState.classId);
+    if (studentsState.status) params.set("status", studentsState.status);
+    params.set("limit", "1000");
+    const res = await apiGet(`/api/students?${params.toString()}`);
+    /* Rows only carry class_id — join the class name for the PDF. */
+    const rows = (res.students || []).map((s) => ({ ...s, class_name: classNameOf(s.class_id) }));
+    if (!rows.length) { showToast("There are no students to export with the current filters.", "warning"); return; }
+
+    const classLabel = studentsState.classId
+      ? classNameOf(studentsState.classId).replace(" — ", " - ")
+      : "All Classes";
+    await downloadStudentsPdf(rows, {
+      classLabel,
+      search: studentsState.search || "",
+      school: window.currentSchool || null
+    });
+    showToast("PDF downloaded.", "success");
+  } catch (err) {
+    showToast(err.message || "Could not generate the PDF.", "error");
+  } finally {
+    btn.disabled = false; btn.innerHTML = original;
+  }
+});
+
+/* ---------- Init ---------- */
+await loadClasses();
+await loadStudents();
+document.getElementById("addStudentBtn").addEventListener("click", () => openStudentModal(null));
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sa-sidebar" id="sidebar"></aside>
+  <div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="main">
+    <header class="sa-topbar" id="topbar"></header>
+    <main class="sa-content">
+      <div class="sa-page-head">
+        <div>
+          <h1>Attendance</h1>
+          <p>Record daily student attendance.</p>
+        </div>
+      </div>
+      <div class="sa-card" style="margin-bottom:20px;">
+        <div class="sa-card-body" style="padding:16px 22px;">
+          <div class="sa-filters">
+            <select class="sa-select" id="classSel"><option value="">Select class…</option></select>
+            <input type="date" class="sa-input" id="dateInput">
+            <button class="sa-btn sa-btn-primary sa-btn-sm" id="loadBtn"><i class="fa-solid fa-users"></i> Load Register</button>
+            <button class="sa-btn sa-btn-ghost sa-btn-sm" id="markPresentBtn" disabled><i class="fa-solid fa-check-double"></i> Mark rest Present</button>
+          </div>
+          <div id="summaryBar" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
+      <div class="sa-card">
+        <div class="sa-card-body">
+          <div id="rosterWrap">
+            <div class="sa-state"><i class="fa-solid fa-clipboard-user"></i><h4>No register loaded</h4><p>Choose a class and a date, then click “Load Register”.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+        <button class="sa-btn sa-btn-primary" id="saveBtn" disabled><i class="fa-solid fa-floppy-disk"></i> Save Attendance</button>
+      </div>
+    </main>
+  </div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, loadingState, errorState } from "../js/common.js";
+
+await requireSchoolAdmin();
+initShell({ active: "attendance" });
+setTopbarTitle("Attendance");
+
+/* Static page references (all exist at load time). */
+const classSel = document.getElementById("classSel");
+const dateInput = document.getElementById("dateInput");
+const loadBtn = document.getElementById("loadBtn");
+const markPresentBtn = document.getElementById("markPresentBtn");
+const rosterWrap = document.getElementById("rosterWrap");
+const saveBtn = document.getElementById("saveBtn");
+const summaryBar = document.getElementById("summaryBar");
+
+const STATUSES = [
+  { v: "present", label: "Present" },
+  { v: "absent", label: "Absent" },
+  { v: "late", label: "Late" },
+  { v: "excused", label: "Excused" }
+];
+
+/* Default to today; never allow picking a future date. */
+dateInput.value = new Date().toISOString().slice(0, 10);
+dateInput.max = dateInput.value;
+
+function statusOptions(current) {
+  return '<option value="">— not marked —</option>' +
+    STATUSES.map((s) => `<option value="${s.v}"${current === s.v ? " selected" : ""}>${s.label}</option>`).join("");
+}
+
+function rowSelects() {
+  return [...rosterWrap.querySelectorAll("select[data-sid]")];
+}
+
+function updateSummary() {
+  const counts = { present: 0, absent: 0, late: 0, excused: 0, unmarked: 0 };
+  rowSelects().forEach((s) => { if (s.value) counts[s.value]++; else counts.unmarked++; });
+  summaryBar.innerHTML =
+    `<span class="sa-badge sa-badge-success">Present ${counts.present}</span>` +
+    `<span class="sa-badge sa-badge-danger">Absent ${counts.absent}</span>` +
+    `<span class="sa-badge sa-badge-warning">Late ${counts.late}</span>` +
+    `<span class="sa-badge sa-badge-info">Excused ${counts.excused}</span>` +
+    `<span class="sa-badge sa-badge-neutral">Not marked ${counts.unmarked}</span>`;
+}
+
+async function loadClasses() {
+  try {
+    const d = await apiGet("/api/classes");
+    const rows = d.classes || [];
+    classSel.innerHTML = '<option value="">Select class…</option>' + rows
+      .map((c) => `<option value="${c.id}">${escapeHtml(c.name)}${c.stream ? " - " + escapeHtml(c.stream) : ""}</option>`)
+      .join("");
+  } catch (e) {
+    classSel.innerHTML = '<option value="">Could not load classes</option>';
+  }
+}
+
+async function loadRoster() {
+  if (!classSel.value) { showToast("Choose a class first.", "warning"); return; }
+  loadingState(rosterWrap, "Loading register…");
+  try {
+    const p = new URLSearchParams({ class_id: classSel.value, date: dateInput.value });
+    const d = await apiGet("/api/attendance?" + p.toString());
+    const rows = d.students || [];
+
+    if (!rows.length) {
+      rosterWrap.innerHTML = `<div class="sa-state"><i class="fa-solid fa-user-graduate"></i><h4>No students in this class</h4><p>Add students to this class to record attendance.</p></div>`;
+      saveBtn.disabled = true;
+      markPresentBtn.disabled = true;
+      summaryBar.innerHTML = "";
+      return;
+    }
+
+    rosterWrap.innerHTML =
+      `<div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Adm. No.</th><th>Student</th><th style="width:200px;">Status</th></tr></thead><tbody>` +
+      rows.map((r) =>
+        `<tr><td>${escapeHtml(r.admission_number || "—")}</td><td>${escapeHtml(r.name)}</td><td><select class="sa-select" data-sid="${r.student_id}">${statusOptions(r.status)}</select></td></tr>`
+      ).join("") + `</tbody></table></div>`;
+
+    rowSelects().forEach((s) => s.addEventListener("change", updateSummary));
+    saveBtn.disabled = false;
+    markPresentBtn.disabled = false;
+    updateSummary();
+
+    if (d.marked_count > 0) showToast(`${d.marked_count} student(s) were already marked for ${d.date}.`, "info");
+  } catch (err) {
+    errorState(rosterWrap, err.message || "Could not load the class register.");
+    saveBtn.disabled = true;
+    markPresentBtn.disabled = true;
+    summaryBar.innerHTML = "";
+  }
+}
+
+async function save() {
+  const records = rowSelects()
+    .map((s) => ({ student_id: s.dataset.sid, status: s.value }))
+    .filter((r) => r.status);
+  if (!records.length) { showToast("Mark at least one student before saving.", "warning"); return; }
+
+    saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving…';
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    if (dateInput.value > today) { showToast("Attendance cannot be recorded for a future date.", "warning"); return; }
+    const res = await apiPost("/api/attendance/save", {
+      class_id: classSel.value,
+      date: dateInput.value,
+      records
+    });
+    showToast(res.message || "Attendance saved.", "success");
+    await loadRoster();
+  } catch (err) {
+    showToast(err.message || "Could not save attendance.", "error");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Attendance';
+  }
+}
+
+markPresentBtn.addEventListener("click", () => {
+  rowSelects().forEach((s) => { if (!s.value) s.value = "present"; });
+  updateSummary();
+});
+
+loadBtn.addEventListener("click", loadRoster);
+classSel.addEventListener("change", () => {
+  rosterWrap.innerHTML = `<div class="sa-state"><i class="fa-solid fa-clipboard-user"></i><h4>No register loaded</h4><p>Choose a class and a date, then click “Load Register”.</p></div>`;
+  saveBtn.disabled = true;
+  markPresentBtn.disabled = true;
+  summaryBar.innerHTML = "";
+});
+dateInput.addEventListener("change", () => { if (classSel.value) loadRoster(); });
+saveBtn.addEventListener("click", save);
+
+await loadClasses();
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receipts | ShuleSmart</title>
+<link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+<link rel="apple-touch-icon" href="../images/favicon.svg">
+
+
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../css/school-admin.css">
+</head>
+<body>
+<div class="app">
+<aside class="sa-sidebar" id="sidebar"></aside>
+<div class="sa-sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main">
+<header class="sa-topbar" id="topbar"></header>
+<main class="sa-content">
+<div class="sa-page-head"><div><h1>Receipts</h1><p>Every issued receipt — search, reprint or void. Issued receipts are never deleted.</p></div></div>
+<div class="sa-card"><div class="sa-card-body">
+<div class="sa-filters">
+  <input type="text" class="sa-input" id="searchInput" placeholder="Search receipt no., reference, student…">
+  <select class="sa-select" id="statusSel">
+    <option value="">All Statuses</option>
+    <option value="ISSUED">Issued</option>
+    <option value="REVERSED">Reversed</option>
+    <option value="VOIDED">Voided</option>
+  </select>
+  <input type="date" class="sa-input" id="fromDate" title="From payment date">
+  <input type="date" class="sa-input" id="toDate" title="To payment date">
+  <button class="sa-btn sa-btn-primary sa-btn-sm" id="applyBtn"><i class="fa-solid fa-filter"></i> Apply</button>
+</div>
+<div id="listContainer"></div>
+<div id="pagerBar" style="display:none;margin-top:16px;"></div>
+</div></div>
+</main>
+</div>
+</div>
+<div id="toastContainer"></div>
+<div id="modalRoot"></div>
+<script type="module">
+import { requireSchoolAdmin } from "../js/auth.js";
+import { apiGet, apiPost } from "../js/api.js";
+import { initShell, setTopbarTitle, showToast, escapeHtml, formatDate, formatCurrency, loadingState, emptyState, errorState, confirmDialog } from "../js/common.js";
+import { printReceiptById } from "../js/print.js";
+
+await requireSchoolAdmin();
+initShell({ active: "receipts" });
+setTopbarTitle("Receipts");
+
+const PAGE = 10;
+let state = { search: "", status: "", from: "", to: "", offset: 0 };
+
+/* Element references — missing before, so the module threw ReferenceError
+   (first on statusSel at module scope) and never rendered the list, making
+   the page appear to have no usable actions. */
+const listContainer = document.getElementById("listContainer");
+const pagerBar = document.getElementById("pagerBar");
+const statusSel = document.getElementById("statusSel");
+const fromDate = document.getElementById("fromDate");
+const toDate = document.getElementById("toDate");
+const applyBtn = document.getElementById("applyBtn");
+
+function statusBadge(s) {
+  const map = { ISSUED: "sa-badge sa-badge-success", REVERSED: "sa-badge sa-badge-danger", VOIDED: "sa-badge sa-badge-warning" };
+  return `<span class="${map[s] || "sa-badge sa-badge-neutral"}">${escapeHtml(String(s || "").toLowerCase())}</span>`;
+}
+
+async function load() {
+  loadingState(listContainer, "Loading receipts…");
+  pagerBar.style.display = "none";
+  try {
+    const p = new URLSearchParams();
+    if (state.search) p.set("search", state.search);
+    if (state.status) p.set("status", state.status);
+    if (state.from) p.set("from", state.from);
+    if (state.to) p.set("to", state.to);
+    p.set("limit", PAGE); p.set("offset", state.offset);
+    const d = await apiGet("/api/receipts?" + p.toString());
+    render(d.receipts || []);
+  } catch (err) {
+    errorState(listContainer, err.message || "Could not load receipts.");
+  }
+}
+
+function render(rows) {
+  if (!rows.length) { emptyState(listContainer, { icon: "fa-solid fa-receipt", title: "No receipts found", message: "Receipts are generated automatically when payments are recorded." }); return; }
+  listContainer.innerHTML = `<div class="sa-table-wrap"><table class="sa-table"><thead><tr>
+    <th>Receipt No.</th><th>Student</th><th>Method</th><th>Reference</th><th style="text-align:right;">Amount</th><th>Date</th><th>Status</th><th></th>
+  </tr></thead><tbody>` + rows.map((r) => `<tr>
+    <td><strong>${escapeHtml(r.receipt_number)}</strong>${r.reprint_count > 0 ? `<div class="sa-cell-sub">Reprinted ×${r.reprint_count}</div>` : ""}</td>
+    <td>${escapeHtml(r.student_name || "")}<div class="sa-cell-sub">${escapeHtml(r.admission_number || "")} • ${escapeHtml(r.class_name || "—")}</div></td>
+    <td>${escapeHtml(r.method || "—")}</td>
+    <td>${escapeHtml(r.reference || "—")}</td>
+    <td style="text-align:right;font-weight:700;">${formatCurrency(r.amount)}</td>
+    <td>${formatDate(r.payment_date)}</td>
+    <td>${statusBadge(r.status)}</td>
+    <td><div class="sa-row-actions">
+      <button data-a="print" data-id="${r.id}" title="View / Print"><i class="fa-solid fa-print"></i></button>
+      ${r.status === "ISSUED" ? `<button data-a="void" data-id="${r.id}" title="Void receipt"><i class="fa-solid fa-ban"></i></button>` : ""}
+    </div></td>
+  </tr>`).join("") + `</tbody></table></div>`;
+  listContainer.querySelectorAll("[data-a]").forEach((b) => b.addEventListener("click", () => act(b.dataset.a, b.dataset.id)));
+}
+
+async function act(action, id) {
+  try {
+    if (action === "print") {
+      showToast("Opening print dialog…", "info");
+      await printReceiptById(id, { markReprint: true });
+      return;
+    }
+    if (action === "void") {
+      if (!(await confirmDialog({ title: "Void this receipt?", message: "The receipt will be marked VOIDED and its linked payment automatically reversed — a reversal entry is added to the student's ledger, so the fees are reinstated and it shows on the statement. The record is never deleted." }))) return;
+      const res = await apiPost(`/api/receipts/${id}/void`, {});
+      showToast(res.message || "Receipt voided.", "success");
+      return load();
+    }
+  } catch (err) { showToast(err.message || "Action failed.", "error"); }
+}
+
+const si = document.getElementById("searchInput");
+si.addEventListener("input", (e) => { clearTimeout(window.__t); window.__t = setTimeout(() => { state.search = e.target.value.trim(); state.offset = 0; load(); }, 350); });
+statusSel.addEventListener("change", (e) => { state.status = e.target.value; state.offset = 0; load(); });
+applyBtn.addEventListener("click", () => { state.from = fromDate.value; state.to = toDate.value; state.offset = 0; load(); });
+
+load();
+</script>
+</body>
+</html>
